@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">QR Generator</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="generate_qr_code">GENERATE QR CODE \n FOR YOUR DEBIT CARD</string>
+    <string name="pay_with_ease">Pay with ease</string>
+    <string name="qr_for_card">GENERATE QR FOR CARD</string>
+    <string name="sign_in">SIGN IN</string>
+    <string name="merchant_locator">MERCHANT LOCATOR</string>
+    <string name="enter_card_deatils">ENTER CARD DETAILS</string>
+    <string name="your_card_details_is_never_stored">Your Card Details is Never Stored</string>
+    <string name="your_login_password">SIGN UP HERE</string>
+    <string name="note_this_is_not_your_cars_pin">NOTE: This is not your Card Pin but the password to your tally account</string>
+    <string name="create_qr">CREATE QR</string>
+    <string name="enter_email">Enter email</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="enter_password">Enter password</string>
+    <string name="transactions">TRANSACTIONS</string>
+    <string name="qr_code">QR CODE</string>
+    <string name="merchants">MERCHANTS</string>
+    <string name="see_all">See all</string>
+    <string name="seven_days">7 days</string>
+    <string name="thirty_days">30 days</string>
+    <string name="timeOut">Time Out</string>
+
+    <string name="all_please_enter_password">Please Enter Your Password</string>
+    <string name="all_please_enter_full_name">Please Enter Your Full Name</string>
+    <string name="all_please_enter_email">Please Enter Your Email</string>
+    <string name="all_please_enter_phone_number">Please Enter Your Phone Number</string>
+    <string name="all_please_enter_issuing_bank">Please Select Your Issuing Bank</string>
+    <string name="all_please_enter_issuing_card_scheme">Please Select Your Card Scheme</string>
+    <string name="all_please_enter_card_expiry_number">Please Enter Your Card Expiry Number</string>
+    <string name="all_please_enter_card_date">Please Enter Your Card Date</string>
+    <string name="all_please_enter_card_cvv">Please Enter Your Card CVV</string>
+</resources>

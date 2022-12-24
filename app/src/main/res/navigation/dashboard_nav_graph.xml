@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/dashboard_nav_graph.xml"
+    app:startDestination="@id/transactionsFragment">
+    <fragment
+        android:id="@+id/transactionsFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.TransactionsFragment"
+        android:label="fragment_transactions"
+        tools:layout="@layout/fragment_transactions" >
+        <action
+            android:id="@+id/action_transactionsFragment_to_transactionHistoryFragment"
+            app:destination="@id/transactionHistoryFragment" />
+        <action
+            android:id="@+id/action_transactionsFragment_to_transactionDetailsFragment"
+            app:destination="@id/transactionDetailsFragment" />
+        <action
+            android:id="@+id/action_transactionsFragment_to_qrDetailsFragment2"
+            app:destination="@id/qrDetailsFragment2" />
+        <action
+            android:id="@+id/action_transactionsFragment_to_displayQrFragment2"
+            app:destination="@id/displayQrFragment2" />
+        <action
+            android:id="@+id/action_transactionsFragment_to_generateMoreQrFragment"
+            app:destination="@id/generateMoreQrFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/transactionHistoryFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.TransactionHistoryFragment"
+        android:label="fragment_transaction_history"
+        tools:layout="@layout/fragment_transaction_history" >
+        <action
+            android:id="@+id/action_transactionHistoryFragment_to_transactionDetailsFragment"
+            app:destination="@id/transactionDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/transactionDetailsFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.TransactionDetailsFragment"
+        android:label="fragment_transaction_details"
+        tools:layout="@layout/fragment_transaction_details" />
+    <fragment
+        android:id="@+id/qrDetailsFragment2"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.QrDetailsFragment"
+        android:label="fragment_qr_details"
+        tools:layout="@layout/fragment_qr_details" />
+    <fragment
+        android:id="@+id/QRFragment2"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.QRFragment"
+        android:label="fragment_q_r"
+        tools:layout="@layout/fragment_q_r" >
+        <action
+            android:id="@+id/action_QRFragment2_to_qrDetailsFragment2"
+            app:destination="@id/qrDetailsFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/displayQrFragment2"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.DisplayQrFragment"
+        android:label="fragment_display_qr"
+        tools:layout="@layout/fragment_display_qr" />
+    <fragment
+        android:id="@+id/generateMoreQrFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.GenerateMoreQrFragment"
+        android:label="fragment_generate_more_qr"
+        tools:layout="@layout/fragment_generate_more_qr" />
+</navigation>

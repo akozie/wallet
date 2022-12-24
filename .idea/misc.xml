@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="app/src/main/res/drawable-v24/ic_arrow_down_24.xml" value="0.15" />
+        <entry key="app/src/main/res/drawable/background_button.xml" value="0.2005" />
+        <entry key="app/src/main/res/drawable/ic_arrow_down_24.xml" value="0.15" />
+        <entry key="app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_big_naira.xml" value="0.117" />
+        <entry key="app/src/main/res/drawable/ic_group_6.xml" value="0.127" />
+        <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.15" />
+        <entry key="app/src/main/res/drawable/ic_naira.xml" value="0.117" />
+        <entry key="app/src/main/res/drawable/ic_nn.xml" value="0.127" />
+        <entry key="app/src/main/res/drawable/indicator_selector.xml" value="0.217" />
+        <entry key="app/src/main/res/drawable/my_button.xml" value="0.149" />
+        <entry key="app/src/main/res/drawable/orange_button.xml" value="0.2145" />
+        <entry key="app/src/main/res/drawable/second_button.xml" value="0.212" />
+        <entry key="app/src/main/res/drawable/sign_in_background.xml" value="0.2145" />
+        <entry key="app/src/main/res/drawable/splash_screen.xml" value="0.15" />
+        <entry key="app/src/main/res/drawable/tab_layout_indicator.xml" value="0.217" />
+        <entry key="app/src/main/res/drawable/tab_layout_reverse_indicator.xml" value="0.217" />
+        <entry key="app/src/main/res/drawable/table_background.xml" value="0.117" />
+        <entry key="app/src/main/res/drawable/white_background.xml" value="0.2145" />
+        <entry key="app/src/main/res/drawable/white_custom_progress_bar.xml" value="0.159" />
+        <entry key="app/src/main/res/layout/activity_authentication.xml" value="0.14010416666666667" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/fragment_all_transactions.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_display_qr.xml" value="0.11764705882352941" />
+        <entry key="app/src/main/res/layout/fragment_generate_more_qr.xml" value="0.3098958333333333" />
+        <entry key="app/src/main/res/layout/fragment_generate_qr.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/fragment_merchants.xml" value="0.28189300411522633" />
+        <entry key="app/src/main/res/layout/fragment_q_r.xml" value="0.2947916666666667" />
+        <entry key="app/src/main/res/layout/fragment_qr_details.xml" value="0.165" />
+        <entry key="app/src/main/res/layout/fragment_recent_transactions.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_sign_in.xml" value="0.165" />
+        <entry key="app/src/main/res/layout/fragment_sign_in_or_generate_q_r.xml" value="0.125" />
+        <entry key="app/src/main/res/layout/fragment_transaction.xml" value="0.165" />
+        <entry key="app/src/main/res/layout/fragment_transaction_details.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/fragment_transaction_history.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_transactions.xml" value="0.165" />
+        <entry key="app/src/main/res/layout/layout__enter_password_pref.xml" value="0.3098958333333333" />
+        <entry key="app/src/main/res/layout/layout_loading_dialog.xml" value="0.375" />
+        <entry key="app/src/main/res/layout/layout_set_password_pref.xml" value="0.3098958333333333" />
+        <entry key="app/src/main/res/layout/qr_details_layout.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/qr_layout.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/transaction_layout.xml" value="0.4103671706263499" />
+        <entry key="app/src/main/res/xml/preferences.xml" value="0.109375" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.165" />
+      </ProjectState>
+    </option>
+  </component>
+</project>

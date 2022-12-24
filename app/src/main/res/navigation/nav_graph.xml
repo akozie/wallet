@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph.xml"
+    app:startDestination="@id/signInOrGenerateQRFragment">
+
+    <fragment
+        android:id="@+id/signInOrGenerateQRFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.SignInOrGenerateQRFragment"
+        android:label="fragment_sign_in_or_generate_q_r"
+        tools:layout="@layout/fragment_sign_in_or_generate_q_r" >
+        <action
+            android:id="@+id/action_signInOrGenerateQRFragment_to_generateQrFragment"
+            app:destination="@id/generateQrFragment" />
+        <action
+            android:id="@+id/action_signInOrGenerateQRFragment_to_signInFragment"
+            app:destination="@id/signInFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/generateQrFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.GenerateQrFragment"
+        android:label="fragment_generate_qr"
+        tools:layout="@layout/fragment_generate_qr" >
+        <action
+            android:id="@+id/action_generateQrFragment_to_signInFragment"
+            app:destination="@id/signInFragment" />
+        <action
+            android:id="@+id/action_generateQrFragment_to_displayQrFragment"
+            app:destination="@id/displayQrFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.SignInFragment"
+        android:label="fragment_sign_in"
+        tools:layout="@layout/fragment_sign_in" />
+    <fragment
+        android:id="@+id/displayQrFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.DisplayQrFragment"
+        android:label="fragment_display_qr"
+        tools:layout="@layout/fragment_display_qr" >
+        <argument
+            android:name="QR"
+            app:argType="com.woleapp.netpos.qrgenerator.ui.model.GenerateQRResponse" />
+    </fragment>
+</navigation>

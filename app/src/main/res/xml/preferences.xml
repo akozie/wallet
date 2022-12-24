@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:defaultValue="print_customer_copy_only"
+        android:entries="@array/printer_settings_title"
+        android:entryValues="@array/printer_settings_value"
+        android:key="pref_printer_settings"
+        android:title="Printer Print Settings"
+        app:useSimpleSummaryProvider="true" />
+
+    <Preference
+        android:enabled="true"
+        android:key="reprint_password"
+        android:title="Reprint Password" />
+
+</PreferenceScreen>
