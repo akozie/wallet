@@ -10,9 +10,7 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentTransactionHistoryBinding
-import com.woleapp.netpos.qrgenerator.databinding.FragmentTransactionsBinding
-import com.woleapp.netpos.qrgenerator.ui.adapter.DashboardViewPagerAdapter
-import com.woleapp.netpos.qrgenerator.ui.adapter.TransactionHistoryPagerAdapter
+import com.woleapp.netpos.qrgenerator.adapter.TransactionHistoryPagerAdapter
 
 class TransactionHistoryFragment : Fragment() {
 

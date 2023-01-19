@@ -19,11 +19,14 @@
             android:id="@+id/action_transactionsFragment_to_qrDetailsFragment2"
             app:destination="@id/qrDetailsFragment2" />
         <action
-            android:id="@+id/action_transactionsFragment_to_displayQrFragment2"
-            app:destination="@id/displayQrFragment2" />
-        <action
             android:id="@+id/action_transactionsFragment_to_generateMoreQrFragment"
             app:destination="@id/generateMoreQrFragment" />
+        <action
+            android:id="@+id/action_transactionsFragment_to_displayQrFragment23"
+            app:destination="@id/displayQrFragment2" />
+        <action
+            android:id="@+id/action_transactionsFragment_to_merchantDetailsFragment"
+            app:destination="@id/merchantDetailsFragment" />
     </fragment>
     <fragment
         android:id="@+id/transactionHistoryFragment"
@@ -43,7 +46,11 @@
         android:id="@+id/qrDetailsFragment2"
         android:name="com.woleapp.netpos.qrgenerator.ui.fragments.QrDetailsFragment"
         android:label="fragment_qr_details"
-        tools:layout="@layout/fragment_qr_details" />
+        tools:layout="@layout/fragment_qr_details" >
+        <argument
+            android:name="DETAILSQR"
+            app:argType="com.woleapp.netpos.qrgenerator.model.QrModel" />
+    </fragment>
     <fragment
         android:id="@+id/QRFragment2"
         android:name="com.woleapp.netpos.qrgenerator.ui.fragments.QRFragment"
@@ -57,10 +64,33 @@
         android:id="@+id/displayQrFragment2"
         android:name="com.woleapp.netpos.qrgenerator.ui.fragments.DisplayQrFragment"
         android:label="fragment_display_qr"
-        tools:layout="@layout/fragment_display_qr" />
+        tools:layout="@layout/fragment_display_qr" >
+        <argument
+            android:name="DISPLAYQR"
+            app:argType="com.woleapp.netpos.qrgenerator.model.QrModel"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_displayQrFragment2_to_transactionsFragment"
+            app:destination="@id/transactionsFragment" />
+    </fragment>
     <fragment
         android:id="@+id/generateMoreQrFragment"
         android:name="com.woleapp.netpos.qrgenerator.ui.fragments.GenerateMoreQrFragment"
         android:label="fragment_generate_more_qr"
-        tools:layout="@layout/fragment_generate_more_qr" />
+        tools:layout="@layout/fragment_generate_more_qr" >
+        <action
+            android:id="@+id/action_generateMoreQrFragment_to_displayQrFragment2"
+            app:destination="@id/displayQrFragment2"
+            app:popUpTo="@id/transactionsFragment"
+            app:popUpToInclusive="false"/>
+    </fragment>
+    <fragment
+        android:id="@+id/merchantDetailsFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.MerchantDetailsFragment"
+        android:label="fragment_merchant_details"
+        tools:layout="@layout/fragment_merchant_details" >
+        <argument
+            android:name="MERCHANT"
+            app:argType="com.woleapp.netpos.qrgenerator.model.Merchant" />
+    </fragment>
 </navigation>

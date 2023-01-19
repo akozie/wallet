@@ -55,26 +55,30 @@
 
         <TextView
             android:id="@+id/qr_title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_marginEnd="@dimen/margin_10dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/margin_10dp"
             android:layout_marginTop="5dp"
             android:text="Price Supermarket"
             android:textColor="@color/text_color"
-            android:textSize="@dimen/text_size_20sp"
+            android:textSize="@dimen/text_size_17sp"
             android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/view_qr"
             app:layout_constraintStart_toEndOf="@+id/qr_image"
             app:layout_constraintTop_toTopOf="@+id/qr_image" />
 
         <TextView
             android:id="@+id/qr_date"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_2dp"
+            android:layout_marginEnd="10dp"
             android:layout_marginBottom="10dp"
             android:text="24th, November, 15:22"
             android:textStyle="italic"
             app:layout_constraintBottom_toBottomOf="@+id/qr_image"
+            app:layout_constraintEnd_toStartOf="@+id/view_qr"
             app:layout_constraintStart_toStartOf="@+id/qr_title"
             app:layout_constraintTop_toBottomOf="@+id/qr_title" />
 

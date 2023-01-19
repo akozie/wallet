@@ -33,6 +33,7 @@
             app:boxStrokeColor="@color/white"
             app:boxStrokeWidth="@dimen/margin_0dp"
             app:hintEnabled="true"
+            app:errorTextColor="@color/white"
             app:layout_constraintEnd_toEndOf="@+id/imageView5"
             app:layout_constraintStart_toStartOf="@+id/imageView5"
             app:layout_constraintTop_toBottomOf="@+id/imageView5">
@@ -42,7 +43,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
-                android:maxLength="5"
                 android:maxLines="1"
                 android:textColor="@android:color/background_dark"
                 android:textCursorDrawable="@color/black"
@@ -62,6 +62,8 @@
             app:boxStrokeColor="@color/white"
             app:boxStrokeWidth="@dimen/margin_0dp"
             app:hintEnabled="true"
+            app:errorTextColor="@color/white"
+            app:passwordToggleEnabled="true"
             app:layout_constraintEnd_toEndOf="@+id/fragment_enter_email"
             app:layout_constraintStart_toStartOf="@+id/fragment_enter_email"
             app:layout_constraintTop_toBottomOf="@+id/fragment_enter_email">
@@ -71,10 +73,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
-                android:maxLength="5"
                 android:maxLines="1"
+                android:inputType="textPassword"
                 android:textColor="@android:color/background_dark"
-                android:textCursorDrawable="@color/black"
                 android:visibility="visible"
                 app:backgroundTint="@color/white" />
         </com.google.android.material.textfield.TextInputLayout>

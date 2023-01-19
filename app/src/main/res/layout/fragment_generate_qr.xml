@@ -141,7 +141,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
-                android:inputType="none"
+                android:inputType="phone"
                 android:textColor="@android:color/background_dark"
                 android:textCursorDrawable="@color/black"
                 android:visibility="visible"
@@ -365,80 +365,80 @@
 
         </LinearLayout>
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="@dimen/margin_10dp"
-            android:layout_marginTop="@dimen/margin_20dp"
-            app:cardBackgroundColor="@color/card_background_color"
-            app:layout_constraintEnd_toEndOf="@+id/linearLayout"
-            app:layout_constraintStart_toStartOf="@+id/linearLayout"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+<!--        <androidx.cardview.widget.CardView-->
+<!--            android:id="@+id/cardView"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:cardCornerRadius="@dimen/margin_10dp"-->
+<!--            android:layout_marginTop="@dimen/margin_20dp"-->
+<!--            app:cardBackgroundColor="@color/card_background_color"-->
+<!--            app:layout_constraintEnd_toEndOf="@+id/linearLayout"-->
+<!--            app:layout_constraintStart_toStartOf="@+id/linearLayout"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/linearLayout">-->
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="@dimen/margin_30dp">
+<!--            <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:layout_margin="@dimen/margin_30dp">-->
 
-                <TextView
-                    android:id="@+id/textView6"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="start"
-                    android:text="@string/your_login_password"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/text_size_23sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+<!--                <TextView-->
+<!--                    android:id="@+id/textView6"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:gravity="start"-->
+<!--                    android:text="@string/your_login_password"-->
+<!--                    android:textColor="@color/black"-->
+<!--                    android:textSize="@dimen/text_size_23sp"-->
+<!--                    android:textStyle="bold"-->
+<!--                    app:layout_constraintEnd_toEndOf="parent"-->
+<!--                    app:layout_constraintStart_toStartOf="parent"-->
+<!--                    app:layout_constraintTop_toTopOf="parent" />-->
 
-                <TextView
-                    android:id="@+id/textView7"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margin_10dp"
-                    android:gravity="start"
-                    android:text="@string/note_this_is_not_your_cars_pin"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/text_size_18sp"
-                    app:layout_constraintEnd_toEndOf="@+id/textView6"
-                    app:layout_constraintStart_toStartOf="@+id/textView6"
-                    app:layout_constraintTop_toBottomOf="@+id/textView6" />
+<!--                <TextView-->
+<!--                    android:id="@+id/textView7"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="@dimen/margin_10dp"-->
+<!--                    android:gravity="start"-->
+<!--                    android:text="@string/note_this_is_not_your_cars_pin"-->
+<!--                    android:textColor="@color/black"-->
+<!--                    android:textSize="@dimen/text_size_18sp"-->
+<!--                    app:layout_constraintEnd_toEndOf="@+id/textView6"-->
+<!--                    app:layout_constraintStart_toStartOf="@+id/textView6"-->
+<!--                    app:layout_constraintTop_toBottomOf="@+id/textView6" />-->
 
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margin_10dp"
-                    android:hint="Enter password"
-                    android:visibility="visible"
-                    app:backgroundTint="@color/white"
-                    app:boxStrokeColor="@color/white"
-                    app:boxStrokeWidth="@dimen/margin_0dp"
-                    app:hintEnabled="true"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@+id/textView7"
-                    app:layout_constraintStart_toStartOf="@+id/textView7"
-                    app:layout_constraintTop_toBottomOf="@+id/textView7"
-                    app:passwordToggleEnabled="true">
+<!--                <com.google.android.material.textfield.TextInputLayout-->
+<!--                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginTop="@dimen/margin_10dp"-->
+<!--                    android:hint="Enter password"-->
+<!--                    android:visibility="visible"-->
+<!--                    app:backgroundTint="@color/white"-->
+<!--                    app:boxStrokeColor="@color/white"-->
+<!--                    app:boxStrokeWidth="@dimen/margin_0dp"-->
+<!--                    app:hintEnabled="true"-->
+<!--                    app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                    app:layout_constraintEnd_toEndOf="@+id/textView7"-->
+<!--                    app:layout_constraintStart_toStartOf="@+id/textView7"-->
+<!--                    app:layout_constraintTop_toBottomOf="@+id/textView7"-->
+<!--                    app:passwordToggleEnabled="true">-->
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/generate_password"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:maxLength="5"
-                        android:maxLines="1"
-                        android:textColor="@android:color/background_dark"
-                        android:textCursorDrawable="@color/black"
-                        android:visibility="visible"
-                        app:backgroundTint="@color/white" />
-                </com.google.android.material.textfield.TextInputLayout>
+<!--                    <com.google.android.material.textfield.TextInputEditText-->
+<!--                        android:id="@+id/generate_password"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="match_parent"-->
+<!--                        android:gravity="center_vertical"-->
+<!--                        android:maxLines="1"-->
+<!--                        android:inputType="textPassword"-->
+<!--                        android:textColor="@android:color/background_dark"-->
+<!--                        android:textCursorDrawable="@color/black"-->
+<!--                        android:visibility="visible"-->
+<!--                        app:backgroundTint="@color/white" />-->
+<!--                </com.google.android.material.textfield.TextInputLayout>-->
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
+<!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
+<!--        </androidx.cardview.widget.CardView>-->
 
         <RelativeLayout
             android:id="@+id/relativeLayout2"
@@ -446,8 +446,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/cardView"
-            app:layout_constraintTop_toBottomOf="@+id/cardView">
+            app:layout_constraintEnd_toEndOf="@+id/linearLayout"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout">
 
             <ProgressBar
                 android:id="@+id/generate_qr_progressBar"

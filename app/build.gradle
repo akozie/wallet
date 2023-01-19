@@ -25,6 +25,8 @@ android {
         buildConfigField("String", "STRING_AUTH_USER_NAME", "\"${prop.getProperty("STRING_AUTH_USER_NAME")}\"")
         buildConfigField("String", "STRING_AUTH_PASSWORD", "\"${prop.getProperty("STRING_AUTH_PASSWORD")}\"")
         buildConfigField("String", "STRING_TALLY_BASE_URL", "\"${prop.getProperty("STRING_TALLY_BASE_URL")}\"")
+        buildConfigField("String", "STRING_TRANSACTION_BASE_URL", "\"${prop.getProperty("STRING_TRANSACTION_BASE_URL")}\"")
+        buildConfigField("String", "STRING_MERCHANT_BASE_URL", "\"${prop.getProperty("STRING_MERCHANT_BASE_URL")}\"")
 
     }
 
@@ -105,5 +107,10 @@ dependencies {
     //JWT
     implementation 'com.auth0:java-jwt:3.10.0'
     implementation 'com.auth0.android:jwtdecode:2.0.0'
+
+    //paging
+    implementation "androidx.paging:paging-runtime-ktx:3.1.1"
+    implementation "androidx.paging:paging-common-ktx:3.1.1"
+    implementation "androidx.paging:paging-rxjava2:3.1.1"
 
 }

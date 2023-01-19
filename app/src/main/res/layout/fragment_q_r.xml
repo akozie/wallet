@@ -27,6 +27,7 @@
             android:drawableLeft="@drawable/ic_baseline_add_24"
             android:drawablePadding="@dimen/margin_10dp"
             android:paddingHorizontal="@dimen/margin_15dp"
+            android:textColor="@color/white"
             android:text="GENERATE MORE QR"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -34,8 +35,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/qrRecycler"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="@dimen/margin_40dp"
+            android:layout_height="0dp"
+            android:paddingTop="@dimen/margin_20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -2,35 +2,33 @@ package com.woleapp.netpos.qrgenerator.ui.fragments
 
 
 import android.app.AlertDialog
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-import androidx.core.content.ContentProviderCompat
+import android.widget.AdapterView
+import android.widget.AutoCompleteTextView
+import android.widget.Button
 import androidx.core.widget.doOnTextChanged
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
 import com.woleapp.netpos.qrgenerator.R
+import com.woleapp.netpos.qrgenerator.adapter.BankCardAdapter
+import com.woleapp.netpos.qrgenerator.adapter.CardSchemeAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentGenerateQrBinding
-import com.woleapp.netpos.qrgenerator.ui.activities.MainActivity
-import com.woleapp.netpos.qrgenerator.ui.adapter.BankCardAdapter
-import com.woleapp.netpos.qrgenerator.ui.adapter.CardSchemeAdapter
-import com.woleapp.netpos.qrgenerator.ui.model.QrModelRequest
-import com.woleapp.netpos.qrgenerator.ui.model.RegisterRequest
-import com.woleapp.netpos.qrgenerator.ui.model.Row
-import com.woleapp.netpos.qrgenerator.ui.model.RowX
-import com.woleapp.netpos.qrgenerator.ui.utils.RandomUtils.alertDialog
-import com.woleapp.netpos.qrgenerator.ui.utils.RandomUtils.observeServerResponse
-import com.woleapp.netpos.qrgenerator.ui.utils.showToast
-import com.woleapp.netpos.qrgenerator.ui.viewmodels.QRViewModel
+import com.woleapp.netpos.qrgenerator.model.QrModelRequest
+import com.woleapp.netpos.qrgenerator.model.Row
+import com.woleapp.netpos.qrgenerator.model.RowX
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
+import com.woleapp.netpos.qrgenerator.utils.showToast
+import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -48,18 +46,18 @@ class GenerateQrFragment : Fragment() {
     private lateinit var cardExpiryNumber: TextInputEditText
     private lateinit var cardExpiryDate: TextInputEditText
     private lateinit var cardExpiryCvv: TextInputEditText
-    private lateinit var passwordView: TextInputEditText
     private lateinit var loader: AlertDialog
     private lateinit var submitBtn: Button
-    private lateinit var bankCard:String
-    private lateinit var cardScheme:String
+    private lateinit var bankCard: String
+    private lateinit var cardScheme: String
+    private lateinit var formattedDate: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-         _binding = FragmentGenerateQrBinding.inflate(inflater, container, false)
+        _binding = FragmentGenerateQrBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -78,15 +76,15 @@ class GenerateQrFragment : Fragment() {
         loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
         initViews()
 //        qrViewModel.getCardSchemes()
-        qrViewModel.cardSchemeResponse.observe(viewLifecycleOwner){
+//        qrViewModel.getCardBanks()
+        qrViewModel.cardSchemeResponse.observe(viewLifecycleOwner) {
             val cardSchemeAdapter = CardSchemeAdapter(
                 qrViewModel.cardSchemes, requireContext(),
                 android.R.layout.simple_expandable_list_item_1
             )
             qrCardScheme.setAdapter(cardSchemeAdapter)
         }
-//        qrViewModel.getCardBanks()
-        qrViewModel.issuingBankResponse.observe(viewLifecycleOwner){
+        qrViewModel.issuingBankResponse.observe(viewLifecycleOwner) {
             val bankCardAdapter = BankCardAdapter(
                 qrViewModel.issuingBank, requireContext(),
                 android.R.layout.simple_expandable_list_item_1
@@ -95,19 +93,19 @@ class GenerateQrFragment : Fragment() {
         }
 
         submitBtn.setOnClickListener {
-            if (passwordView.text.toString().trim().isNullOrEmpty()){
-                generateQr()
-            }else{
-                register()
-            }
+            generateQr()
         }
 
         cardExpiryDate.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?,
-                                           start: Int, count: Int, after: Int) {
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int, count: Int, after: Int
+            ) {
             }
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             }
+
             override fun afterTextChanged(s: Editable?) {
                 if (s.toString().length == 2 && !s.toString().contains("/")) {
                     s!!.append("/")
@@ -115,18 +113,21 @@ class GenerateQrFragment : Fragment() {
             }
         })
 
-        qrCardScheme.onItemClickListener = object : AdapterView.OnItemClickListener{
+        qrCardScheme.onItemClickListener = object : AdapterView.OnItemClickListener {
             override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val category  = adapterView?.getItemAtPosition(p2) as Row
+                val category = adapterView?.getItemAtPosition(p2) as Row
                 cardScheme = category.card_scheme
             }
         }
-        qrIssuingBank.onItemClickListener = object : AdapterView.OnItemClickListener{
+        qrIssuingBank.onItemClickListener = object : AdapterView.OnItemClickListener {
             override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val category  = adapterView?.getItemAtPosition(p2) as RowX
+                val category = adapterView?.getItemAtPosition(p2) as RowX
                 bankCard = category.bank_id
             }
         }
+        val c = Calendar.getInstance().time
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+        formattedDate = formatter.format(c)
     }
 
     private fun initViews() {
@@ -139,7 +140,6 @@ class GenerateQrFragment : Fragment() {
             cardExpiryNumber = cardNumber
             cardExpiryDate = expiryDate
             cardExpiryCvv = cardCvv
-            passwordView = generatePassword
             submitBtn = btnGenerateQr
         }
     }
@@ -147,7 +147,9 @@ class GenerateQrFragment : Fragment() {
     private fun generateQr() {
         when {
             full_name.text.toString().isEmpty() -> {
-                showToast(getString(R.string.all_please_enter_full_name))
+                binding.fragmentFullName.error =
+                    getString(R.string.all_please_enter_full_name)
+                binding.fragmentFullName.errorIconDrawable = null
             }
             emailAddress.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_email))
@@ -247,7 +249,7 @@ class GenerateQrFragment : Fragment() {
         cardExpiryNumber.doOnTextChanged { _, _, _, _ ->
             when {
                 cardExpiryNumber.text.toString().trim().isEmpty() -> {
-                        showToast(getString(R.string.all_please_enter_card_expiry_number))
+                    showToast(getString(R.string.all_please_enter_card_expiry_number))
                     isValidated = false
                 }
                 else -> {
@@ -280,21 +282,6 @@ class GenerateQrFragment : Fragment() {
                 }
             }
         }
-//        passwordView.doOnTextChanged { _, _, _, _ ->
-//            when {
-//                passwordView.text.toString().trim().isEmpty() -> {
-//                    binding.confirmPasswordField.error =
-//                        getString(R.string.all_please_enter_confirm_password)
-//                    binding.confirmPasswordField.errorIconDrawable =
-//                        null
-//                    isValidated = false
-//                }
-//                else -> {
-//                    binding.confirmPasswordField.error = null
-//                    isValidated = true
-//                }
-//            }
-//        }
         return isValidated
     }
 
@@ -313,46 +300,14 @@ class GenerateQrFragment : Fragment() {
             generateQr,
             requireContext()
         )
-        observeServerResponse(qrViewModel.generateQrResponse, loader, requireActivity().supportFragmentManager){
-            val action = GenerateQrFragmentDirections.actionGenerateQrFragmentToDisplayQrFragment(qrViewModel.generateQrResponse.value?.data!!)
+        observeServerResponse(
+            qrViewModel.generateQrResponse,
+            loader,
+            requireActivity().supportFragmentManager
+        ) {
+            val action =
+                GenerateQrFragmentDirections.actionGenerateQrFragmentToShowQrFragment(qrViewModel.generateQrResponse.value?.data!!)
             findNavController().navigate(action)
         }
-
-    }
-
-    private fun register() {
-        val registerRequest = RegisterRequest(
-            fullname = full_name.text.toString().trim(),
-            email = emailAddress.text.toString().trim(),
-            mobile_phone = phoneNumber.text.toString().trim(),
-            password = passwordView.text.toString().trim()
-        )
-        qrViewModel.register(
-            registerRequest
-        )
-        val generateQr = QrModelRequest(
-            fullname = full_name.text.toString().trim(),
-            email = emailAddress.text.toString().trim(),
-            card_cvv = cardExpiryCvv.text.toString().trim(),
-            card_expiry = cardExpiryDate.text.toString().trim(),
-            card_number = cardExpiryNumber.text.toString().trim(),
-            card_scheme = qrCardScheme.text.toString().trim(),
-            issuing_bank = bankCard,
-            mobile_phone = phoneNumber.text.toString().trim()
-        )
-        qrViewModel.generateQR(
-            generateQr,
-            requireContext()
-        )
-        observeServerResponse(qrViewModel.registerResponse, loader, requireActivity().supportFragmentManager){
-            startActivity(
-                Intent(requireContext(), MainActivity::class.java).apply {
-                    flags =
-                        Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
-            )
-        }
-        observeServerResponse(qrViewModel.generateQrResponse, loader, requireActivity().supportFragmentManager){}
-
     }
 }

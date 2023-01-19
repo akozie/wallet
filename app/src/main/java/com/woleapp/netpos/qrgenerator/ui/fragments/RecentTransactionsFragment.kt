@@ -6,11 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentRecentTransactionsBinding
-import com.woleapp.netpos.qrgenerator.databinding.FragmentSignInOrGenerateQRBinding
-import com.woleapp.netpos.qrgenerator.ui.adapter.TransactionAdapter
-import com.woleapp.netpos.qrgenerator.ui.model.TransactionModel
+import com.woleapp.netpos.qrgenerator.adapter.TransactionAdapter
+import com.woleapp.netpos.qrgenerator.model.TransactionModel
 import java.util.ArrayList
 
 

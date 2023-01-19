@@ -6,12 +6,15 @@
     <string name="pay_with_ease">Pay with ease</string>
     <string name="qr_for_card">GENERATE QR FOR CARD</string>
     <string name="sign_in">SIGN IN</string>
+    <string name="sign_up">SIGN UP</string>
     <string name="merchant_locator">MERCHANT LOCATOR</string>
     <string name="enter_card_deatils">ENTER CARD DETAILS</string>
     <string name="your_card_details_is_never_stored">Your Card Details is Never Stored</string>
     <string name="your_login_password">SIGN UP HERE</string>
     <string name="note_this_is_not_your_cars_pin">NOTE: This is not your Card Pin but the password to your tally account</string>
     <string name="create_qr">CREATE QR</string>
+    <string name="enter_full_name">Enter full name</string>
+    <string name="enter_mobile_number">Enter mobile number</string>
     <string name="enter_email">Enter email</string>
     <string name="forgot_password">Forgot password?</string>
     <string name="enter_password">Enter password</string>

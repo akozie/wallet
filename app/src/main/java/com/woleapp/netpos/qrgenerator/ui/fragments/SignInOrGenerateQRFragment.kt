@@ -27,6 +27,10 @@ class SignInOrGenerateQRFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.signUpButton.setOnClickListener {
+            val action = SignInOrGenerateQRFragmentDirections.actionSignInOrGenerateQRFragmentToSignUpFragment()
+            findNavController().navigate(action)
+        }
         binding.signInButton.setOnClickListener {
             val action = SignInOrGenerateQRFragmentDirections.actionSignInOrGenerateQRFragmentToSignInFragment()
             findNavController().navigate(action)

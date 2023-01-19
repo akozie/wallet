@@ -12,7 +12,7 @@ tools:context=".ui.fragments.TransactionFragment">
     android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/margin_10dp"
+    android:layout_marginTop="@dimen/margin_5dp"
     android:background="@drawable/orange_button"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
@@ -21,7 +21,7 @@ tools:context=".ui.fragments.TransactionFragment">
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/margin_20dp"
+        android:layout_margin="@dimen/margin_10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -47,13 +47,14 @@ tools:context=".ui.fragments.TransactionFragment">
             app:layout_constraintTop_toBottomOf="@+id/imageView6" />
 
         <TextView
-            android:id="@+id/textView9"
-            android:layout_width="wrap_content"
+            android:id="@+id/user_email"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="kk@gmail.com"
             android:textColor="@color/white"
-            android:textSize="@dimen/text_size_25sp"
+            android:textSize="@dimen/text_size_22sp"
             android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/sign_out"
             app:layout_constraintStart_toStartOf="@+id/textView8"
             app:layout_constraintTop_toBottomOf="@+id/textView8" />
 
@@ -64,17 +65,17 @@ tools:context=".ui.fragments.TransactionFragment">
             android:layout_marginEnd="20dp"
             android:layout_marginBottom="10dp"
             android:src="@drawable/tally_user"
-            app:layout_constraintBottom_toTopOf="@+id/textView10"
+            app:layout_constraintBottom_toTopOf="@+id/sign_out"
             app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
-            android:id="@+id/textView10"
+            android:id="@+id/sign_out"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sign Out"
             android:textColor="@color/white"
             android:textSize="@dimen/text_size_18sp"
-            app:layout_constraintBottom_toBottomOf="@+id/textView9"
+            app:layout_constraintBottom_toBottomOf="@+id/user_email"
             app:layout_constraintEnd_toEndOf="@+id/imageView7"
             app:layout_constraintStart_toStartOf="@+id/imageView7" />
 
@@ -102,11 +103,20 @@ tools:context=".ui.fragments.TransactionFragment">
             android:textSize="@dimen/text_size_18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/transactionRecycler"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginTop="@dimen/margin_10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -114,6 +124,40 @@ tools:context=".ui.fragments.TransactionFragment">
             app:layout_constraintTop_toBottomOf="@+id/see_all" />
 
 
+        <TextView
+            android:id="@+id/generate_a_qr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:text="Generate a QR code"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/empty_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No result found"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/retry"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/margin_40dp"
+            android:background="@color/orange"
+            android:text="retry"
+            android:visibility="gone"
+            android:layout_marginTop="@dimen/margin_10dp"
+            android:textSize="@dimen/text_size_11sp"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/empty_text" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

@@ -5,14 +5,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.FragmentTransaction
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.woleapp.netpos.qrgenerator.R
-import com.woleapp.netpos.qrgenerator.databinding.ActivityMainBinding
 import com.woleapp.netpos.qrgenerator.databinding.FragmentTransactionsBinding
-import com.woleapp.netpos.qrgenerator.ui.adapter.DashboardViewPagerAdapter
+import com.woleapp.netpos.qrgenerator.adapter.DashboardViewPagerAdapter
 
 
 class TransactionsFragment : Fragment() {
