@@ -9,9 +9,16 @@ import com.google.gson.Gson
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.db.AppDatabase
 import com.woleapp.netpos.qrgenerator.model.*
+import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
+import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutResponse
+import com.woleapp.netpos.qrgenerator.model.pay.PayModel
+import com.woleapp.netpos.qrgenerator.model.pay.PayResponse
 import com.woleapp.netpos.qrgenerator.network.QRRepository
 import com.woleapp.netpos.qrgenerator.utils.Event
 import com.woleapp.netpos.qrgenerator.utils.PREF_USER
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.createClientDataForNonVerveCard
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.createClientDataForVerveCard
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.stringToBase64
 import com.woleapp.netpos.qrgenerator.utils.Resource
 import com.woleapp.netpos.qrgenerator.utils.Singletons
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,17 +58,19 @@ class QRViewModel @Inject constructor(
         MutableLiveData()
     val issuingBankResponse: LiveData<Resource<BankCardResponse>> get() = _issuingBankResponse
 
+
+    private val _checkOutRResponse: MutableLiveData<Resource<CheckOutResponse>> =
+        MutableLiveData()
+    val checkOutRResponse: LiveData<Resource<CheckOutResponse>> get() = _checkOutRResponse
+
+    private val _payResponse: MutableLiveData<Resource<PayResponse>> =
+        MutableLiveData()
+    val payResponse: LiveData<Resource<PayResponse>> get() = _payResponse
+
+
     private var _transactionResponse: MutableLiveData<Resource<TransactionResponse>> =
         MutableLiveData()
     val transactionResponse: LiveData<Resource<TransactionResponse>> get() = _transactionResponse
-
-    private var _merchantResponse: MutableLiveData<Resource<MerchantResponse>> =
-        MutableLiveData()
-    val merchantResponse: LiveData<Resource<MerchantResponse>> get() = _merchantResponse
-
-    private var _allMerchantResponse: MutableLiveData<Resource<AllMerchantResponse>> =
-        MutableLiveData()
-    val allMerchantResponse: LiveData<Resource<AllMerchantResponse>> get() = _allMerchantResponse
 
     private val _generateQrMessage = MutableLiveData<Event<String>>()
     val generateQrMessage: LiveData<Event<String>>
@@ -82,6 +91,14 @@ class QRViewModel @Inject constructor(
     private val _merchantMessage = MutableLiveData<Event<String>>()
     val merchantMessage: LiveData<Event<String>>
         get() = _merchantMessage
+
+    private val _checkOutMessage = MutableLiveData<Event<String>>()
+    val checkOutMessage: LiveData<Event<String>>
+        get() = _checkOutMessage
+
+    private val _payMessage = MutableLiveData<Event<String>>()
+    val payMessage: LiveData<Event<String>>
+        get() = _payMessage
 
     val cardSchemes = arrayListOf<Row>()
 
@@ -317,6 +334,59 @@ class QRViewModel @Inject constructor(
         )
     }
 
+
+//    fun checkOutQr(checkOutModel: CheckOutModel) {
+//        if (_isVerveCard.value == true) _checkOutRResponseVerve.value =
+//            Resource.loading(null) else _checkOutRResponse.value = Resource.loading(null)
+//        disposable.add(
+//            qrRepository.checkOut(checkOutModel)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .flatMap {
+//                    Single.just(it.body())
+//                }
+//                .subscribe { postQrResponse, error ->
+//                    postQrResponse?.let {
+//                        val serverResponse: Any? = if (it.has("TermUrl")) {
+//                            Gson().fromJson(
+//                                it,
+//                                PostQrToServerResponse::class.java
+//                            )
+//                        } else if (it.get("status").asString.lowercase() != "failed") {
+//                            Gson().fromJson(it, PostQrToServerVerveResponseModel::class.java)
+//                        } else {
+//                            null
+//                        }
+//                        if (serverResponse is PostQrToServerResponse) {
+//                            _checkOutRResponse.value = Resource.success(serverResponse)
+//                        } else if (serverResponse is PostQrToServerVerveResponseModel) {
+//                            _checkOutRResponseVerve.value =
+//                                Resource.success(serverResponse)
+//                        } else {
+//                            if (_isVerveCard.value == true) _checkOutRResponseVerve.value =
+//                                Resource.error(null) else _checkOutRResponse.value =
+//                                Resource.error(null)
+//                        }
+//                    }
+//                    error?.let {
+//                        if (_isVerveCard.value == true) {
+//                            _checkOutRResponseVerve.value =
+//                                if (it is SocketTimeoutException) Resource.timeOut(null) else Resource.error(
+//                                    null
+//                                )
+//                        } else {
+//                            _checkOutRResponse.value =
+//                                if (it is SocketTimeoutException) Resource.timeOut(null) else Resource.error(
+//                                    null
+//                                )
+//                        }
+//                        Timber.d(Gson().toJson(it))
+//                    }
+//                }
+//        )
+//    }
+
+
     fun getEachTransaction(qrCodeID: String) {
         _transactionResponse.postValue(Resource.loading(null))
         disposable.add(
@@ -350,69 +420,52 @@ class QRViewModel @Inject constructor(
     }
 
 
-//    fun getMerchant(searchQuery:String) {
-//        _merchantResponse.postValue(Resource.loading(null))
-//        disposable.add(
-//            qrRepository.getMerchant(searchQuery)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe { data, error ->
-//                    data?.let {
-//                        _merchantResponse.postValue(Resource.success(it))
-//                        _merchantLIst = arrayListOf()
-//                        _merchantLIst = it.data.rows
-//                   //     _message.value = Event("Success")
-//                    }
-//                    error?.let {
-//                        _merchantResponse.postValue(Resource.error(null))
-//                       // Timber.d("ERROR==${it.localizedMessage}")
-//                        (it as? HttpException).let { httpException ->
-//                            val errorMessage = httpException?.response()?.errorBody()?.string()
-//                                ?: "{\"message\":\"Unexpected error\"}"
-//                            _merchantMessage.value = Event(
-//                                try {
-//                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
-//                                } catch (e: Exception) {
-//                                    "Error"
-//                                }
-//                            )
-//                        }
-//                    }
-//                }
-//        )
-//    }
-
-//    fun getAllMerchant() {
-//        _allMerchantResponse.postValue(Resource.loading(null))
-//        disposable.add(
-//            qrRepository.getAllMerchant()
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe { data, error ->
-//                    data?.let {
-//                        _allMerchantResponse.postValue(Resource.success(it))
-//                        _allMerchantLIst = arrayListOf()
-//                        _allMerchantLIst = it.data
-//                        //     _message.value = Event("Success")
-//                    }
-//                    error?.let {
-//                        _allMerchantResponse.postValue(Resource.error(null))
-//                        // Timber.d("ERROR==${it.localizedMessage}")
-//                        (it as? HttpException).let { httpException ->
-//                            val errorMessage = httpException?.response()?.errorBody()?.string()
-//                                ?: "{\"message\":\"Unexpected error\"}"
-//                            _merchantMessage.value = Event(
-//                                try {
-//                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
-//                                } catch (e: Exception) {
-//                                    "Error"
-//                                }
-//                            )
-//                        }
-//                    }
-//                }
-//        )
-//    }
+    fun payQrCharges(checkOutModel: CheckOutModel, qrModelRequest: QrModelRequest, pin: String = "") {
+        _checkOutRResponse.postValue(Resource.loading(null))
+        disposable.add(
+            qrRepository.checkOut(checkOutModel)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMap {
+                    val clientDataString = if (qrModelRequest.card_scheme == CardScheme.VERVE.type)
+                        createClientDataForVerveCard(
+                            it.transId,
+                            qrModelRequest.card_number,
+                            qrModelRequest.card_expiry,
+                            qrModelRequest.card_cvv,
+                            pin
+                        )
+                    else createClientDataForNonVerveCard(
+                        it.transId,
+                        qrModelRequest.card_number,
+                        qrModelRequest.card_expiry,
+                        qrModelRequest.card_cvv
+                    )
+                    val clientData = stringToBase64(clientDataString)
+                    qrRepository.pay(clientData)
+                }
+                .subscribe { data, error ->
+                    data?.let {
+                        _payResponse.postValue(Resource.success(it))
+                    }
+                    error?.let {
+                        _payResponse.postValue(Resource.error(null))
+                        // Timber.d("ERROR==${it.localizedMessage}")
+                        (it as? HttpException).let { httpException ->
+                            val errorMessage = httpException?.response()?.errorBody()?.string()
+                                ?: "{\"message\":\"Unexpected error\"}"
+                            _payMessage.value = Event(
+                                try {
+                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
+                                } catch (e: Exception) {
+                                    "Error"
+                                }
+                            )
+                        }
+                    }
+                }
+        )
+    }
 
 
     fun clear() {

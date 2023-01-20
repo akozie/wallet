@@ -27,6 +27,8 @@ android {
         buildConfigField("String", "STRING_TALLY_BASE_URL", "\"${prop.getProperty("STRING_TALLY_BASE_URL")}\"")
         buildConfigField("String", "STRING_TRANSACTION_BASE_URL", "\"${prop.getProperty("STRING_TRANSACTION_BASE_URL")}\"")
         buildConfigField("String", "STRING_MERCHANT_BASE_URL", "\"${prop.getProperty("STRING_MERCHANT_BASE_URL")}\"")
+        buildConfigField("String", "STRING_CHECKOUT_BASE_URL", "\"${prop.getProperty("STRING_CHECKOUT_BASE_URL")}\"")
+        buildConfigField("String", "STRING_CHECKOUT_MERCHANT_ID", "\"${prop.getProperty("STRING_CHECKOUT_MERCHANT_ID")}\"")
 
     }
 
@@ -45,6 +47,9 @@ android {
     }
     buildFeatures {
         viewBinding true
+    }
+    dataBinding {
+        enabled = true
     }
 }
 

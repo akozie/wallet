@@ -31,4 +31,5 @@ interface QRService {
     fun getCardBanks(
     ): Single<BankCardResponse>
 
+
 }

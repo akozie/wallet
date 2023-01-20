@@ -2,6 +2,7 @@ package com.woleapp.netpos.qrgenerator.di
 
 import com.google.gson.Gson
 import com.woleapp.netpos.qrgenerator.BuildConfig
+import com.woleapp.netpos.qrgenerator.network.CheckoutService
 import com.woleapp.netpos.qrgenerator.network.MerchantService
 import com.woleapp.netpos.qrgenerator.network.QRService
 import com.woleapp.netpos.qrgenerator.network.TransactionService
@@ -38,6 +39,12 @@ object AppModule {
     @Singleton
     @Named("merchantBaseUrl")
     fun providesMerchantBaseUrl(): String = BuildConfig.STRING_MERCHANT_BASE_URL
+
+
+    @Provides
+    @Singleton
+    @Named("checkoutBaseUrl")
+    fun providesCheckoutBaseUrl(): String = BuildConfig.STRING_CHECKOUT_BASE_URL
 
 
     @Provides
@@ -113,6 +120,20 @@ object AppModule {
 
     @Provides
     @Singleton
+    @Named("defaultCheckoutRetrofit")
+    fun providesCheckoutRetrofit(
+        @Named("defaultOkHttp") okhttp: OkHttpClient,
+        @Named("checkoutBaseUrl") baseUrl: String
+    ): Retrofit =
+        Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .baseUrl(baseUrl)
+            .client(okhttp)
+            .build()
+
+    @Provides
+    @Singleton
     fun providesContactlessRegService(
         @Named("defaultRetrofit") retrofit: Retrofit
     ): QRService = retrofit.create(QRService::class.java)
@@ -128,6 +149,12 @@ object AppModule {
     fun providesMerchantService(
         @Named("defaultMerchantRetrofit") retrofit: Retrofit
     ): MerchantService = retrofit.create(MerchantService::class.java)
+
+    @Provides
+    @Singleton
+    fun providesCheckoutService(
+        @Named("defaultCheckoutRetrofit") retrofit: Retrofit
+    ): CheckoutService = retrofit.create(CheckoutService::class.java)
 
     @Provides
     @Singleton

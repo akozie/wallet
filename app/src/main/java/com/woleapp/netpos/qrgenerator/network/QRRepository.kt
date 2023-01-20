@@ -3,6 +3,8 @@ package com.woleapp.netpos.qrgenerator.network
 import com.woleapp.netpos.qrgenerator.model.LoginRequest
 import com.woleapp.netpos.qrgenerator.model.QrModelRequest
 import com.woleapp.netpos.qrgenerator.model.RegisterRequest
+import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
+import com.woleapp.netpos.qrgenerator.model.pay.PayModel
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -11,6 +13,7 @@ import javax.inject.Singleton
 class QRRepository @Inject constructor(
     private val qrService: QRService,
     private val transactionService: TransactionService,
+    private val checkoutService: CheckoutService,
     private val merchantService: MerchantService
 ) {
 
@@ -28,7 +31,9 @@ class QRRepository @Inject constructor(
     fun getAllTransaction(qrCodeId: String) = transactionService.getEachTransaction(qrCodeId, 1, 10)
 
 
-   // fun getMerchant(searchQuery: String) = merchantService.getMerchant(searchQuery)
+    fun checkOut(checkOutModel: CheckOutModel) = checkoutService.checkOut(checkOutModel)
 
-   // fun getAllMerchant() = merchantService.getAllMerchant()
+    fun pay(clientData: String) = checkoutService.pay(PayModel(clientData,"PAY"))
+
+
 }

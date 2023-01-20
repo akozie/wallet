@@ -35,4 +35,23 @@
     <string name="all_please_enter_card_expiry_number">Please Enter Your Card Expiry Number</string>
     <string name="all_please_enter_card_date">Please Enter Your Card Date</string>
     <string name="all_please_enter_card_cvv">Please Enter Your Card CVV</string>
+    <string name="enter_pin">Enter Card Pin</string>
+
+    <string name="btn_cal_0">0</string>
+    <string name="btn_cal_1">1</string>
+    <string name="btn_cal_2">2</string>
+    <string name="btn_cal_3">3</string>
+    <string name="btn_cal_4">4</string>
+    <string name="btn_cal_5">5</string>
+    <string name="btn_cal_6">6</string>
+    <string name="btn_cal_7">7</string>
+    <string name="btn_cal_8">8</string>
+    <string name="btn_cal_9">9</string>
+    <string name="btn_esc">Esc</string>
+    <string name="btn_confirm">Confirm</string>
+
+    <string name="pin_too_short">Pin too short</string>
+    <string name="max_input">Maximum input reached</string>
+
+
 </resources>

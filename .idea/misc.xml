@@ -12,6 +12,7 @@
         <entry key="app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_baseline_share_24.xml" value="0.1445" />
         <entry key="app/src/main/res/drawable/ic_big_naira.xml" value="0.117" />
+        <entry key="app/src/main/res/drawable/ic_cal_clear.xml" value="0.23" />
         <entry key="app/src/main/res/drawable/ic_call.xml" value="0.1445" />
         <entry key="app/src/main/res/drawable/ic_group_6.xml" value="0.127" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.15" />
@@ -51,6 +52,7 @@
         <entry key="app/src/main/res/layout/fragment_web_view.xml" value="0.3098958333333333" />
         <entry key="app/src/main/res/layout/layout__enter_password_pref.xml" value="0.3098958333333333" />
         <entry key="app/src/main/res/layout/layout_loading_dialog.xml" value="0.375" />
+        <entry key="app/src/main/res/layout/layout_randomized_pin_block.xml" value="0.2947916666666667" />
         <entry key="app/src/main/res/layout/layout_set_password_pref.xml" value="0.3098958333333333" />
         <entry key="app/src/main/res/layout/merchant_layout.xml" value="0.3178082191780822" />
         <entry key="app/src/main/res/layout/qr_details_layout.xml" value="0.335" />
