@@ -424,9 +424,7 @@ class QRViewModel @Inject constructor(
         _checkOutRResponse.postValue(Resource.loading(null))
         disposable.add(
             qrRepository.checkOut(checkOutModel)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .flatMap {
+             .flatMap {
                     val clientDataString = if (qrModelRequest.card_scheme == CardScheme.VERVE.type)
                         createClientDataForVerveCard(
                             it.transId,
@@ -442,8 +440,11 @@ class QRViewModel @Inject constructor(
                         qrModelRequest.card_cvv
                     )
                     val clientData = stringToBase64(clientDataString)
-                    qrRepository.pay(clientData)
+                 val newClientData = clientData.replace("\n", "")
+                    qrRepository.pay(newClientData)
                 }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
                     data?.let {
                         _payResponse.postValue(Resource.success(it))

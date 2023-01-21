@@ -31,7 +31,14 @@ class QRRepository @Inject constructor(
     fun getAllTransaction(qrCodeId: String) = transactionService.getEachTransaction(qrCodeId, 1, 10)
 
 
-    fun checkOut(checkOutModel: CheckOutModel) = checkoutService.checkOut(checkOutModel)
+    fun checkOut(checkOutModel: CheckOutModel) = checkoutService.checkOut(
+        checkOutModel.merchantId,
+        checkOutModel.name,
+        checkOutModel.email,
+        checkOutModel.amount,
+        checkOutModel.currency,
+        checkOutModel.orderId
+    )
 
     fun pay(clientData: String) = checkoutService.pay(PayModel(clientData,"PAY"))
 

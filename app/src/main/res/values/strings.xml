@@ -52,6 +52,8 @@
 
     <string name="pin_too_short">Pin too short</string>
     <string name="max_input">Maximum input reached</string>
+    <string name="cancel">Cancel</string>
+    <string name="send_receipt_as_message">Send Receipt as message</string>
 
 
 </resources>

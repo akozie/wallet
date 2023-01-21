@@ -29,6 +29,7 @@ android {
         buildConfigField("String", "STRING_MERCHANT_BASE_URL", "\"${prop.getProperty("STRING_MERCHANT_BASE_URL")}\"")
         buildConfigField("String", "STRING_CHECKOUT_BASE_URL", "\"${prop.getProperty("STRING_CHECKOUT_BASE_URL")}\"")
         buildConfigField("String", "STRING_CHECKOUT_MERCHANT_ID", "\"${prop.getProperty("STRING_CHECKOUT_MERCHANT_ID")}\"")
+        buildConfigField("String", "STRING_WEB_VIEW_BASE_URL", "\"${prop.getProperty("STRING_WEB_VIEW_BASE_URL")}\"")
 
     }
 
@@ -48,6 +49,7 @@ android {
     buildFeatures {
         viewBinding true
     }
+
     dataBinding {
         enabled = true
     }
@@ -117,5 +119,8 @@ dependencies {
     implementation "androidx.paging:paging-runtime-ktx:3.1.1"
     implementation "androidx.paging:paging-common-ktx:3.1.1"
     implementation "androidx.paging:paging-rxjava2:3.1.1"
+
+    // Lootie
+    implementation "com.airbnb.android:lottie:5.2.0"
 
 }

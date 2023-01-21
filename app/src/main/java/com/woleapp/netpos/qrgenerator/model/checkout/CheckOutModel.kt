@@ -7,7 +7,7 @@ data class CheckOutModel(
     val merchantId: String,
     val name: String,
     val email: String,
-    val amount: Int,
+    val amount: Double,
     val currency: String,
     val orderId: String = getGUID()
 )

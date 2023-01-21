@@ -6,13 +6,20 @@ import com.woleapp.netpos.qrgenerator.model.pay.PayModel
 import com.woleapp.netpos.qrgenerator.model.pay.PayResponse
 import io.reactivex.Single
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface CheckoutService {
 
-    @POST("v2/checkout")
+    @GET("v2/checkout")
     fun checkOut(
-        @Body checkOutModel: CheckOutModel
+        @Query("merchantId") merchantId : String,
+        @Query("name") name : String,
+        @Query("email") email : String,
+        @Query("amount") amount : Double,
+        @Query("currency") currency : String,
+        @Query("orderId") orderId : String,
     ): Single<CheckOutResponse>
 
     @POST("v2/pay")

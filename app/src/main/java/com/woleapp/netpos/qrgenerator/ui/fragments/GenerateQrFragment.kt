@@ -21,12 +21,15 @@ import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.adapter.BankCardAdapter
 import com.woleapp.netpos.qrgenerator.adapter.CardSchemeAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentGenerateQrBinding
+import com.woleapp.netpos.qrgenerator.model.CardScheme
 import com.woleapp.netpos.qrgenerator.model.QrModelRequest
 import com.woleapp.netpos.qrgenerator.model.Row
 import com.woleapp.netpos.qrgenerator.model.RowX
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
+import com.woleapp.netpos.qrgenerator.ui.dialog.QrPasswordPinBlockDialog
 import com.woleapp.netpos.qrgenerator.utils.PIN_BLOCK_BK
 import com.woleapp.netpos.qrgenerator.utils.PIN_BLOCK_RK
+import com.woleapp.netpos.qrgenerator.utils.QR_PIN_PAD
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.showToast
@@ -63,6 +66,12 @@ class GenerateQrFragment : Fragment() {
             requireActivity()
         ){ _, bundle ->
             val data = bundle.getString(PIN_BLOCK_BK)
+            data?.let {
+                showToast(it)
+                val checkOutModel = getCheckOutModel()
+                val qrModelRequest = getQrRequestModel()
+                qrViewModel.payQrCharges(checkOutModel, qrModelRequest, it)
+            }
         }
     }
 
@@ -326,14 +335,26 @@ class GenerateQrFragment : Fragment() {
         }
     }
     private fun checkOut() {
-        val checkOutModel = CheckOutModel(
-            merchantId = BuildConfig.STRING_CHECKOUT_MERCHANT_ID,
-            name = full_name.text.toString().trim(),
-            email = emailAddress.text.toString().trim(),
-            amount = 5,
-            currency = "NGN"
-        )
-        val qrRequest = QrModelRequest(
+        val checkOutModel = getCheckOutModel()
+        val qrRequest = getQrRequestModel()
+        if (qrRequest.card_scheme == CardScheme.VERVE.type) {
+            QrPasswordPinBlockDialog().show(childFragmentManager, QR_PIN_PAD)
+        }else{
+            qrViewModel.payQrCharges(checkOutModel, qrRequest)
+        }
+        observeServerResponse(
+            qrViewModel.payResponse,
+            loader,
+            requireActivity().supportFragmentManager
+        ) {
+            val action =
+                GenerateQrFragmentDirections.actionGenerateQrFragmentToWebViewFragment()
+            findNavController().navigate(action)
+        }
+    }
+
+    private fun getQrRequestModel():QrModelRequest =
+        QrModelRequest(
             fullname = full_name.text.toString().trim(),
             email = emailAddress.text.toString().trim(),
             card_cvv = cardExpiryCvv.text.toString().trim(),
@@ -343,15 +364,13 @@ class GenerateQrFragment : Fragment() {
             issuing_bank = bankCard,
             mobile_phone = phoneNumber.text.toString().trim()
         )
-        qrViewModel.payQrCharges(checkOutModel, qrRequest)
-        observeServerResponse(
-            qrViewModel.checkOutRResponse,
-            loader,
-            requireActivity().supportFragmentManager
-        ) {
-//            val action =
-//                GenerateQrFragmentDirections.actionGenerateQrFragmentToShowQrFragment(qrViewModel.generateQrResponse.value?.data!!)
-//            findNavController().navigate(action)
-        }
-    }
+
+    private fun getCheckOutModel(): CheckOutModel =
+        CheckOutModel(
+            merchantId = BuildConfig.STRING_CHECKOUT_MERCHANT_ID,
+            name = full_name.text.toString().trim(),
+            email = emailAddress.text.toString().trim(),
+            amount = 5.00,
+            currency = "NGN"
+        )
 }
