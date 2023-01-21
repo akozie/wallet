@@ -5,6 +5,7 @@
       <map>
         <entry key="app/src/main/res/drawable-v24/ic_arrow_down_24.xml" value="0.15" />
         <entry key="app/src/main/res/drawable/background_button.xml" value="0.2005" />
+        <entry key="app/src/main/res/drawable/curve_bg.xml" value="0.1935" />
         <entry key="app/src/main/res/drawable/custom_eye.xml" value="0.1855" />
         <entry key="app/src/main/res/drawable/ic_arrow_down_24.xml" value="0.15" />
         <entry key="app/src/main/res/drawable/ic_baseline_call_24.xml" value="0.1445" />
@@ -58,6 +59,7 @@
         <entry key="app/src/main/res/layout/qr_details_layout.xml" value="0.335" />
         <entry key="app/src/main/res/layout/qr_layout.xml" value="0.25" />
         <entry key="app/src/main/res/layout/transaction_layout.xml" value="0.4103671706263499" />
+        <entry key="app/src/main/res/layout/transaction_status_modal.xml" value="0.14010416666666667" />
         <entry key="app/src/main/res/xml/preferences.xml" value="0.109375" />
       </map>
     </option>

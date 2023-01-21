@@ -1,7 +1,10 @@
 package com.woleapp.netpos.qrgenerator.di
 
+import android.content.Context
 import com.google.gson.Gson
 import com.woleapp.netpos.qrgenerator.BuildConfig
+import com.woleapp.netpos.qrgenerator.db.AppDatabase
+import com.woleapp.netpos.qrgenerator.db.QrDao
 import com.woleapp.netpos.qrgenerator.network.CheckoutService
 import com.woleapp.netpos.qrgenerator.network.MerchantService
 import com.woleapp.netpos.qrgenerator.network.QRService
@@ -9,7 +12,9 @@ import com.woleapp.netpos.qrgenerator.network.TransactionService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.reactivex.disposables.CompositeDisposable
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -173,4 +178,22 @@ object AppModule {
     @Provides
     @Singleton
     fun providesGson(): Gson = Gson()
+
+    @Provides
+    @Singleton
+    fun providesAppDatabase(
+        @ApplicationContext context: Context) : AppDatabase =
+        AppDatabase.getDatabaseInstance(context)
+
+    @Provides
+    @Singleton
+    fun providesQrDao(
+        appDatabase: AppDatabase): QrDao {
+        return appDatabase.getQrDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providesCompositeDisposable(): CompositeDisposable =
+        CompositeDisposable()
 }

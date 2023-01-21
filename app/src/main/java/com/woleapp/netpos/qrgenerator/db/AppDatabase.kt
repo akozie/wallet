@@ -7,12 +7,13 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.woleapp.netpos.qrgenerator.model.DomainQREntity
 import com.woleapp.netpos.qrgenerator.model.GenerateQRResponse
+import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
 
-@Database(entities = [DomainQREntity::class], version = 7, exportSchema = false)
+@Database(entities = [DomainQREntity::class, QrTransactionResponseModel::class], version = 8, exportSchema = false)
 @TypeConverters(AppTypeConverter::class)
 abstract class AppDatabase : RoomDatabase() {
 
-    abstract fun qrDao(): QrDao
+    abstract fun getQrDao(): QrDao
 
     companion object {
         @Volatile

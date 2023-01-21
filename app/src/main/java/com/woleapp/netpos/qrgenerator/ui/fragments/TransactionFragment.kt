@@ -16,17 +16,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pixplicity.easyprefs.library.Prefs
-import com.woleapp.netpos.qrgenerator.adapter.QrDetailsAdapter
 import com.woleapp.netpos.qrgenerator.adapter.TransactionAdapter
 import com.woleapp.netpos.qrgenerator.adapter.paging.TransactionPagingAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentTransactionBinding
 import com.woleapp.netpos.qrgenerator.db.AppDatabase
-import com.woleapp.netpos.qrgenerator.model.QrModel
 import com.woleapp.netpos.qrgenerator.model.TransactionModel
 import com.woleapp.netpos.qrgenerator.ui.activities.AuthenticationActivity
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.Singletons
-import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import com.woleapp.netpos.qrgenerator.viewmodels.TransactionViewModel
 import io.reactivex.disposables.CompositeDisposable
@@ -59,7 +55,7 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionClick {
         //loader.visibility = View.VISIBLE
 
         val userId = Singletons().getCurrentlyLoggedInUser()?.id.toString()
-        val num = AppDatabase.getDatabaseInstance(requireContext()).qrDao()
+        val num = AppDatabase.getDatabaseInstance(requireContext()).getQrDao()
             .getUserQrCodes(userId)
         if (num.isEmpty()){
             qrCodeID = null

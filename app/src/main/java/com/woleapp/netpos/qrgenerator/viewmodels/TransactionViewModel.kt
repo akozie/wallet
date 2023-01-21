@@ -1,5 +1,6 @@
 package com.woleapp.netpos.qrgenerator.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -10,19 +11,22 @@ import androidx.paging.rxjava2.cachedIn
 import androidx.paging.rxjava2.flowable
 import com.woleapp.netpos.qrgenerator.model.Transaction
 import com.woleapp.netpos.qrgenerator.model.paging.TransactionsPagingSource
+import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
+import com.woleapp.netpos.qrgenerator.network.TransactionRepository
 import com.woleapp.netpos.qrgenerator.network.TransactionService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Flowable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 @HiltViewModel
 class TransactionViewModel @Inject constructor(
     private val transactionService: TransactionService,
+    private val transactionRepository: TransactionRepository,
+    private val compositeDisposable: CompositeDisposable
 ) : ViewModel() {
-
-//    fun getBookings(qrCodeID : String) = Pager(PagingConfig(pageSize = 20, enablePlaceholders = false)){
-//        TransactionsPagingSource(transactionService,qrCodeID, 10)
-//    }.flow.cachedIn(viewModelScope)
 
     fun getTransactions(qrCodeID: String): Flowable<PagingData<Transaction>> {
         return Pager(PagingConfig(pageSize = 20, enablePlaceholders = false)) {
@@ -31,31 +35,20 @@ class TransactionViewModel @Inject constructor(
             .cachedIn(viewModelScope)
     }
 
-//    fun getSearchedMerchant(search : String): Flowable<PagingData<Merchant>> {
-//        return Pager(PagingConfig(pageSize = 20, enablePlaceholders = false)){
-//            SearchMerchantPagingSource(merchantService,search, 10)
-//        }.flowable.map { pagingData -> pagingData.filter { it != null }}
-//            .cachedIn(viewModelScope)
-//    }
-
-//    override fun getMovies(): Flowable<PagingData<Movies.Movie>> {
-//        return Pager(
-//            config = PagingConfig(
-//                pageSize = 20,
-//                enablePlaceholders = true,
-//                maxSize = 30,
-//                prefetchDistance = 5,
-//                initialLoadSize = 40),
-//            pagingSourceFactory = { pagingSource }
-//        ).flowable
-//    }
-//
-//    fun getFavoriteMovies(): Flowable<PagingData<Movies.Movie>> {
-//        return repository
-//            .getMovies()
-//            .map { pagingData -> pagingData.filter { it.poster != null } }
-//            .cachedIn(viewModelScope)
-//    }
-
+    fun saveQrTransaction(qrTransactionResponseModel: QrTransactionResponseModel){
+        compositeDisposable.add(
+            transactionRepository.saveQrTransaction(qrTransactionResponseModel)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {data, error ->
+                    data?.let {
+                        Log.d("DATA", it.toString())
+                    }
+                    error?.let {
+                        Log.d("ERROR", it.localizedMessage)
+                    }
+                }
+        )
+    }
 
 }

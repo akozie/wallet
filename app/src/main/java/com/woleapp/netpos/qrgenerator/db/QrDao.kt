@@ -6,6 +6,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.woleapp.netpos.qrgenerator.model.DomainQREntity
 import com.woleapp.netpos.qrgenerator.model.GenerateQRResponse
+import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
+import io.reactivex.Single
 
 @Dao
 interface QrDao {
@@ -15,4 +17,7 @@ interface QrDao {
 
     @Query("SELECT qrData FROM qr WHERE userId = :userQrCodeID")
     fun getUserQrCodes(userQrCodeID:String): List<GenerateQRResponse>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertQrTransaction(qrTransactionResponseModel: QrTransactionResponseModel) : Single<Long>
 }

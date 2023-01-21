@@ -9,11 +9,14 @@ import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.activity.OnBackPressedCallback
+import androidx.fragment.app.activityViewModels
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentShowQrBinding
 import com.woleapp.netpos.qrgenerator.databinding.FragmentWebViewBinding
+import com.woleapp.netpos.qrgenerator.di.customDependencies.JavaScriptInterface
 import com.woleapp.netpos.qrgenerator.di.customDependencies.WebViewCallBack
 import com.woleapp.netpos.qrgenerator.utils.WEB_VIEW_JAVASCRIPT_TAG
+import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -22,9 +25,10 @@ class WebViewFragment : Fragment() {
 
     private lateinit var _binding: FragmentWebViewBinding
     private val binding get() = _binding
-    private lateinit var wbView: WebView
+    private lateinit var webView: WebView
     private lateinit var webSettings: WebSettings
-
+    private val qrViewModel by activityViewModels<QRViewModel>()
+    private lateinit var javaScriptInterface: JavaScriptInterface
     @Inject
     lateinit var customWebViewClient: WebViewCallBack
 
@@ -41,12 +45,10 @@ class WebViewFragment : Fragment() {
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    if (wbView != null) {
-                        if (wbView.canGoBack()) {
-                            wbView.goBack()
-                        } else {
-                            requireActivity().supportFragmentManager.popBackStack()
-                        }
+                    if (webView.canGoBack()) {
+                        webView.goBack()
+                    } else {
+                        requireActivity().supportFragmentManager.popBackStack()
                     }
                 }
             }
@@ -58,7 +60,20 @@ class WebViewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        wbView = binding.webView
+        qrViewModel.payResponse.observe(viewLifecycleOwner) { response ->
+            response.data?.let {
+                javaScriptInterface = JavaScriptInterface(
+                    requireActivity().supportFragmentManager,
+                    it.TermUrl,
+                    it.MD,
+                    it.PaReq,
+                    it.ACSUrl,
+                    it.transId
+                )
+                webView = binding.webView
+                setUpWebView(webView)
+            }
+        }
     }
 
     private fun setUpWebView(webView: WebView) {
@@ -69,7 +84,7 @@ class WebViewFragment : Fragment() {
         webView.apply {
             webViewClient = customWebViewClient
             webChromeClient = WebChromeClient()
-          //  addJavascriptInterface(javaScriptInterface, WEB_VIEW_JAVASCRIPT_TAG)
+            addJavascriptInterface(javaScriptInterface, WEB_VIEW_JAVASCRIPT_TAG)
             loadUrl("file:///android_asset/3ds_pay.html")
         }
     }

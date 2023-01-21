@@ -54,6 +54,8 @@
     <string name="max_input">Maximum input reached</string>
     <string name="cancel">Cancel</string>
     <string name="send_receipt_as_message">Send Receipt as message</string>
+    <string name="success">Success</string>
+    <string name="failed">Failed</string>
 
 
 </resources>

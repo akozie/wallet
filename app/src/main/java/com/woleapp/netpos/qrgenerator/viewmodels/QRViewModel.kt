@@ -11,7 +11,6 @@ import com.woleapp.netpos.qrgenerator.db.AppDatabase
 import com.woleapp.netpos.qrgenerator.model.*
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutResponse
-import com.woleapp.netpos.qrgenerator.model.pay.PayModel
 import com.woleapp.netpos.qrgenerator.model.pay.PayResponse
 import com.woleapp.netpos.qrgenerator.network.QRRepository
 import com.woleapp.netpos.qrgenerator.utils.Event
@@ -239,7 +238,7 @@ class QRViewModel @Inject constructor(
                             date = formattedDate
                         )
                         val dataQREntity = DomainQREntity(it.qr_code_id!!, userId, generalResponse)
-                        AppDatabase.getDatabaseInstance(context).qrDao()
+                        AppDatabase.getDatabaseInstance(context).getQrDao()
                             .insertQrCode(dataQREntity)
                     }
                     error?.let {

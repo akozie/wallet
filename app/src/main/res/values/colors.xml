@@ -15,4 +15,6 @@
     <color name="colorDivider">#ffe6ebf3</color>
     <color name="pinButtonBackground">@color/colorPrimary</color>
     <color name="text_color">#020202</color>
+    <color name="success">#1A9211</color>
+    <color name="failed">#F01808</color>
 </resources>

@@ -1,6 +1,5 @@
 package com.woleapp.netpos.qrgenerator.ui.fragments
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -62,7 +61,7 @@ class QRFragment : Fragment(), QrAdapter.OnQrClick {
     private fun getQrCodes() {
         qrDataList = arrayListOf()
         val userId = Singletons().getCurrentlyLoggedInUser()?.id.toString()
-        val num = AppDatabase.getDatabaseInstance(requireContext()).qrDao()
+        val num = AppDatabase.getDatabaseInstance(requireContext()).getQrDao()
             .getUserQrCodes(userId)
         num.forEach {
             qrDataList.add(QrModel(it.data!!, it.qr_code_id!!, it.card_scheme!!, it.date!!, it.issuing_bank!!))

@@ -12,6 +12,7 @@ import androidx.lifecycle.LiveData
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.model.Status
 import com.woleapp.netpos.qrgenerator.model.TransactionModel
+import java.text.DecimalFormat
 import java.util.*
 import java.util.Base64.getDecoder
 
@@ -134,5 +135,10 @@ object RandomUtils {
 
     fun createClientDataForVerveCard(transID:String, cardNumber:String, expiryDate:String, cvv:String, pin:String):String =
          "$transID:LIVE:$cardNumber:$expiryDate:$cvv:$pin:NGN:QR"
+
+    fun Number.formatCurrency(currencySymbol: String = "\u20A6"): String {
+        val format = DecimalFormat("#,###.00")
+        return "$currencySymbol${format.format(this)}"
+    }
 
 }
