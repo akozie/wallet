@@ -164,5 +164,6 @@
     <dimen name="dimen_4dp">4dp</dimen>
     <dimen name="dimen_25dp">25dp</dimen>
     <dimen name="dimen_40dp">40dp</dimen>
+    <dimen name="dimen_110dp">110dp</dimen>
 
 </resources>

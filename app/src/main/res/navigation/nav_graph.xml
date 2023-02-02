@@ -19,6 +19,9 @@
         <action
             android:id="@+id/action_signInOrGenerateQRFragment_to_signUpFragment"
             app:destination="@id/signUpFragment" />
+        <action
+            android:id="@+id/action_signInOrGenerateQRFragment_to_needCardWebViewFragment"
+            app:destination="@id/needCardWebViewFragment" />
     </fragment>
     <fragment
         android:id="@+id/generateQrFragment"
@@ -65,7 +68,11 @@
     </fragment>
     <fragment
         android:id="@+id/webViewFragment"
-        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.WebViewFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.webview.WebViewFragment"
         android:label="fragment_web_view"
         tools:layout="@layout/fragment_web_view" />
+    <fragment
+        android:id="@+id/needCardWebViewFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.webview.NeedCardWebViewFragment"
+        android:label="NeedCardWebViewFragment" />
 </navigation>

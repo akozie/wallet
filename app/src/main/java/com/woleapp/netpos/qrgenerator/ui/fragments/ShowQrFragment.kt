@@ -142,12 +142,12 @@ class ShowQrFragment : Fragment() {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
         Toast.makeText(requireContext(), "Successfuly Saved", Toast.LENGTH_SHORT).show()
         try {
-            outputStream!!.flush()
+            outputStream.flush()
         } catch (e: IOException) {
             e.printStackTrace()
         }
         try {
-            outputStream!!.close()
+            outputStream.close()
         } catch (e: IOException) {
             e.printStackTrace()
         }

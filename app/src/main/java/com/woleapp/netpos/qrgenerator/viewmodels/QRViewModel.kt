@@ -334,58 +334,6 @@ class QRViewModel @Inject constructor(
     }
 
 
-//    fun checkOutQr(checkOutModel: CheckOutModel) {
-//        if (_isVerveCard.value == true) _checkOutRResponseVerve.value =
-//            Resource.loading(null) else _checkOutRResponse.value = Resource.loading(null)
-//        disposable.add(
-//            qrRepository.checkOut(checkOutModel)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .flatMap {
-//                    Single.just(it.body())
-//                }
-//                .subscribe { postQrResponse, error ->
-//                    postQrResponse?.let {
-//                        val serverResponse: Any? = if (it.has("TermUrl")) {
-//                            Gson().fromJson(
-//                                it,
-//                                PostQrToServerResponse::class.java
-//                            )
-//                        } else if (it.get("status").asString.lowercase() != "failed") {
-//                            Gson().fromJson(it, PostQrToServerVerveResponseModel::class.java)
-//                        } else {
-//                            null
-//                        }
-//                        if (serverResponse is PostQrToServerResponse) {
-//                            _checkOutRResponse.value = Resource.success(serverResponse)
-//                        } else if (serverResponse is PostQrToServerVerveResponseModel) {
-//                            _checkOutRResponseVerve.value =
-//                                Resource.success(serverResponse)
-//                        } else {
-//                            if (_isVerveCard.value == true) _checkOutRResponseVerve.value =
-//                                Resource.error(null) else _checkOutRResponse.value =
-//                                Resource.error(null)
-//                        }
-//                    }
-//                    error?.let {
-//                        if (_isVerveCard.value == true) {
-//                            _checkOutRResponseVerve.value =
-//                                if (it is SocketTimeoutException) Resource.timeOut(null) else Resource.error(
-//                                    null
-//                                )
-//                        } else {
-//                            _checkOutRResponse.value =
-//                                if (it is SocketTimeoutException) Resource.timeOut(null) else Resource.error(
-//                                    null
-//                                )
-//                        }
-//                        Timber.d(Gson().toJson(it))
-//                    }
-//                }
-//        )
-//    }
-
-
     fun getEachTransaction(qrCodeID: String) {
         _transactionResponse.postValue(Resource.loading(null))
         disposable.add(
@@ -420,7 +368,7 @@ class QRViewModel @Inject constructor(
 
 
     fun payQrCharges(checkOutModel: CheckOutModel, qrModelRequest: QrModelRequest, pin: String = "") {
-        _checkOutRResponse.postValue(Resource.loading(null))
+        _payResponse.postValue(Resource.loading(null))
         disposable.add(
             qrRepository.checkOut(checkOutModel)
              .flatMap {
@@ -446,6 +394,7 @@ class QRViewModel @Inject constructor(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
                     data?.let {
+                        //_payMessage.value = Event(it.result)
                         _payResponse.postValue(Resource.success(it))
                     }
                     error?.let {
@@ -468,6 +417,9 @@ class QRViewModel @Inject constructor(
     }
 
 
+    fun cleanPayResponse() {
+        _payResponse.value =null
+    }
     fun clear() {
         _generateQrResponse.postValue(null)
     }

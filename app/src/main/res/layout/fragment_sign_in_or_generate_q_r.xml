@@ -46,7 +46,7 @@
             android:id="@+id/image"
             android:layout_width="wrap_content"
             android:layout_height="200dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="20dp"
             android:src="@drawable/qr_code"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -56,7 +56,7 @@
             android:id="@+id/imageView"
             android:layout_width="wrap_content"
             android:layout_height="70dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:src="@drawable/tally_logo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -67,7 +67,7 @@
             android:id="@+id/relativeLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:layout_marginStart="50dp"
             android:layout_marginEnd="50dp"
             app:layout_constraintEnd_toEndOf="@+id/imageView"
@@ -168,6 +168,28 @@
 
         </RelativeLayout>
 
+        <RelativeLayout
+            android:id="@+id/relativeLayout4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="@dimen/margin_10"
+            android:layout_marginEnd="50dp"
+            app:layout_constraintEnd_toEndOf="@+id/relativeLayout2"
+            app:layout_constraintStart_toStartOf="@+id/relativeLayout2"
+            app:layout_constraintTop_toBottomOf="@+id/relativeLayout3">
+
+            <TextView
+                android:id="@+id/need_a_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:text="Need a Payment Card? "
+                android:textColor="@color/black" />
+
+        </RelativeLayout>
+
         <ImageView
             android:layout_height="30dp"
             android:layout_width="wrap_content"
@@ -177,7 +199,6 @@
             app:layout_constraintTop_toTopOf="@+id/textView3" />
 
         <TextView
-            android:layout_marginTop="@dimen/margin_10dp"
             android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -187,6 +208,6 @@
             android:textColor="@color/black"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/relativeLayout3" />
+            app:layout_constraintTop_toBottomOf="@+id/relativeLayout4" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

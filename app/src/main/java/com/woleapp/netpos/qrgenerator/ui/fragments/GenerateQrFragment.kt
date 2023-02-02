@@ -16,6 +16,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
+import com.google.gson.Gson
+import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.BuildConfig
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.adapter.BankCardAdapter
@@ -27,12 +29,9 @@ import com.woleapp.netpos.qrgenerator.model.Row
 import com.woleapp.netpos.qrgenerator.model.RowX
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.ui.dialog.QrPasswordPinBlockDialog
-import com.woleapp.netpos.qrgenerator.utils.PIN_BLOCK_BK
-import com.woleapp.netpos.qrgenerator.utils.PIN_BLOCK_RK
-import com.woleapp.netpos.qrgenerator.utils.QR_PIN_PAD
+import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
-import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
@@ -116,6 +115,7 @@ class GenerateQrFragment : Fragment() {
         }
 
         submitBtn.setOnClickListener {
+//            qrViewModel.cleanPayResponse()
             generateQr()
         }
 
@@ -334,6 +334,7 @@ class GenerateQrFragment : Fragment() {
             findNavController().navigate(action)
         }
     }
+
     private fun checkOut() {
         val checkOutModel = getCheckOutModel()
         val qrRequest = getQrRequestModel()
@@ -347,9 +348,14 @@ class GenerateQrFragment : Fragment() {
             loader,
             requireActivity().supportFragmentManager
         ) {
-            val action =
-                GenerateQrFragmentDirections.actionGenerateQrFragmentToWebViewFragment()
-            findNavController().navigate(action)
+            if (qrViewModel.payResponse.value?.data?.code == "90"){
+                showToast(qrViewModel.payResponse.value?.data?.result.toString())
+            }else{
+                Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
+                val action =
+                    GenerateQrFragmentDirections.actionGenerateQrFragmentToWebViewFragment()
+                findNavController().navigate(action)
+            }
         }
     }
 
@@ -370,7 +376,12 @@ class GenerateQrFragment : Fragment() {
             merchantId = BuildConfig.STRING_CHECKOUT_MERCHANT_ID,
             name = full_name.text.toString().trim(),
             email = emailAddress.text.toString().trim(),
-            amount = 5.00,
+            amount = 2.00,
             currency = "NGN"
         )
+
+    override fun onDestroy() {
+        qrViewModel.cleanPayResponse()
+        super.onDestroy()
+    }
 }

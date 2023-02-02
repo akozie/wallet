@@ -39,5 +39,9 @@ class SignInOrGenerateQRFragment : Fragment() {
             val action = SignInOrGenerateQRFragmentDirections.actionSignInOrGenerateQRFragmentToGenerateQrFragment()
             findNavController().navigate(action)
         }
+        binding.needACard.setOnClickListener {
+            val action = SignInOrGenerateQRFragmentDirections.actionSignInOrGenerateQRFragmentToNeedCardWebViewFragment()
+            findNavController().navigate(action)
+        }
     }
 }

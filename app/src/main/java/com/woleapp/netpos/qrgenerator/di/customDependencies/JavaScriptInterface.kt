@@ -1,5 +1,6 @@
 package com.woleapp.netpos.qrgenerator.di.customDependencies
 
+import android.util.Log
 import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
@@ -16,12 +17,12 @@ import javax.inject.Inject
 
 
 class JavaScriptInterface(
-     private val fragmentManager: FragmentManager,
-     private val termUrl: String,
-     private val md: String,
-     private val cReq: String,
-     private val acsUrl: String,
-     private val transId: String
+    private val fragmentManager: FragmentManager,
+    private val termUrl: String,
+    private val md: String,
+    private val cReq: String,
+    private val acsUrl: String,
+    private val transId: String
 ) {
     private val webViewBaseUrl =
         BuildConfig.STRING_WEB_VIEW_BASE_URL + BuildConfig.STRING_CHECKOUT_MERCHANT_ID + "/"
@@ -32,6 +33,7 @@ class JavaScriptInterface(
 
     @JavascriptInterface
     fun webViewCallback(webViewResponse: String) {
+        Log.d("CALLBACKSTRING", webViewResponse)
         val responseFromWebView = Gson().fromJson(
             webViewResponse,
             QrTransactionResponseModel::class.java
