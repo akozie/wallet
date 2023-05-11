@@ -371,7 +371,7 @@ class GenerateQrFragment : Fragment() {
             merchantId = UtilityParam.STRING_CHECKOUT_MERCHANT_ID,
             name = full_name.text.toString().trim(),
             email = emailAddress.text.toString().trim(),
-            amount = 10.00,
+            amount = 1.00,
             currency = "NGN"
         )
 
@@ -401,6 +401,21 @@ class GenerateQrFragment : Fragment() {
             "You need to grant permission to save this file"
         ) {
             receiptPdf = createPdf(view, this)
+        }
+    }
+    private fun showAmountDialogForVerveCard() {
+        qrAmountDialogForVerveCard.show()
+        verveCardQrAmountDialogBinding.proceed.setOnClickListener {
+            if (verveCardQrAmountDialogBinding.amount.text.isNullOrEmpty()) {
+                verveCardQrAmountDialogBinding.amount.error = getString(R.string.amount_empty)
+            }
+            val amountDouble =
+                verveCardQrAmountDialogBinding.amount.text.toString().toDoubleOrNull()
+            amountToPayInDouble = amountDouble
+            verveCardQrAmountDialogBinding.amount.text?.clear()
+            qrAmountDialogForVerveCard.cancel()
+            qrAmountDialogForVerveCard.dismiss()
+            qrPinBlock.show(requireActivity().supportFragmentManager, STRING_PIN_BLOCK_DIALOG_TAG)
         }
     }
 }
