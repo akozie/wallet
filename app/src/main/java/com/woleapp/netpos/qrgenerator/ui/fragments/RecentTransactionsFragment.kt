@@ -1,24 +1,22 @@
 package com.woleapp.netpos.qrgenerator.ui.fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.woleapp.netpos.qrgenerator.databinding.FragmentRecentTransactionsBinding
 import com.woleapp.netpos.qrgenerator.adapter.TransactionAdapter
+import com.woleapp.netpos.qrgenerator.databinding.FragmentRecentTransactionsBinding
 import com.woleapp.netpos.qrgenerator.model.TransactionModel
-import java.util.ArrayList
 
 
-class RecentTransactionsFragment : Fragment(), TransactionAdapter.OnTransactionClick  {
+class RecentTransactionsFragment : Fragment(), TransactionAdapter.OnTransactionClick {
 
     private var _binding: FragmentRecentTransactionsBinding? = null
     private val binding get() = _binding!!
     private lateinit var transactionAdapter: TransactionAdapter
     private lateinit var transactionDataList: ArrayList<TransactionModel>
-
 
 
     override fun onCreateView(
@@ -35,25 +33,93 @@ class RecentTransactionsFragment : Fragment(), TransactionAdapter.OnTransactionC
         generateTransactionData()
         transactionSetUp()
     }
+
     private fun transactionSetUp() {
         transactionAdapter = TransactionAdapter(transactionDataList, this)
-        binding.recentTransactionRecycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.recentTransactionRecycler.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.recentTransactionRecycler.adapter = transactionAdapter
     }
 
-    private fun generateTransactionData(){
+    private fun generateTransactionData() {
         transactionDataList = arrayListOf()
-        transactionDataList.add(TransactionModel("Prince Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("Prince Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("Prince Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("Prince Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("Prince Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("Prince Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("Prince Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("Prince Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("Prince Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("Prince Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("Prince Supermarket", "20th of November 15:32", "4000"))
+        transactionDataList.add(
+            TransactionModel(
+                "Prince Supermarket",
+                "20th of November 15:32",
+                "4000"
+            )
+        )
+        transactionDataList.add(
+            TransactionModel(
+                "Prince Supermarket",
+                "20th of November 15:32",
+                "4000"
+            )
+        )
+        transactionDataList.add(
+            TransactionModel(
+                "Prince Supermarket",
+                "20th of November 15:32",
+                "4000"
+            )
+        )
+        transactionDataList.add(
+            TransactionModel(
+                "Prince Supermarket",
+                "20th of November 15:32",
+                "4000"
+            )
+        )
+        transactionDataList.add(
+            TransactionModel(
+                "Prince Supermarket",
+                "20th of November 15:32",
+                "4000"
+            )
+        )
+        transactionDataList.add(
+            TransactionModel(
+                "Prince Supermarket",
+                "20th of November 15:32",
+                "4000"
+            )
+        )
+        transactionDataList.add(
+            TransactionModel(
+                "Prince Supermarket",
+                "20th of November 15:32",
+                "4000"
+            )
+        )
+        transactionDataList.add(
+            TransactionModel(
+                "Prince Supermarket",
+                "20th of November 15:32",
+                "4000"
+            )
+        )
+        transactionDataList.add(
+            TransactionModel(
+                "Prince Supermarket",
+                "20th of November 15:32",
+                "4000"
+            )
+        )
+        transactionDataList.add(
+            TransactionModel(
+                "Prince Supermarket",
+                "20th of November 15:32",
+                "4000"
+            )
+        )
+        transactionDataList.add(
+            TransactionModel(
+                "Prince Supermarket",
+                "20th of November 15:32",
+                "4000"
+            )
+        )
     }
 
     override fun onTransactionClicked(transaction: TransactionModel) {

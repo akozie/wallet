@@ -1,6 +1,5 @@
 package com.woleapp.netpos.qrgenerator.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -35,17 +34,17 @@ class TransactionViewModel @Inject constructor(
             .cachedIn(viewModelScope)
     }
 
-    fun saveQrTransaction(qrTransactionResponseModel: QrTransactionResponseModel){
+    fun saveQrTransaction(qrTransactionResponseModel: QrTransactionResponseModel) {
         compositeDisposable.add(
             transactionRepository.saveQrTransaction(qrTransactionResponseModel)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {data, error ->
+                .subscribe { data, error ->
                     data?.let {
-                        Log.d("DATA", it.toString())
+                        //  Log.d("DATA", it.toString())
                     }
                     error?.let {
-                        Log.d("ERROR", it.localizedMessage)
+                        //   Log.d("ERROR", it.localizedMessage)
                     }
                 }
         )

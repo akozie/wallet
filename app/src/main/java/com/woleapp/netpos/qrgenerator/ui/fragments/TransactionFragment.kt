@@ -22,6 +22,7 @@ import com.woleapp.netpos.qrgenerator.databinding.FragmentTransactionBinding
 import com.woleapp.netpos.qrgenerator.db.AppDatabase
 import com.woleapp.netpos.qrgenerator.model.TransactionModel
 import com.woleapp.netpos.qrgenerator.ui.activities.AuthenticationActivity
+import com.woleapp.netpos.qrgenerator.utils.PREF_USER
 import com.woleapp.netpos.qrgenerator.utils.Singletons
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import com.woleapp.netpos.qrgenerator.viewmodels.TransactionViewModel
@@ -35,45 +36,40 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionClick {
     private lateinit var userEmail: String
     private var qrCodeID: String? = null
     private val mDisposable = CompositeDisposable()
-    private val qrViewModel by activityViewModels<QRViewModel>()
     private val mViewModel by activityViewModels<TransactionViewModel>()
     private lateinit var mAdapter: TransactionPagingAdapter
-    private lateinit var loader:ProgressBar
+    private lateinit var loader: ProgressBar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        _binding =  FragmentTransactionBinding.inflate(inflater, container, false)
+        _binding = FragmentTransactionBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         loader = binding.progressBar
-        //loader.visibility = View.VISIBLE
-
         val userId = Singletons().getCurrentlyLoggedInUser()?.id.toString()
         val num = AppDatabase.getDatabaseInstance(requireContext()).getQrDao()
             .getUserQrCodes(userId)
-        if (num.isEmpty()){
+        if (num.isEmpty()) {
             qrCodeID = null
-        }else{
+        } else {
             num.forEach {
                 qrCodeID = it.qr_code_id
             }
         }
 
-      //  qrCodeID = "67899"
-        if (qrCodeID.isNullOrEmpty()){
+        if (qrCodeID.isNullOrEmpty()) {
             loader.visibility = View.GONE
             binding.generateAQr.visibility = View.VISIBLE
-           // showToast("Generate a QR code")
-        }else{
+        } else {
             transactionSetUp()
         }
-        binding.signOut.setOnClickListener{
+        binding.signOut.setOnClickListener {
             AlertDialog.Builder(context)
                 .setTitle("Logout")
                 .setMessage("Are you sure you want to logout?") // Specifying a listener allows you to take an action before dismissing the dialog.
@@ -82,7 +78,7 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionClick {
                     R.string.yes,
                     DialogInterface.OnClickListener { dialog, which ->
                         // Continue with delete operation
-                        Prefs.edit().clear().apply()
+                        Prefs.remove(PREF_USER)
                         startActivity(
                             Intent(requireContext(), AuthenticationActivity::class.java).apply {
                                 flags =
@@ -93,10 +89,6 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionClick {
                 .setNegativeButton(R.string.no, null)
                 .show()
         }
-//        binding.seeAll.setOnClickListener {
-//            val action = TransactionsFragmentDirections.actionTransactionsFragmentToTransactionHistoryFragment()
-//            findNavController().navigate(action)
-//        }
         userEmail = Singletons().getCurrentlyLoggedInUser()?.email.toString()
         binding.userEmail.text = userEmail
 
@@ -106,23 +98,23 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionClick {
     }
 
     private fun transactionSetUp() {
-      //  loader.visibility = View.VISIBLE
         mAdapter = TransactionPagingAdapter()
         mDisposable.add(mViewModel.getTransactions(qrCodeID!!).subscribe {
             mAdapter.submitData(lifecycle, it)
         })
-        binding.transactionRecycler.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.transactionRecycler.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.transactionRecycler.adapter = mAdapter
 
         mAdapter.addLoadStateListener { loadState ->
             binding.apply {
                 if (loadState.source.refresh is LoadState.NotLoading &&
                     loadState.append.endOfPaginationReached &&
-                    mAdapter.itemCount < 1){
+                    mAdapter.itemCount < 1
+                ) {
                     transactionRecycler.isVisible = false
                     emptyText.isVisible = true
                     retry.isVisible = true
-                    seeAll.isVisible = false
                     loader.visibility = View.GONE
                 } else {
                     emptyText.isVisible = false
@@ -131,34 +123,12 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionClick {
             }
         }
 
-//        qrViewModel.getAllMerchant()
-//        observeServerResponse(
-//            qrViewModel.allMerchantResponse,
-//            loader,
-//            requireActivity().supportFragmentManager
-//        ) {
-//
-//        }
     }
 
-//    private fun qrSetUp() {
-//        qrViewModel.transactionResponse.value?.data?.data?.rows?.let {
-//            qrDetailsDataList = it
-//        }
-//        if (qrDetailsDataList.isEmpty()){
-//            showToast("EMPTY")
-//        }else{
-//            qrDetailAdapter = QrDetailsAdapter(qrDetailsDataList)
-//            qrDetailRecyclerview.adapter = qrDetailAdapter
-//            qrDetailRecyclerview.layoutManager =
-//                LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-//
-//        }
-//
-//    }
 
     override fun onTransactionClicked(transaction: TransactionModel) {
-        val action = TransactionsFragmentDirections.actionTransactionsFragmentToTransactionDetailsFragment()
+        val action =
+            TransactionsFragmentDirections.actionTransactionsFragmentToTransactionDetailsFragment()
         findNavController().navigate(action)
     }
 }

@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+    </data>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:fillViewport="true"
+        android:fitsSystemWindows="true"
+        tools:context=".ui.fragments.AddToBalanceFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="?actionBarSize"
+        android:layout_margin="@dimen/margin_10"
+        >
+
+        <TextView
+            android:id="@+id/add_money"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawablePadding="@dimen/margin_10"
+            android:text="Add Money"
+            android:textColor="@color/black"
+            android:layout_marginTop="@dimen/margin_20dp"
+            android:textSize="@dimen/text_size_18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/enter_amount_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter Amount"
+            android:layout_marginTop="@dimen/margin_30dp"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/add_money" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_amount"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter Amount"
+            android:layout_marginTop="@dimen/margin_10"
+            android:visibility="visible"
+            app:backgroundTint="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:boxStrokeWidth="@dimen/margin_0dp"
+            app:endIconDrawable="@drawable/ic_arrow_down_24"
+            app:endIconTint="@color/black"
+            app:hintEnabled="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/enter_amount_text">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/amount"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:inputType="number"
+                android:textColor="@android:color/background_dark"
+                android:textCursorDrawable="@color/black"
+                android:visibility="visible"
+                app:backgroundTint="@color/background_color" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/Issuing_bank_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Issuing Bank"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_amount" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_issuing_bank"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            app:backgroundTint="@color/white"
+            app:hintEnabled="true"
+            android:layout_marginTop="20dp"
+            android:hint="Select Issuing Bank"
+            app:boxStrokeWidth="@dimen/margin_0dp"
+            app:boxStrokeColor="@color/white"
+            app:endIconDrawable="@drawable/ic_arrow_down_24"
+            app:endIconTint="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/Issuing_bank_text">
+
+            <AutoCompleteTextView
+                android:id="@+id/issuing_bank"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:inputType="none"
+                android:focusable="false"
+                app:backgroundTint="@color/background_color" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/card_scheme_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Card Scheme"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_issuing_bank" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_card_scheme"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            app:backgroundTint="@color/white"
+            app:hintEnabled="true"
+            android:layout_marginTop="20dp"
+            android:hint="Select Card Scheme"
+            app:boxStrokeWidth="@dimen/margin_0dp"
+            app:boxStrokeColor="@color/white"
+            app:endIconDrawable="@drawable/ic_arrow_down_24"
+            app:endIconTint="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/card_scheme_text">
+
+            <AutoCompleteTextView
+                android:id="@+id/card_scheme"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:inputType="none"
+                android:focusable="false"
+                app:backgroundTint="@color/background_color" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/card_number_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Card Number"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_card_scheme" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_card_number"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Card Number"
+            android:layout_marginTop="10dp"
+            android:visibility="visible"
+            app:backgroundTint="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:boxStrokeWidth="@dimen/margin_0dp"
+            app:startIconDrawable="@drawable/card_number_icon"
+            app:hintEnabled="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/card_number_text">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/card_number"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:inputType="number"
+                android:textColor="@android:color/background_dark"
+                android:textCursorDrawable="@color/black"
+                android:visibility="visible"
+                app:backgroundTint="@color/background_color" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/fragment_card_number"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_card_number">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/margin_5dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/expiry_date_tv"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Expiration Date"
+                    android:textColor="@color/black"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/fragment_card_expiry_date"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:hint="MM/YY"
+                    android:visibility="visible"
+                    app:backgroundTint="@color/white"
+                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeWidth="@dimen/margin_0dp"
+                    app:endIconDrawable="@drawable/ic_arrow_down_24"
+                    app:endIconTint="@color/black"
+                    app:hintEnabled="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/expiry_date_tv">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/expiry_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:inputType="phone"
+                        android:maxLength="5"
+                        android:maxLines="1"
+                        android:textColor="@android:color/background_dark"
+                        android:textCursorDrawable="@color/black"
+                        android:visibility="visible"
+                        app:backgroundTint="@color/background_color" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/cvv"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="CVV"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="@+id/fragment_card_cvv"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/fragment_card_cvv"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_20dp"
+                    android:layout_marginTop="10dp"
+                    android:hint="CVV"
+                    android:visibility="visible"
+                    app:backgroundTint="@color/white"
+                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeWidth="@dimen/margin_0dp"
+                    app:endIconTint="@color/black"
+                    app:hintEnabled="true"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/cvv">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/card_cvv"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:inputType="phone"
+                        android:maxLength="3"
+                        android:maxLines="1"
+                        android:textColor="@android:color/background_dark"
+                        android:textCursorDrawable="@color/black"
+                        android:visibility="visible"
+                        app:backgroundTint="@color/background_color" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/linearLayout_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/margin_10"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/fragment_card_number"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/btn_generate_qr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:backgroundTint="@color/black"
+                    app:cardCornerRadius="@dimen/margin_10"
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="55dp"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:paddingHorizontal="60dp"
+                        android:text="PROCESS"
+                        android:textColor="@color/white" />
+
+                </androidx.cardview.widget.CardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+        </LinearLayout>
+
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+</layout>

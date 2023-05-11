@@ -47,7 +47,7 @@
             android:layout_marginTop="@dimen/dimen_20dp"
             android:layout_marginEnd="@dimen/margin_10"
             android:fontFamily="@font/poppins_bold"
-            android:paddingHorizontal="@dimen/dimen_4dp"
+            android:paddingHorizontal="@dimen/margin_10"
             android:textSize="30sp"
             android:textStyle="bold|italic"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -67,17 +67,39 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_btn_cancel" />
 
-        <ImageView
+        <Button
             android:id="@+id/print_receipt"
-            android:layout_width="@dimen/dimen_40dp"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/dimen_40dp"
             android:layout_marginTop="@dimen/dimen_20dp"
             android:layout_marginBottom="@dimen/dimen_40dp"
+            android:text="Download Receipt"
+            android:textColor="@color/white"
+            android:paddingHorizontal="@dimen/margin_10dp"
+            android:background="@color/orange"
             android:contentDescription="@string/send_receipt_as_message"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/success_failed"
+            app:srcCompat="@drawable/ic_print" />
+
+        <Button
+            android:id="@+id/view_generated_qr"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/dimen_40dp"
+            android:layout_marginTop="@dimen/dimen_20dp"
+            android:layout_marginBottom="@dimen/dimen_40dp"
+            android:text="View QR"
+            android:visibility="gone"
+            android:textColor="@color/white"
+            android:paddingHorizontal="@dimen/margin_10dp"
+            android:background="@color/orange"
+            android:contentDescription="@string/send_receipt_as_message"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/print_receipt"
             app:srcCompat="@drawable/ic_print" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -28,35 +28,43 @@
             android:id="@+id/transaction_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_20dp"
+            android:layout_marginStart="@dimen/margin_10dp"
             android:text="Price Supermarket"
             android:textColor="@color/text_color"
-            android:textSize="@dimen/text_size_20sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/transaction_image"
             app:layout_constraintTop_toTopOf="@+id/transaction_image" />
 
         <TextView
-            android:id="@+id/transaction_date"
+            android:id="@+id/transaction_id"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_2dp"
-            android:text="24th, November, 15:22"
-            android:textStyle="italic"
+            android:text="TransID"
+            android:visibility="gone"
+            android:textColor="@color/text_color"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/transaction_title"
             app:layout_constraintTop_toBottomOf="@+id/transaction_title" />
 
         <TextView
+            android:id="@+id/transaction_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="24th, November, 15:22"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/transaction_title"
+            app:layout_constraintTop_toBottomOf="@+id/transaction_id" />
+
+        <TextView
             android:id="@+id/transaction_price"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_2dp"
-            android:drawableLeft="@drawable/ic_naira"
+            android:layout_marginTop="5dp"
             android:text="5000"
             android:textColor="@color/text_color"
-            android:textSize="@dimen/text_size_18sp"
             app:layout_constraintEnd_toEndOf="@+id/transaction_date"
             app:layout_constraintStart_toStartOf="@+id/transaction_title"
             app:layout_constraintTop_toBottomOf="@+id/transaction_date" />

@@ -1,15 +1,12 @@
 package com.woleapp.netpos.qrgenerator.ui.fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.woleapp.netpos.qrgenerator.R
+import androidx.fragment.app.Fragment
 import com.woleapp.netpos.qrgenerator.databinding.FragmentMerchantDetailsBinding
-import com.woleapp.netpos.qrgenerator.databinding.FragmentMerchantsBinding
 import com.woleapp.netpos.qrgenerator.model.Merchant
-import com.woleapp.netpos.qrgenerator.model.QrModel
 
 
 class MerchantDetailsFragment : Fragment() {
@@ -28,7 +25,7 @@ class MerchantDetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val merchantDetails =  arguments?.getParcelable<Merchant>("MERCHANT")
+        val merchantDetails = arguments?.getParcelable<Merchant>("MERCHANT")
 
         if (merchantDetails != null) {
             binding.merchantDetailsName.text = merchantDetails.contact_name

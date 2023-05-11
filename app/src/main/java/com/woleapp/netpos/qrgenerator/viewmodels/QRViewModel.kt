@@ -1,6 +1,7 @@
 package com.woleapp.netpos.qrgenerator.viewmodels
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,14 +13,12 @@ import com.woleapp.netpos.qrgenerator.model.*
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutResponse
 import com.woleapp.netpos.qrgenerator.model.pay.PayResponse
+import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
 import com.woleapp.netpos.qrgenerator.network.QRRepository
-import com.woleapp.netpos.qrgenerator.utils.Event
-import com.woleapp.netpos.qrgenerator.utils.PREF_USER
+import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.createClientDataForNonVerveCard
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.createClientDataForVerveCard
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.stringToBase64
-import com.woleapp.netpos.qrgenerator.utils.Resource
-import com.woleapp.netpos.qrgenerator.utils.Singletons
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -34,15 +33,14 @@ import javax.inject.Inject
 @HiltViewModel
 class QRViewModel @Inject constructor(
     private val qrRepository: QRRepository,
+    private val disposable : CompositeDisposable,
+    private val gson: Gson
 ) : ViewModel() {
-    private val disposable = CompositeDisposable()
 
-    private var _loginResponse: MutableLiveData<Resource<LoginResponse>> =
-        MutableLiveData()
+    private var _loginResponse: MutableLiveData<Resource<LoginResponse>> = MutableLiveData()
     val loginResponse: LiveData<Resource<LoginResponse>> get() = _loginResponse
 
-    private var _registerResponse: MutableLiveData<Resource<GeneralResponse>> =
-        MutableLiveData()
+    private var _registerResponse: MutableLiveData<Resource<GeneralResponse>> = MutableLiveData()
     val registerResponse: LiveData<Resource<GeneralResponse>> get() = _registerResponse
 
     private var _generateQrResponse: MutableLiveData<Resource<GenerateQRResponse>> =
@@ -58,12 +56,10 @@ class QRViewModel @Inject constructor(
     val issuingBankResponse: LiveData<Resource<BankCardResponse>> get() = _issuingBankResponse
 
 
-    private val _checkOutRResponse: MutableLiveData<Resource<CheckOutResponse>> =
-        MutableLiveData()
+    private val _checkOutRResponse: MutableLiveData<Resource<CheckOutResponse>> = MutableLiveData()
     val checkOutRResponse: LiveData<Resource<CheckOutResponse>> get() = _checkOutRResponse
 
-    private val _payResponse: MutableLiveData<Resource<PayResponse>> =
-        MutableLiveData()
+    private val _payResponse: MutableLiveData<Resource<PayResponse>> = MutableLiveData()
     val payResponse: LiveData<Resource<PayResponse>> get() = _payResponse
 
 
@@ -83,6 +79,19 @@ class QRViewModel @Inject constructor(
     val loginMessage: LiveData<Event<String>>
         get() = _loginMessage
 
+
+    // FOR QRt
+    private val _qrTransactionResponseFromWebView: MutableLiveData<QrTransactionResponseModel> =
+        MutableLiveData()
+    val qrTransactionResponseFromWebView: LiveData<QrTransactionResponseModel> get() = _qrTransactionResponseFromWebView
+
+    private val _showQrPrintDialog = MutableLiveData<Event<String>>()
+    val showQrPrintDialog: LiveData<Event<String>>
+        get() = _showQrPrintDialog
+
+
+    var displayQrStatus = 0
+
     private val _transactionMessage = MutableLiveData<Event<String>>()
     val transactionMessage: LiveData<Event<String>>
         get() = _transactionMessage
@@ -90,10 +99,6 @@ class QRViewModel @Inject constructor(
     private val _merchantMessage = MutableLiveData<Event<String>>()
     val merchantMessage: LiveData<Event<String>>
         get() = _merchantMessage
-
-    private val _checkOutMessage = MutableLiveData<Event<String>>()
-    val checkOutMessage: LiveData<Event<String>>
-        get() = _checkOutMessage
 
     private val _payMessage = MutableLiveData<Event<String>>()
     val payMessage: LiveData<Event<String>>
@@ -103,329 +108,269 @@ class QRViewModel @Inject constructor(
 
     val issuingBank = arrayListOf<RowX>()
 
-    private lateinit var allUsers: LiveData<List<GenerateQRResponse>>
-
-    //     lateinit var transactionLIst : List<Transaction>
-    private lateinit var _merchantLIst: List<Merchant>
-    val merchantLIst: List<Merchant>
-        get() = _merchantLIst
-    private lateinit var _allMerchantLIst: List<Merchant>
-    val allMerchantLIst: List<Merchant>
-        get() = _allMerchantLIst
 
     private lateinit var formattedDate: String
 
 
     fun login(loginRequest: LoginRequest) {
         _loginResponse.postValue(Resource.loading(null))
-        //saveAccountNumber(accountNumber)
-        disposable.add(
-            qrRepository.login(loginRequest)
-                .flatMap {
-                    Timber.e(it.toString())
-                    if (!it.success) {
-                        throw Exception("Login Failed, Check Credentials")
-                    }
-                    val userToken = it.token
-                    val userTokenDecoded = JWT(userToken)
-                    val user = User().apply {
-                        this.fullname =
-                            if (userTokenDecoded.claims.containsKey("fullname")) userTokenDecoded.getClaim(
-                                "fullname"
-                            ).asString().toString() else " "
-                        this.mobile_phone =
-                            if (userTokenDecoded.claims.containsKey("mobile_phone")) userTokenDecoded.getClaim(
-                                "mobile_phone"
-                            ).asString().toString() else " "
-                        this.email =
-                            if (userTokenDecoded.claims.containsKey("email")) userTokenDecoded.getClaim(
-                                "email"
-                            ).asString().toString() else " "
-                        this.id =
-                            if (userTokenDecoded.claims.containsKey("id")) userTokenDecoded.getClaim(
-                                "id"
-                            ).asInt()!! else 1
-                    }
-                    // Log.d("FULLNAME","${user}")
-                    Single.just(user)
+        disposable.add(qrRepository.login(loginRequest).flatMap {
+            Timber.e(it.toString())
+            if (!it.success) {
+                throw Exception("Login Failed, Check Credentials")
+            }
+            val userToken = it.token
+            Prefs.putString(USER_TOKEN, userToken)
+            Log.d("USER_TOKEN", userToken)
+            val userTokenDecoded = JWT(userToken)
+            val user = User().apply {
+                this.fullname =
+                    if (userTokenDecoded.claims.containsKey("fullname")) userTokenDecoded.getClaim(
+                        "fullname"
+                    ).asString().toString() else " "
+                this.mobile_phone =
+                    if (userTokenDecoded.claims.containsKey("mobile_phone")) userTokenDecoded.getClaim(
+                        "mobile_phone"
+                    ).asString().toString() else " "
+                this.email =
+                    if (userTokenDecoded.claims.containsKey("email")) userTokenDecoded.getClaim(
+                        "email"
+                    ).asString().toString() else " "
+                this.id =
+                    if (userTokenDecoded.claims.containsKey("id")) userTokenDecoded.getClaim(
+                        "id"
+                    ).asInt()!! else 1
+            }
+            Single.just(user)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribe { data, error ->
+                data?.let {
+                    Prefs.putString(PREF_USER, Gson().toJson(it))
+                    _loginResponse.postValue(Resource.success(it) as Resource<LoginResponse>)
+                    _loginMessage.value = Event("User logged in successfully")
                 }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { data, error ->
-                    data?.let {
-                        Prefs.putString(PREF_USER, Gson().toJson(it))
-                        _loginResponse.postValue(Resource.success(it) as Resource<LoginResponse>)
-                        _loginMessage.value = Event("User logged in successfully")
-                        //  Log.d("EEEMAIL","${it.email}")
-                    }
-                    error?.let {
-                        _loginResponse.postValue(Resource.error(null))
-                        // Timber.d("ERROR==${it.localizedMessage}")
-                        (it as? HttpException).let { httpException ->
-                            val errorMessage = httpException?.response()?.errorBody()?.string()
-                                ?: "{\"message\":\"Unexpected error\"}"
-                            _loginMessage.value = Event(
-                                try {
-                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
-                                        ?: "Error"
-                                } catch (e: Exception) {
-                                    "Error"
-                                }
-                            )
-                            //Timber.e("SHOWME--->$errorMessage")
-                        }
+                error?.let {
+                    _loginResponse.postValue(Resource.error(null))
+                    (it as? HttpException).let { httpException ->
+                        val errorMessage = httpException?.response()?.errorBody()?.string()
+                            ?: "{\"message\":\"Unexpected error\"}"
+                        _loginMessage.value = Event(
+                            try {
+                                Gson().fromJson(errorMessage, ErrorModel::class.java).message
+                                    ?: "Error"
+                            } catch (e: Exception) {
+                                "Error"
+                            }
+                        )
                     }
                 }
-        )
+            })
     }
 
     fun register(registerRequest: RegisterRequest) {
         _registerResponse.postValue(Resource.loading(null))
-        //saveAccountNumber(accountNumber)
-        disposable.add(
-            qrRepository.register(registerRequest)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { data, error ->
-                    data?.let {
-                        _registerResponse.postValue(Resource.success(it))
-                        _registerMessage.value = Event("Registration Successful")
-                    }
-                    error?.let {
-                        _registerResponse.postValue(Resource.error(null))
-                        // Timber.d("ERROR==${it.localizedMessage}")
-                        (it as? HttpException).let { httpException ->
-                            val errorMessage = httpException?.response()?.errorBody()?.string()
-                                ?: "{\"message\":\"Unexpected error\"}"
-                            _registerMessage.value = Event(
-                                try {
-                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
-                                        ?: "Error"
-                                } catch (e: Exception) {
-                                    "Error"
-                                }
-                            )
-                            //Timber.e("SHOWME--->$errorMessage")
-                        }
+        disposable.add(qrRepository.register(registerRequest).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread()).subscribe { data, error ->
+                data?.let {
+                    _registerResponse.postValue(Resource.success(it))
+                    _registerMessage.value = Event("Registration Successful")
+                }
+                error?.let {
+                    _registerResponse.postValue(Resource.error(null))
+                    // Timber.d("ERROR==${it.localizedMessage}")
+                    (it as? HttpException).let { httpException ->
+                        val errorMessage = httpException?.response()?.errorBody()?.string()
+                            ?: "{\"message\":\"Unexpected error\"}"
+                        _registerMessage.value = Event(
+                            try {
+                                Gson().fromJson(errorMessage, ErrorModel::class.java).message
+                                    ?: "Error"
+                            } catch (e: Exception) {
+                                "Error"
+                            }
+                        )
                     }
                 }
-        )
+            })
     }
 
     fun generateQR(qrModelRequest: QrModelRequest, context: Context) {
         _generateQrResponse.postValue(Resource.loading(null))
-        //saveAccountNumber(accountNumber)
-        disposable.add(
-            qrRepository.generateQR(qrModelRequest)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { data, error ->
-                    data?.let {
-                        //    Prefs.putString(PREF_QR, Gson().toJson(it))
-                        _generateQrResponse.postValue(Resource.success(it))
-                        _generateQrMessage.value = Event("Success")
-                        val c = Calendar.getInstance().time
-                        val formatter =
-                            SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
-                        formattedDate = formatter.format(c)
-                        val userId = Singletons().getCurrentlyLoggedInUser()?.id.toString()
-                        val generalResponse = GenerateQRResponse(
-                            qr_code_id = it.qr_code_id,
-                            data = it.data,
-                            success = true,
-                            card_scheme = it.card_scheme,
-                            issuing_bank = it.issuing_bank,
-                            date = formattedDate
-                        )
+        disposable.add(qrRepository.generateQR(qrModelRequest).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread()).subscribe { data, error ->
+                data?.let {
+                    _generateQrResponse.postValue(Resource.success(it))
+                    _generateQrMessage.value = Event("Success")
+                    val c = Calendar.getInstance().time
+                    val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+                    formattedDate = formatter.format(c)
+                    val userId = Singletons().getCurrentlyLoggedInUser()?.id.toString()
+                    val generalResponse = GenerateQRResponse(
+                        qr_code_id = it.qr_code_id,
+                        data = it.data,
+                        success = true,
+                        card_scheme = it.card_scheme,
+                        issuing_bank = it.issuing_bank,
+                        date = formattedDate
+                    )
+                    if (userId.isNotEmpty()) {
                         val dataQREntity = DomainQREntity(it.qr_code_id!!, userId, generalResponse)
                         AppDatabase.getDatabaseInstance(context).getQrDao()
                             .insertQrCode(dataQREntity)
                     }
-                    error?.let {
-                        _generateQrResponse.postValue(Resource.error(null))
-                        // Timber.d("ERROR==${it.localizedMessage}")
-                        (it as? HttpException).let { httpException ->
-                            val errorMessage = httpException?.response()?.errorBody()?.string()
-                                ?: "{\"message\":\"Unexpected error\"}"
-                            _generateQrMessage.value = Event(
-                                try {
-                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
-                                        ?: "Error"
-                                } catch (e: Exception) {
-                                    "Error"
-                                }
-                            )
-                            //Timber.e("SHOWME--->$errorMessage")
-                        }
+                }
+                error?.let {
+                    _generateQrResponse.postValue(Resource.error(null))
+                    (it as? HttpException).let { httpException ->
+                        val errorMessage = httpException?.response()?.errorBody()?.string()
+                            ?: "{\"message\":\"Unexpected error\"}"
+                        _generateQrMessage.value = Event(
+                            try {
+                                Gson().fromJson(errorMessage, ErrorModel::class.java).message
+                                    ?: "Error"
+                            } catch (e: Exception) {
+                                "Error"
+                            }
+                        )
                     }
                 }
-        )
+            })
     }
 
     fun getCardSchemes() {
         _cardSchemeResponse.postValue(Resource.loading(null))
         //saveAccountNumber(accountNumber)
-        disposable.add(
-            qrRepository.getCardSchemes()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { data, error ->
-                    data?.let {
-                        _cardSchemeResponse.postValue(Resource.success(it))
-                        //  _message.value = Event("Success")
-                        for (i in 0 until it.rows.size) {
-                            it.rows[i].let { it1 -> cardSchemes.add(it1) }
+        disposable.add(qrRepository.getCardSchemes().subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread()).subscribe { data, error ->
+                data?.let {
+                    _cardSchemeResponse.postValue(Resource.success(it))
+                    //  _message.value = Event("Success")
+                    for (i in 0 until it.rows.size) {
+                        it.rows[i].let { it1 -> cardSchemes.add(it1) }
 
-                        }
-                    }
-                    error?.let {
-                        _cardSchemeResponse.postValue(Resource.error(null))
-                        // Timber.d("ERROR==${it.localizedMessage}")
-//                        (it as? HttpException).let { httpException ->
-//                            val errorMessage = httpException?.response()?.errorBody()?.string()
-//                                ?: "{\"message\":\"Unexpected error\"}"
-//                            _message.value = Event(
-//                                try {
-//                                    gson.fromJson(errorMessage, ErrorModel::class.java).message
-//                                } catch (e: Exception) {
-//                                    "Error"
-//                                }
-//                            )
-//                            //Timber.e("SHOWME--->$errorMessage")
-//                        }
                     }
                 }
-        )
+                error?.let {
+                    _cardSchemeResponse.postValue(Resource.error(null))
+                }
+            })
     }
 
     fun getCardBanks() {
         _issuingBankResponse.postValue(Resource.loading(null))
-        //saveAccountNumber(accountNumber)
-        disposable.add(
-            qrRepository.getCardBanks()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { data, error ->
-                    data?.let {
-                        _issuingBankResponse.postValue(Resource.success(it))
-                        //     _message.value = Event("Success")
-                        for (i in 0 until it.rows.size) {
-                            it.rows[i].let { it1 -> issuingBank.add(it1) }
-                        }
-                    }
-                    error?.let {
-                        _issuingBankResponse.postValue(Resource.error(null))
-                        // Timber.d("ERROR==${it.localizedMessage}")
-//                        (it as? HttpException).let { httpException ->
-//                            val errorMessage = httpException?.response()?.errorBody()?.string()
-//                                ?: "{\"message\":\"Unexpected error\"}"
-//                            _message.value = Event(
-//                                try {
-//                                    gson.fromJson(errorMessage, ErrorModel::class.java).message
-//                                } catch (e: Exception) {
-//                                    "Error"
-//                                }
-//                            )
-//                            //Timber.e("SHOWME--->$errorMessage")
-//                        }
+        disposable.add(qrRepository.getCardBanks().subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread()).subscribe { data, error ->
+                data?.let {
+                    _issuingBankResponse.postValue(Resource.success(it))
+                    //     _message.value = Event("Success")
+                    for (i in 0 until it.rows.size) {
+                        it.rows[i].let { it1 -> issuingBank.add(it1) }
                     }
                 }
-        )
+                error?.let {
+                    _issuingBankResponse.postValue(Resource.error(null))
+                }
+            })
     }
 
 
     fun getEachTransaction(qrCodeID: String) {
         _transactionResponse.postValue(Resource.loading(null))
-        disposable.add(
-            qrRepository.getAllTransaction(qrCodeID)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { data, error ->
-                    data?.let {
-                        _transactionResponse.postValue(Resource.success(it))
-//                         transactionLIst = arrayListOf()
-//                        transactionLIst = it.data.rows
-                        //     _message.value = Event("Success")
-                    }
-                    error?.let {
-                        _transactionResponse.postValue(Resource.error(null))
-                        // Timber.d("ERROR==${it.localizedMessage}")
-                        (it as? HttpException).let { httpException ->
-                            val errorMessage = httpException?.response()?.errorBody()?.string()
-                                ?: "{\"message\":\"Unexpected error\"}"
-                            _transactionMessage.value = Event(
-                                try {
-                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
-                                } catch (e: Exception) {
-                                    "Error"
-                                }
-                            )
-                        }
-                    }
+        disposable.add(qrRepository.getAllTransaction(qrCodeID).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread()).subscribe { data, error ->
+                data?.let {
+                    _transactionResponse.postValue(Resource.success(it))
                 }
-        )
-    }
-
-
-    fun payQrCharges(checkOutModel: CheckOutModel, qrModelRequest: QrModelRequest, pin: String = "") {
-        _payResponse.postValue(Resource.loading(null))
-        disposable.add(
-            qrRepository.checkOut(checkOutModel)
-             .flatMap {
-                    val clientDataString = if (qrModelRequest.card_scheme == CardScheme.VERVE.type)
-                        createClientDataForVerveCard(
-                            it.transId,
-                            qrModelRequest.card_number,
-                            qrModelRequest.card_expiry,
-                            qrModelRequest.card_cvv,
-                            pin
+                error?.let {
+                    _transactionResponse.postValue(Resource.error(null))
+                    // Timber.d("ERROR==${it.localizedMessage}")
+                    (it as? HttpException).let { httpException ->
+                        val errorMessage = httpException?.response()?.errorBody()?.string()
+                            ?: "{\"message\":\"Unexpected error\"}"
+                        _transactionMessage.value = Event(
+                            try {
+                                Gson().fromJson(errorMessage, ErrorModel::class.java).message
+                            } catch (e: Exception) {
+                                "Error"
+                            }
                         )
-                    else createClientDataForNonVerveCard(
-                        it.transId,
-                        qrModelRequest.card_number,
-                        qrModelRequest.card_expiry,
-                        qrModelRequest.card_cvv
-                    )
-                    val clientData = stringToBase64(clientDataString)
-                 val newClientData = clientData.replace("\n", "")
-                    qrRepository.pay(newClientData)
-                }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { data, error ->
-                    data?.let {
-                        //_payMessage.value = Event(it.result)
-                        _payResponse.postValue(Resource.success(it))
-                    }
-                    error?.let {
-                        _payResponse.postValue(Resource.error(null))
-                        // Timber.d("ERROR==${it.localizedMessage}")
-                        (it as? HttpException).let { httpException ->
-                            val errorMessage = httpException?.response()?.errorBody()?.string()
-                                ?: "{\"message\":\"Unexpected error\"}"
-                            _payMessage.value = Event(
-                                try {
-                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
-                                } catch (e: Exception) {
-                                    "Error"
-                                }
-                            )
-                        }
                     }
                 }
+            })
+    }
+
+
+    fun payQrCharges(
+        checkOutModel: CheckOutModel, qrModelRequest: QrModelRequest, pin: String = ""
+    ) {
+        _payResponse.postValue(Resource.loading(null))
+        disposable.add(qrRepository.checkOut(checkOutModel).flatMap {
+            saveTransIDAndAmountResponse(CheckOutResponse(
+                it.amount,
+                it.customerId,
+                it.domain,
+                it.merchantId,
+                it.status,
+                it.transId
+            ))
+            val clientDataString =
+                if (qrModelRequest.card_scheme == CardScheme.VERVE.type) createClientDataForVerveCard(
+                    it.transId,
+                    qrModelRequest.card_number,
+                    qrModelRequest.card_expiry,
+                    qrModelRequest.card_cvv,
+                    pin
+                )
+                else createClientDataForNonVerveCard(
+                    it.transId,
+                    qrModelRequest.card_number,
+                    qrModelRequest.card_expiry,
+                    qrModelRequest.card_cvv
+                )
+            val clientData = stringToBase64(clientDataString)
+            val newClientData = clientData.replace("\n", "")
+            qrRepository.pay(newClientData)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribe { data, error ->
+                data?.let {
+                    //_payMessage.value = Event(it.result)
+                    _payResponse.postValue(Resource.success(it))
+                }
+                error?.let {
+                    _payResponse.postValue(Resource.error(null))
+                    // Timber.d("ERROR==${it.localizedMessage}")
+                    (it as? HttpException).let { httpException ->
+                        val errorMessage = httpException?.response()?.errorBody()?.string()
+                            ?: "{\"message\":\"Unexpected error\"}"
+                        _payMessage.value = Event(
+                            try {
+                                Gson().fromJson(errorMessage, ErrorModel::class.java).message
+                            } catch (e: Exception) {
+                                "Error"
+                            }
+                        )
+                    }
+                }
+            })
+    }
+
+    // FOR QR
+    fun setQrTransactionResponse(qrTransactionResponse: QrTransactionResponseModel) {
+        _qrTransactionResponseFromWebView.value = qrTransactionResponse
+    }
+
+    fun showReceiptDialogForQrPayment() {
+        _showQrPrintDialog.value = Event(
+            Gson().toJson(qrTransactionResponseFromWebView.value)
         )
     }
 
-
-    fun cleanPayResponse() {
-        _payResponse.value =null
-    }
-    fun clear() {
-        _generateQrResponse.postValue(null)
+    private fun saveTransIDAndAmountResponse(transIDAndAmount: CheckOutResponse) {
+        Prefs.putString(TRANS_ID_AND_AMOUNT, gson.toJson(transIDAndAmount))
     }
 
     override fun onCleared() {
-        super.onCleared()
         disposable.clear()
+        super.onCleared()
     }
 }

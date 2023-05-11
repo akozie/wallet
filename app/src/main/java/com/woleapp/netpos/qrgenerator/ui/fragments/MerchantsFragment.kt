@@ -6,13 +6,11 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
-import androidx.paging.flatMap
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.woleapp.netpos.qrgenerator.adapter.paging.SearchMerchantPagingAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentMerchantsBinding
@@ -27,16 +25,9 @@ class MerchantsFragment : Fragment(), SearchMerchantPagingAdapter.OnMerchantClic
 
     private lateinit var _binding: FragmentMerchantsBinding
     private val binding get() = _binding
-//    private lateinit var merchantAdapter: MerchantAdapter
-//    private lateinit var allMerchantAdapter: AllMerchantAdapter
-    private lateinit var merchantList: List<Merchant>
     private lateinit var searchedMerchantAdapter: SearchMerchantPagingAdapter
-
-    // private lateinit var allMerchantList: List<AllMerchant>
     private val qrViewModel by activityViewModels<QRViewModel>()
     private val merchantViewModel by activityViewModels<MerchantViewModel>()
-
-    private lateinit var loader: ProgressBar
     private val mDisposable = CompositeDisposable()
 
     override fun onCreateView(
@@ -55,7 +46,6 @@ class MerchantsFragment : Fragment(), SearchMerchantPagingAdapter.OnMerchantClic
                 showToast(message)
             }
         }
-        //  loader = RandomUtils.alertDialog(requireContext(), R.layout.layout_loading_dialog)
 
         binding.searchText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -65,7 +55,7 @@ class MerchantsFragment : Fragment(), SearchMerchantPagingAdapter.OnMerchantClic
             }
 
             override fun afterTextChanged(editable: Editable?) {
-                if (editable?.isNotEmpty() == true){
+                if (editable?.isNotEmpty() == true) {
                     searchedMerchantSetUp(editable.toString())
                 }
             }
@@ -73,7 +63,7 @@ class MerchantsFragment : Fragment(), SearchMerchantPagingAdapter.OnMerchantClic
         merchants()
     }
 
-    private fun merchants(){
+    private fun merchants() {
         searchedMerchantAdapter = SearchMerchantPagingAdapter(this)
         mDisposable.add(merchantViewModel.getAllMerchant().subscribe {
             searchedMerchantAdapter.submitData(lifecycle, it)
@@ -88,15 +78,14 @@ class MerchantsFragment : Fragment(), SearchMerchantPagingAdapter.OnMerchantClic
                     searchedMerchantAdapter.itemCount < 1
                 ) {
                     locatorText.isVisible = true
-                    //locatorIcon.isVisible = false
                     progressIcon.isVisible = false
                 } else {
                     locatorText.isVisible = false
-                   // loader.isVisible = true
                 }
             }
         }
     }
+
     private fun searchedMerchantSetUp(search: String) {
         mDisposable.add(merchantViewModel.getSearchedMerchant(search).subscribe {
             searchedMerchantAdapter.submitData(lifecycle, it)
@@ -126,6 +115,5 @@ class MerchantsFragment : Fragment(), SearchMerchantPagingAdapter.OnMerchantClic
                 merchant
             )
         findNavController().navigate(action)
-       // binding.searchText.setText("")
     }
 }

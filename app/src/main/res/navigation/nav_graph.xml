@@ -75,4 +75,12 @@
         android:id="@+id/needCardWebViewFragment"
         android:name="com.woleapp.netpos.qrgenerator.ui.webview.NeedCardWebViewFragment"
         android:label="NeedCardWebViewFragment" />
+    <dialog
+        android:id="@+id/responseModal"
+        android:name="com.woleapp.netpos.qrgenerator.ui.dialog.ResponseModal"
+        android:label="ResponseModal" >
+        <action
+            android:id="@+id/action_responseModal_to_showQrFragment"
+            app:destination="@id/showQrFragment" />
+    </dialog>
 </navigation>

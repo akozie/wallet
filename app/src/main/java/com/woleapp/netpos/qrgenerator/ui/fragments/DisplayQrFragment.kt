@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
-import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentDisplayQrBinding
 import com.woleapp.netpos.qrgenerator.model.GenerateQRResponse
 import com.woleapp.netpos.qrgenerator.model.QrModel
@@ -18,7 +17,8 @@ class DisplayQrFragment : Fragment() {
 
     private lateinit var _binding: FragmentDisplayQrBinding
     private val binding get() = _binding
-    private lateinit var viewQr:GenerateQRResponse
+    private lateinit var viewQr: GenerateQRResponse
+    private val qrViewModel by activityViewModels<QRViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,11 +31,16 @@ class DisplayQrFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val qrCode =  arguments?.getParcelable<QrModel>("DISPLAYQR")?.data
-        if (qrCode.isNullOrEmpty()){
-            Glide.with(requireContext()).load(viewQr.data).into(binding.qrCode)
-        }else{
+//        qrViewModel.generateQrResponse.value?.data?.data?.let {
+//            Glide.with(requireContext()).load(it).into(binding.qrCode)
+//        }
+        val qrCode = arguments?.getParcelable<QrModel>("DISPLAYQR")?.data
+        if (qrCode.isNullOrEmpty()) {
+            //Glide.with(requireContext()).load(viewQr.data).into(binding.qrCode)
+            qrViewModel.generateQrResponse.value?.data?.data?.let {
+                Glide.with(requireContext()).load(it).into(binding.qrCode)
+            }
+        } else {
             Glide.with(requireContext()).load(qrCode).into(binding.qrCode)
         }
     }

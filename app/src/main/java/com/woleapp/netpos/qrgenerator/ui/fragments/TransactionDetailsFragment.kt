@@ -1,12 +1,10 @@
 package com.woleapp.netpos.qrgenerator.ui.fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.woleapp.netpos.qrgenerator.R
-import com.woleapp.netpos.qrgenerator.databinding.FragmentTransactionBinding
+import androidx.fragment.app.Fragment
 import com.woleapp.netpos.qrgenerator.databinding.FragmentTransactionDetailsBinding
 
 

@@ -50,7 +50,6 @@ class SignUpFragment : Fragment() {
                 signupButton.isEnabled = true
             }
         }
-        //loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
         loader = binding.signUpProgressBar
         initViews()
         signupButton.setOnClickListener {

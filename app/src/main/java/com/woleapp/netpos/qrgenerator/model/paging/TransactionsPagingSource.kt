@@ -1,23 +1,18 @@
 package com.woleapp.netpos.qrgenerator.model.paging
 
 
-
-import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.rxjava2.RxPagingSource
 import com.woleapp.netpos.qrgenerator.model.Transaction
 import com.woleapp.netpos.qrgenerator.model.TransactionResponse
-import com.woleapp.netpos.qrgenerator.model.Transactions
 import com.woleapp.netpos.qrgenerator.network.TransactionService
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import retrofit2.HttpException
-import java.io.IOException
 
 class TransactionsPagingSource(
     private val transactionService: TransactionService,
-    private val qrCodeID:String,
-    private val pageSize:Int
+    private val qrCodeID: String,
+    private val pageSize: Int
 ) : RxPagingSource<Int, Transaction>() {
     override fun getRefreshKey(state: PagingState<Int, Transaction>): Int? {
         return null
@@ -32,7 +27,10 @@ class TransactionsPagingSource(
             .onErrorReturn { LoadResult.Error(it) }
     }
 
-    private fun toLoadResult(data: TransactionResponse, position: Int): LoadResult<Int, Transaction> {
+    private fun toLoadResult(
+        data: TransactionResponse,
+        position: Int
+    ): LoadResult<Int, Transaction> {
         return LoadResult.Page(
             data = data.data.rows,
             prevKey = if (position == 1) null else position - 1,

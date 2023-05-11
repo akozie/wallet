@@ -27,6 +27,15 @@
         <action
             android:id="@+id/action_transactionsFragment_to_merchantDetailsFragment"
             app:destination="@id/merchantDetailsFragment" />
+        <action
+            android:id="@+id/action_transactionsFragment_to_addToBalanceFragment"
+            app:destination="@id/addToBalanceFragment" />
+        <action
+            android:id="@+id/action_transactionsFragment_to_displayWalletQrFragment"
+            app:destination="@id/displayWalletQrFragment" />
+        <action
+            android:id="@+id/action_transactionsFragment_to_myTallyFragment"
+            app:destination="@id/myTallyFragment" />
     </fragment>
     <fragment
         android:id="@+id/transactionHistoryFragment"
@@ -83,6 +92,9 @@
             app:destination="@id/displayQrFragment2"
             app:popUpTo="@id/transactionsFragment"
             app:popUpToInclusive="false"/>
+        <action
+            android:id="@+id/action_generateMoreQrFragment_to_webViewFragment2"
+            app:destination="@id/webViewFragment2" />
     </fragment>
     <fragment
         android:id="@+id/merchantDetailsFragment"
@@ -93,4 +105,69 @@
             android:name="MERCHANT"
             app:argType="com.woleapp.netpos.qrgenerator.model.Merchant" />
     </fragment>
+    <fragment
+        android:id="@+id/webViewFragment2"
+        android:name="com.woleapp.netpos.qrgenerator.ui.webview.WebViewFragment"
+        android:label="WebViewFragment" />
+    <dialog
+        android:id="@+id/responseModal2"
+        android:name="com.woleapp.netpos.qrgenerator.ui.dialog.ResponseModal"
+        android:label="ResponseModal" >
+        <action
+            android:id="@+id/action_responseModal2_to_displayQrFragment2"
+            app:destination="@id/displayQrFragment2" />
+    </dialog>
+    <fragment
+        android:id="@+id/myTallyFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.MyTallyFragment"
+        android:label="MyTallyFragment" >
+        <action
+            android:id="@+id/action_myTallyFragment_to_addToBalanceFragment"
+            app:destination="@id/addToBalanceFragment" />
+        <action
+            android:id="@+id/action_myTallyFragment_to_transactionsFragment"
+            app:destination="@id/transactionsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addToBalanceFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.AddToBalanceFragment"
+        android:label="AddToBalanceFragment" >
+        <action
+            android:id="@+id/action_addToBalanceFragment_to_tallyWalletWebViewFragment"
+            app:destination="@id/tallyWalletWebViewFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/sendWithTallyQrFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.SendWithTallyQrFragment"
+        android:label="SendWithTallyQrFragment" />
+    <fragment
+        android:id="@+id/displayWalletQrFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.DisplayWalletQrFragment"
+        android:label="DisplayWalletQrFragment" />
+    <fragment
+        android:id="@+id/sendWithTallyQrResultFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.SendWithTallyQrResultFragment"
+        android:label="SendWithTallyQrResultFragment" />
+    <fragment
+        android:id="@+id/sendWithTallyNumberFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.SendWithTallyNumberFragment"
+        android:label="SendWithTallyNumberFragment" >
+        <action
+            android:id="@+id/action_sendWithTallyNumberFragment_to_sendWithTallyQrResultFragment"
+            app:destination="@id/sendWithTallyQrResultFragment" />
+        <action
+            android:id="@+id/action_sendWithTallyNumberFragment_to_myTallyFragment2"
+            app:destination="@id/myTallyFragment" />
+        <action
+            android:id="@+id/action_sendWithTallyNumberFragment_to_transactionsFragment"
+            app:destination="@id/transactionsFragment" />
+    </fragment>
+    <dialog
+        android:id="@+id/tallyWalletResponseModal"
+        android:name="com.woleapp.netpos.qrgenerator.ui.dialog.TallyWalletResponseModal"
+        android:label="TallyWalletResponseModal" />
+    <fragment
+        android:id="@+id/tallyWalletWebViewFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.webview.TallyWalletWebViewFragment"
+        android:label="TallyWalletWebViewFragment" />
 </navigation>

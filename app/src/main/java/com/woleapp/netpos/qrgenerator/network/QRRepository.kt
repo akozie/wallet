@@ -14,7 +14,8 @@ class QRRepository @Inject constructor(
     private val qrService: QRService,
     private val transactionService: TransactionService,
     private val checkoutService: CheckoutService,
-    private val merchantService: MerchantService
+    private val merchantService: MerchantService,
+    private val walletService: WalletService
 ) {
 
     fun login(loginRequest: LoginRequest) = qrService.login(loginRequest)

@@ -127,13 +127,14 @@
 
         <TextView
             android:id="@+id/status"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_10"
             android:fontFamily="@font/poppins_bold"
             android:text="@string/transaction_status_place_holder"
             android:textAllCaps="true"
-            android:textSize="@dimen/text_size_20sp"
+            android:gravity="center"
+            android:textSize="@dimen/text_size_18sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"

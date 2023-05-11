@@ -5,16 +5,18 @@ import com.google.gson.Gson
 import com.woleapp.netpos.qrgenerator.BuildConfig
 import com.woleapp.netpos.qrgenerator.db.AppDatabase
 import com.woleapp.netpos.qrgenerator.db.QrDao
-import com.woleapp.netpos.qrgenerator.network.CheckoutService
-import com.woleapp.netpos.qrgenerator.network.MerchantService
-import com.woleapp.netpos.qrgenerator.network.QRService
-import com.woleapp.netpos.qrgenerator.network.TransactionService
+import com.woleapp.netpos.qrgenerator.network.*
+import com.woleapp.netpos.qrgenerator.utils.Singletons
+import com.woleapp.netpos.qrgenerator.utils.UtilityParam
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.reactivex.Scheduler
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -32,24 +34,28 @@ object AppModule {
     @Provides
     @Singleton
     @Named("baseUrl")
-    fun providesBaseUrl(): String = BuildConfig.STRING_TALLY_BASE_URL
+    fun providesBaseUrl(): String = UtilityParam.STRING_TALLY_BASE_URL
 
 
     @Provides
     @Singleton
     @Named("transactionBaseUrl")
-    fun providesTransactionBaseUrl(): String = BuildConfig.STRING_TRANSACTION_BASE_URL
+    fun providesTransactionBaseUrl(): String = UtilityParam.STRING_TRANSACTION_BASE_URL
 
     @Provides
     @Singleton
     @Named("merchantBaseUrl")
-    fun providesMerchantBaseUrl(): String = BuildConfig.STRING_MERCHANT_BASE_URL
-
+    fun providesMerchantBaseUrl(): String = UtilityParam.STRING_MERCHANT_BASE_URL
 
     @Provides
     @Singleton
     @Named("checkoutBaseUrl")
-    fun providesCheckoutBaseUrl(): String = BuildConfig.STRING_CHECKOUT_BASE_URL
+    fun providesCheckoutBaseUrl(): String = UtilityParam.STRING_CHECKOUT_BASE_URL
+
+    @Provides
+    @Singleton
+    @Named("tallyWalletBaseUrl")
+    fun providesTallyWalletBaseUrl(): String = UtilityParam.STRING_TALLY_WALLET_BASE_URL
 
 
     @Provides
@@ -63,7 +69,13 @@ object AppModule {
     @Singleton
     @Named("headerInterceptor")
     fun providesHeaderInterceptor(): Interceptor =
-        BasicAuthInterceptor(BuildConfig.STRING_AUTH_USER_NAME, BuildConfig.STRING_AUTH_PASSWORD)
+        BasicAuthInterceptor(UtilityParam.STRING_AUTH_USER_NAME, UtilityParam.STRING_AUTH_PASSWORD)
+
+    @Provides
+    @Singleton
+    @Named("walletHeaderInterceptor")
+    fun providesWalletHeaderInterceptor(): Interceptor =
+        BearerAuthInterceptor(UtilityParam.STRING_WALLET_X_API_TOKEN)
 
     @Provides
     @Singleton
@@ -92,6 +104,21 @@ object AppModule {
             .readTimeout(70, TimeUnit.SECONDS)
             .writeTimeout(70, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
+            .addInterceptor(loggingInterceptor)
+            .build()
+    @Provides
+    @Singleton
+    @Named("walletOkHttp")
+    fun providesOKHTTPClientForWallet(
+        @Named("loggingInterceptor") loggingInterceptor: Interceptor,
+        @Named("walletHeaderInterceptor") walletHeaderInterceptor: Interceptor
+    ): OkHttpClient =
+        OkHttpClient().newBuilder()
+            .connectTimeout(70, TimeUnit.SECONDS)
+            .readTimeout(70, TimeUnit.SECONDS)
+            .writeTimeout(70, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
+            .addInterceptor(walletHeaderInterceptor)
             .addInterceptor(loggingInterceptor)
             .build()
 
@@ -153,6 +180,20 @@ object AppModule {
 
     @Provides
     @Singleton
+    @Named("defaultTallyWalletRetrofit")
+    fun providesTallyWalletRetrofit(
+        @Named("walletOkHttp") okhttp: OkHttpClient,
+        @Named("tallyWalletBaseUrl") baseUrl: String
+    ): Retrofit =
+        Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .baseUrl(baseUrl)
+            .client(okhttp)
+            .build()
+
+    @Provides
+    @Singleton
     fun providesContactlessRegService(
         @Named("defaultRetrofit") retrofit: Retrofit
     ): QRService = retrofit.create(QRService::class.java)
@@ -177,6 +218,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun providesTallyWalletService(
+        @Named("defaultTallyWalletRetrofit") retrofit: Retrofit
+    ): WalletService = retrofit.create(WalletService::class.java)
+
+    @Provides
+    @Singleton
     fun providesGson(): Gson = Gson()
 
     @Provides
@@ -194,6 +241,16 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providesCompositeDisposable(): CompositeDisposable =
-        CompositeDisposable()
+    @Named("io-scheduler")
+    fun providesIoScheduler(): Scheduler = Schedulers.io()
+
+    @Provides
+    @Singleton
+    @Named("main-scheduler")
+    fun providesMainThreadScheduler(): Scheduler = AndroidSchedulers.mainThread()
+
+    @Provides
+    @Singleton
+    fun providesCompositeDisposable(): CompositeDisposable = CompositeDisposable()
+
 }

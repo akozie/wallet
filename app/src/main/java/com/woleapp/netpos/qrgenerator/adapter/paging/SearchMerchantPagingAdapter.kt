@@ -15,12 +15,10 @@ class SearchMerchantPagingAdapter(private val merchantClickListener: OnMerchantC
         differCallback
     ) {
 
-
     inner class SearchMerchantViewHolder(private val binding: MerchantLayoutBinding) :
         RecyclerView.ViewHolder(binding.root) {
         val merchantName = binding.merchantName
         val merchantAddress = binding.merchantAddress
-
     }
 
     companion object {
@@ -34,7 +32,6 @@ class SearchMerchantPagingAdapter(private val merchantClickListener: OnMerchantC
             }
         }
     }
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchMerchantViewHolder {
         val binding = MerchantLayoutBinding.inflate(

@@ -16,11 +16,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.woleapp.netpos.qrgenerator.databinding.FragmentShowQrBinding
-import com.woleapp.netpos.qrgenerator.model.GenerateQRResponse
-import com.woleapp.netpos.qrgenerator.utils.REQUEST_CODE
-import com.woleapp.netpos.qrgenerator.utils.getBitMap
+import com.woleapp.netpos.qrgenerator.model.QrModelRequest
+import com.woleapp.netpos.qrgenerator.utils.*
+import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import java.io.*
 
 
@@ -29,7 +30,9 @@ class ShowQrFragment : Fragment() {
 
     private lateinit var _binding: FragmentShowQrBinding
     private val binding get() = _binding
-    private lateinit var outputStream : OutputStream
+    private lateinit var outputStream: OutputStream
+    private val qrViewModel by activityViewModels<QRViewModel>()
+    private lateinit var getQrModel: QrModelRequest
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,13 +45,12 @@ class ShowQrFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        getQrModel = Singletons().getSavedQrModelRequest()!!
 
-        val qrCode = arguments?.getParcelable<GenerateQRResponse>("QR")?.data
-        if (qrCode.isNullOrEmpty()) {
-            Glide.with(requireContext()).load(com.woleapp.netpos.qrgenerator.R.drawable.providus_verve).into(binding.qrCode)
-        } else {
-            Glide.with(requireContext()).load(qrCode).into(binding.qrCode)
+        qrViewModel.generateQrResponse.value?.data?.data?.let {
+            Glide.with(requireContext()).load(it).into(binding.qrCode)
         }
+
 
         binding.share.setOnClickListener {
             share()
@@ -56,9 +58,13 @@ class ShowQrFragment : Fragment() {
 
         binding.download.setOnClickListener {
             binding.download.setOnClickListener {
-                if (ContextCompat.checkSelfPermission(requireContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
+                if (ContextCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
                     saveImage();
-                }else {
+                } else {
                     askPermission();
 
                 }
@@ -122,16 +128,27 @@ class ShowQrFragment : Fragment() {
             e.printStackTrace()
         }
     }
+
     private fun saveImage() {
 
-        val drawable = binding.qrCode.getDrawable() as BitmapDrawable
+        val drawable = binding.qrCode.drawable as BitmapDrawable
         val bitmap = drawable.bitmap
-        val dir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath)
-        // val dir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "")
+        val dir =
+            File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath)
         if (!dir.exists()) {
             dir.mkdir()
         }
-        val file = File(dir, System.currentTimeMillis().toString() + ".jpg")
+        val file = getQrModel.let {
+            File(
+                dir,
+                "${
+                    it.fullname!!.replace(
+                        " ",
+                        "_"
+                    )
+                }_${it.issuing_bank}_${it.card_scheme}_$QR_FILE_DOWNLOAD${getCurrentDateTimeAsFormattedString()}" + ".jpg"
+            )
+        }
 
         outputStream = FileOutputStream(file)
         try {

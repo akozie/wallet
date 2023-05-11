@@ -20,6 +20,7 @@ class TransactionPagingAdapter :
         val transactionTitle = binding.transactionTitle
         val transactionDate = binding.transactionDate
         val transactionPrice = binding.transactionPrice
+        val transactionID = binding.transactionId
 
     }
 
@@ -52,6 +53,7 @@ class TransactionPagingAdapter :
                     transactionTitle.text = current?.transactionType.toString()
                     transactionDate.text = current?.transactionTime
                     transactionPrice.text = current?.transmissionDateTime
+                    transactionID.text = current?.rrn
                 }
             }
         }

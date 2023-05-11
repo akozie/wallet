@@ -3,6 +3,7 @@ package com.woleapp.netpos.qrgenerator.utils
 import android.app.AlertDialog
 import android.content.Context
 import android.util.Base64
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ProgressBar
@@ -11,22 +12,65 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.model.Status
-import com.woleapp.netpos.qrgenerator.model.TransactionModel
+import com.woleapp.netpos.qrgenerator.model.wallet.SendWithTallyNumberResponse
+import io.reactivex.Scheduler
+import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
 import java.text.DecimalFormat
 import java.util.*
-import java.util.Base64.getDecoder
 
 object RandomUtils {
 
-    fun generateTransactionData(){
-        val transactionDataList = arrayListOf<TransactionModel>()
-        transactionDataList.add(TransactionModel("XYZ Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("XYZ Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("XYZ Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("XYZ Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("XYZ Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("XYZ Supermarket", "20th of November 15:32", "4000"))
-        transactionDataList.add(TransactionModel("XYZ Supermarket", "20th of November 15:32", "4000"))
+    fun <T> Fragment.observeServerResponse(
+        serverResponse: Single<Resource<T>>,
+        loadingDialog: AlertDialog,
+        compositeDisposable: CompositeDisposable,
+        ioScheduler: Scheduler,
+        mainThreadSchedulers: Scheduler,
+        successAction: () -> Unit
+    ) {
+        compositeDisposable.add(
+            serverResponse.subscribeOn(ioScheduler).observeOn(mainThreadSchedulers)
+                .subscribe { data, error ->
+                    data?.let {
+                        when (it.status) {
+                            Status.SUCCESS -> {
+                                Log.d("ERROR", it.data.toString())
+                                loadingDialog.dismiss()
+                                if (
+                                    it.data is SendWithTallyNumberResponse
+                                ) {
+                                    successAction()
+                                } else {
+                                    showSnackBar(
+                                        this.requireView(),
+                                        getString(R.string.an_error_occurred)
+                                    )
+                                }
+                            }
+                            Status.LOADING -> {
+                                loadingDialog.show()
+                            }
+                            Status.ERROR -> {
+                                loadingDialog.cancel()
+                                loadingDialog.dismiss()
+                            }
+                            Status.TIMEOUT -> {
+                                loadingDialog.cancel()
+                                loadingDialog.dismiss()
+                                showSnackBar(this.requireView(), getString(R.string.timeOut))
+                            }
+                        }
+
+                    }
+                    error?.let {
+                        loadingDialog.cancel()
+                        loadingDialog.dismiss()
+                        showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
+                    }
+
+                }
+        )
     }
 
 
@@ -40,7 +84,7 @@ object RandomUtils {
             when (it.status) {
                 Status.SUCCESS -> {
                     loadingDialog.dismiss()
-                        successAction()
+                    successAction()
                 }
                 Status.LOADING -> {
                     loadingDialog.show()
@@ -52,7 +96,6 @@ object RandomUtils {
                 Status.TIMEOUT -> {
                     loadingDialog.cancel()
                     loadingDialog.dismiss()
-                    //loadingDialog.requireActivity().finish()
                     showToast(getString(R.string.timeOut))
                 }
             }
@@ -69,7 +112,7 @@ object RandomUtils {
             when (it.status) {
                 Status.SUCCESS -> {
                     loadingDialog.visibility = View.GONE
-                        successAction()
+                    successAction()
                 }
                 Status.LOADING -> {
                     loadingDialog.visibility = View.VISIBLE
@@ -93,7 +136,7 @@ object RandomUtils {
         serverResponse.observe(this.viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
-                        successAction()
+                    successAction()
                 }
                 Status.LOADING -> {
                 }
@@ -106,13 +149,13 @@ object RandomUtils {
         }
     }
 
+
     fun alertDialog(
-        context: Context,
-        layout: Int
-    ): AlertDialog{
-        val dialogView: View = LayoutInflater.from(context)
-            .inflate(layout, null)
+        context: Context, layout: Int
+    ): AlertDialog {
+        val dialogView: View = LayoutInflater.from(context).inflate(layout, null)
         val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
+        dialogBuilder.setCancelable(false)
         dialogBuilder.setView(dialogView)
 
         return dialogBuilder.create()
@@ -130,11 +173,13 @@ object RandomUtils {
         return String(decodedString)
     }
 
-    fun createClientDataForNonVerveCard(transID:String, cardNumber:String, expiryDate:String, cvv:String):String =
-         "$transID:LIVE:$cardNumber:$expiryDate:$cvv::NGN:QR"
+    fun createClientDataForNonVerveCard(
+        transID: String, cardNumber: String, expiryDate: String, cvv: String
+    ): String = "$transID:LIVE:$cardNumber:$expiryDate:$cvv::NGN:QR"
 
-    fun createClientDataForVerveCard(transID:String, cardNumber:String, expiryDate:String, cvv:String, pin:String):String =
-         "$transID:LIVE:$cardNumber:$expiryDate:$cvv:$pin:NGN:QR"
+    fun createClientDataForVerveCard(
+        transID: String, cardNumber: String, expiryDate: String, cvv: String, pin: String
+    ): String = "$transID:LIVE:$cardNumber:$expiryDate:$cvv:$pin:NGN:QR"
 
     fun Number.formatCurrency(currencySymbol: String = "\u20A6"): String {
         val format = DecimalFormat("#,###.00")

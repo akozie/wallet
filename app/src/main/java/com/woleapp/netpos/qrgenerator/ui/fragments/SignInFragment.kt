@@ -1,24 +1,23 @@
 package com.woleapp.netpos.qrgenerator.ui.fragments
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Base64
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
-import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.textfield.TextInputEditText
 import com.woleapp.netpos.qrgenerator.R
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.databinding.FragmentSignInBinding
-import com.woleapp.netpos.qrgenerator.ui.activities.MainActivity
 import com.woleapp.netpos.qrgenerator.model.LoginRequest
 import com.woleapp.netpos.qrgenerator.model.User
+import com.woleapp.netpos.qrgenerator.ui.activities.MainActivity
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
@@ -34,7 +33,7 @@ class SignInFragment : Fragment() {
     private lateinit var loginButton: Button
     private val qrViewModel by viewModels<QRViewModel>()
     private lateinit var loader: ProgressBar
-    private lateinit var user:User
+    private lateinit var user: User
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,13 +52,12 @@ class SignInFragment : Fragment() {
                 loginButton.isEnabled = true
             }
         }
-        //loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
         loader = binding.signInProgressBar
         initViews()
         loginButton.setOnClickListener {
             login()
-           // loginButton.isEnabled = false
         }
+
     }
 
     private fun initViews() {
