@@ -39,6 +39,12 @@
         <action
             android:id="@+id/action_generateQrFragment_to_webViewFragment"
             app:destination="@id/webViewFragment" />
+        <action
+            android:id="@+id/action_generateQrFragment_to_enterOtpFragment"
+            app:destination="@id/enterOtpFragment" />
+        <action
+            android:id="@+id/action_generateQrFragment_to_qrPasswordPinBlockDialog"
+            app:destination="@id/qrPasswordPinBlockDialog" />
     </fragment>
     <fragment
         android:id="@+id/signInFragment"
@@ -83,4 +89,13 @@
             android:id="@+id/action_responseModal_to_showQrFragment"
             app:destination="@id/showQrFragment" />
     </dialog>
+    <fragment
+        android:id="@+id/enterOtpFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.EnterOtpFragment"
+        android:label="fragment_enter_otp"
+        tools:layout="@layout/fragment_enter_otp" />
+    <dialog
+        android:id="@+id/qrPasswordPinBlockDialog"
+        android:name="com.woleapp.netpos.qrgenerator.ui.dialog.QrPasswordPinBlockDialog"
+        android:label="QrPasswordPinBlockDialog" />
 </navigation>

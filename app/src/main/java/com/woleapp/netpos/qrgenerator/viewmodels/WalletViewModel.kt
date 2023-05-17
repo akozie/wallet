@@ -1,5 +1,6 @@
 package com.woleapp.netpos.qrgenerator.viewmodels
 
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
@@ -20,6 +21,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import retrofit2.HttpException
 import javax.inject.Inject
+import kotlin.coroutines.coroutineContext
 
 @HiltViewModel
 class WalletViewModel @Inject constructor(
@@ -138,14 +140,13 @@ class WalletViewModel @Inject constructor(
 //            })
 //    }
 
-    fun sendWithTallyNumber(token: String, sendWithTallyNumberRequest: SendWithTallyNumberRequest) =
+    fun sendWithTallyNumber(context:Context, token: String, sendWithTallyNumberRequest: SendWithTallyNumberRequest) =
         walletRepository.sendWithTallyNumber(token, sendWithTallyNumberRequest)
             .flatMap {
-                if (it.isSuccessful) {
-                    Single.just(Resource.success(it.body()))
+                if (it.status == "Success") {
+                    Single.just(Resource.success(it))
                 } else {
-                    Log.d("NEWERROR", it.body().toString())
-                    Single.just(Resource.error(it.errorBody()))
+                    Single.just(Resource.error(it))
                 }
             }
 

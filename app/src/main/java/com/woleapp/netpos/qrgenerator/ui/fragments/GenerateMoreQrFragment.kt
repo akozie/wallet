@@ -69,7 +69,6 @@ class GenerateMoreQrFragment : Fragment() {
         ) { _, bundle ->
             val data = bundle.getString(PIN_BLOCK_BK)
             data?.let {
-                showToast(it)
                 val checkOutModel = getCheckOutModel()
                 val qrModelRequest = getQrRequestModel()
                 generateQrViewModel.displayQrStatus = 1
@@ -321,7 +320,7 @@ class GenerateMoreQrFragment : Fragment() {
     private fun checkOut() {
         val checkOutModel = getCheckOutModel()
         val qrRequest = getQrRequestModel()
-        if (qrRequest.card_scheme == CardScheme.VERVE.type) {
+        if (qrRequest.card_scheme.contains("verve", true)) {
             QrPasswordPinBlockDialog().show(childFragmentManager, QR_PIN_PAD)
         } else {
             generateQrViewModel.displayQrStatus = 1
@@ -365,7 +364,7 @@ class GenerateMoreQrFragment : Fragment() {
             merchantId = UtilityParam.STRING_CHECKOUT_MERCHANT_ID,
             name = userFullName.text.toString().trim(),
             email = emailAddress.text.toString().trim(),
-            amount = 100.00,
+            amount = CHARGE_AMOUNT,
             currency = "NGN"
         )
 

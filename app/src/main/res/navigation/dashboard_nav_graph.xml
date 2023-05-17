@@ -139,7 +139,11 @@
     <fragment
         android:id="@+id/sendWithTallyQrFragment"
         android:name="com.woleapp.netpos.qrgenerator.ui.fragments.SendWithTallyQrFragment"
-        android:label="SendWithTallyQrFragment" />
+        android:label="SendWithTallyQrFragment" >
+        <action
+            android:id="@+id/action_sendWithTallyQrFragment_to_sendWithTallyQrResultFragment"
+            app:destination="@id/sendWithTallyQrResultFragment" />
+    </fragment>
     <fragment
         android:id="@+id/displayWalletQrFragment"
         android:name="com.woleapp.netpos.qrgenerator.ui.fragments.DisplayWalletQrFragment"
@@ -170,4 +174,9 @@
         android:id="@+id/tallyWalletWebViewFragment"
         android:name="com.woleapp.netpos.qrgenerator.ui.webview.TallyWalletWebViewFragment"
         android:label="TallyWalletWebViewFragment" />
+    <fragment
+        android:id="@+id/enterOtpFragment2"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.EnterOtpFragment"
+        android:label="fragment_enter_otp"
+        tools:layout="@layout/fragment_enter_otp" />
 </navigation>

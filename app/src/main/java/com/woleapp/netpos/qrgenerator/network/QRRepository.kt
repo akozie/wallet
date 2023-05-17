@@ -1,10 +1,14 @@
 package com.woleapp.netpos.qrgenerator.network
 
+import com.google.gson.JsonObject
 import com.woleapp.netpos.qrgenerator.model.LoginRequest
 import com.woleapp.netpos.qrgenerator.model.QrModelRequest
 import com.woleapp.netpos.qrgenerator.model.RegisterRequest
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.model.pay.PayModel
+import com.woleapp.netpos.qrgenerator.model.verve.SendOtpForVerveCardModel
+import io.reactivex.Single
+import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,4 +48,6 @@ class QRRepository @Inject constructor(
     fun pay(clientData: String) = checkoutService.pay(PayModel(clientData,"PAY"))
 
 
+    fun consummateTransactionBySendingOtp(otpPayLoad: SendOtpForVerveCardModel): Single<Response<JsonObject>> =
+        checkoutService.sendOtpForVerveCard(otpPayLoad)
 }

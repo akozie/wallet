@@ -1,10 +1,14 @@
 package com.woleapp.netpos.qrgenerator.network
 
+import com.google.gson.JsonObject
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutResponse
 import com.woleapp.netpos.qrgenerator.model.pay.PayModel
 import com.woleapp.netpos.qrgenerator.model.pay.PayResponse
+import com.woleapp.netpos.qrgenerator.model.verve.PostQrToServerVerveResponseModel
+import com.woleapp.netpos.qrgenerator.model.verve.SendOtpForVerveCardModel
 import io.reactivex.Single
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -25,6 +29,9 @@ interface CheckoutService {
     @POST("v2/pay")
     fun pay(
         @Body payModel: PayModel
-    ): Single<PayResponse>
+    ): Single<JsonObject>
 
+
+    @POST("v2/pay")
+    fun sendOtpForVerveCard(@Body sendOtpPayLoad: SendOtpForVerveCardModel): Single<Response<JsonObject>>
 }

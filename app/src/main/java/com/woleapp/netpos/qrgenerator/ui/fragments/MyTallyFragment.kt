@@ -142,7 +142,6 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
     }
 
     private fun verifyWalletOTP(token: String, otp: String) {
-
         walletViewModel.verifyWalletOTP(token, otp)
         observeServerResponse(
             walletViewModel.walletOTPResponse,

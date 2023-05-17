@@ -9,6 +9,7 @@ import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResult
+import androidx.navigation.fragment.findNavController
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.LayoutRandomizedPinBlockBinding
 import com.woleapp.netpos.qrgenerator.utils.PIN_BLOCK_BK
@@ -80,9 +81,7 @@ class QrPasswordPinBlockDialog : DialogFragment() {
                 return@setOnClickListener
             }
             requireActivity().supportFragmentManager.setFragmentResult(PIN_BLOCK_RK, bundleOf(PIN_BLOCK_BK to etPinEt.text.toString()))
-            dialog?.cancel()
-            dialog?.dismiss()
-            dismiss()
+            findNavController().popBackStack()
         }
 
         return binding.root

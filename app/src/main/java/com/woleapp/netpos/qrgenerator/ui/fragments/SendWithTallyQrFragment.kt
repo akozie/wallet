@@ -12,26 +12,37 @@ import android.view.LayoutInflater
 import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
+import com.google.gson.Gson
+import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentSendWithTallyQrBinding
+import com.woleapp.netpos.qrgenerator.model.AmountAndTallyNumber
+import com.woleapp.netpos.qrgenerator.utils.AMOUNT_AND_TALLY_NUMBER
+import com.woleapp.netpos.qrgenerator.utils.PREF_USER
 import com.woleapp.netpos.qrgenerator.utils.REQUEST_CAMERA_CODE_PERMISSION
+import com.woleapp.netpos.qrgenerator.utils.showToast
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.IOException
 
-
+@AndroidEntryPoint
 class SendWithTallyQrFragment : Fragment() {
 
     private lateinit var binding: FragmentSendWithTallyQrBinding
     private lateinit var barcodeDetector: BarcodeDetector
     private lateinit var cameraSource: CameraSource
     private lateinit var scannedValue: String
+    private lateinit var creditAmount: EditText
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -43,6 +54,7 @@ class SendWithTallyQrFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+         creditAmount = binding.creditAmount
         if (ContextCompat.checkSelfPermission(
                 requireContext(), Manifest.permission.CAMERA
             ) != PackageManager.PERMISSION_GRANTED
@@ -115,8 +127,20 @@ class SendWithTallyQrFragment : Fragment() {
                         cameraSource.stop()
                         binding.barcodeLine.clearAnimation()
                         shakeItBaby(requireContext())
-                        Toast.makeText(requireContext(), "value- $scannedValue", Toast.LENGTH_SHORT)
-                            .show()
+                        val result = AmountAndTallyNumber(
+                             creditAmount.text.trim().toString(),
+                            scannedValue
+                        )
+                        Prefs.putString(AMOUNT_AND_TALLY_NUMBER, Gson().toJson(result))
+                        val amount = creditAmount.text.trim()
+                        if (amount.isNullOrEmpty()){
+                            showToast("Amount can't be empty")
+                        }else {
+                            parentFragmentManager.beginTransaction()
+                                .replace(R.id.mainActivityfragmentContainerView, SendWithTallyQrResultFragment())
+                                .addToBackStack(null)
+                                .commit()
+                        }
                     }
 
                 } else {

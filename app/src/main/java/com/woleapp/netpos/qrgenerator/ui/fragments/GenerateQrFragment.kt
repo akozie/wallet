@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,7 +27,6 @@ import com.woleapp.netpos.qrgenerator.adapter.BankCardAdapter
 import com.woleapp.netpos.qrgenerator.adapter.CardSchemeAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentGenerateQrBinding
 import com.woleapp.netpos.qrgenerator.databinding.LayoutQrReceiptPdfBinding
-import com.woleapp.netpos.qrgenerator.model.CardScheme
 import com.woleapp.netpos.qrgenerator.model.QrModelRequest
 import com.woleapp.netpos.qrgenerator.model.Row
 import com.woleapp.netpos.qrgenerator.model.RowX
@@ -64,21 +64,22 @@ class GenerateQrFragment : Fragment() {
     private lateinit var formattedDate: String
     private lateinit var receiptPdf: File
     private lateinit var pdfView: LayoutQrReceiptPdfBinding
+    private val qrPinBlock: QrPasswordPinBlockDialog = QrPasswordPinBlockDialog()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requireActivity().supportFragmentManager.setFragmentResultListener(
             PIN_BLOCK_RK,
-            requireActivity()
+            this
         ) { _, bundle ->
             val data = bundle.getString(PIN_BLOCK_BK)
             data?.let {
-                showToast(it)
                 val checkOutModel = getCheckOutModel()
                 val qrModelRequest = getQrRequestModel()
                 qrViewModel.displayQrStatus = 0
                 qrViewModel.payQrCharges(checkOutModel, qrModelRequest, it)
+
             }
         }
     }
@@ -113,8 +114,6 @@ class GenerateQrFragment : Fragment() {
         }
         loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
         initViews()
-//        qrViewModel.getCardSchemes()
-//        qrViewModel.getCardBanks()
         qrViewModel.cardSchemeResponse.observe(viewLifecycleOwner) {
             val cardSchemeAdapter = CardSchemeAdapter(
                 qrViewModel.cardSchemes, requireContext(),
@@ -215,7 +214,6 @@ class GenerateQrFragment : Fragment() {
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
-                    // generateEachQr()
                     checkOut()
                 }
             }
@@ -327,9 +325,12 @@ class GenerateQrFragment : Fragment() {
     private fun checkOut() {
         val checkOutModel = getCheckOutModel()
         val qrRequest = getQrRequestModel()
-        if (qrRequest.card_scheme == CardScheme.VERVE.type) {
-            QrPasswordPinBlockDialog().show(childFragmentManager, QR_PIN_PAD)
+        if (qrRequest.card_scheme.contains("verve", true)) {
+            qrViewModel.setIsVerveCard(true)
+            val action = GenerateQrFragmentDirections.actionGenerateQrFragmentToQrPasswordPinBlockDialog()
+            findNavController().navigate(action)
         } else {
+            qrViewModel.setIsVerveCard(false)
             qrViewModel.displayQrStatus = 0
             qrViewModel.payQrCharges(checkOutModel, qrRequest)
         }
@@ -352,7 +353,24 @@ class GenerateQrFragment : Fragment() {
             }
         }
 
+        observeServerResponse(
+            qrViewModel.payVerveResponse,
+            loader,
+            requireActivity().supportFragmentManager
+        ) {
+            Log.d("VERVERESP", "RESPONSEOBJECT")
+            if (qrViewModel.payVerveResponse.value?.data?.code == "90") {
+                Log.d("SECONDVERVERESP", "RESPONSEOBJECT2")
+                showToast(qrViewModel.payVerveResponse.value?.data?.result.toString())
+            } else {
+                Log.d("THIRDVERVERESP", "RESPONSEOBJECT333")
+                val action =
+                    GenerateQrFragmentDirections.actionGenerateQrFragmentToEnterOtpFragment()
+                findNavController().navigate(action)
+            }
+        }
     }
+
 
     private fun getQrRequestModel(): QrModelRequest =
         QrModelRequest(
@@ -371,7 +389,7 @@ class GenerateQrFragment : Fragment() {
             merchantId = UtilityParam.STRING_CHECKOUT_MERCHANT_ID,
             name = full_name.text.toString().trim(),
             email = emailAddress.text.toString().trim(),
-            amount = 1.00,
+            amount = CHARGE_AMOUNT,
             currency = "NGN"
         )
 
@@ -403,19 +421,10 @@ class GenerateQrFragment : Fragment() {
             receiptPdf = createPdf(view, this)
         }
     }
+
     private fun showAmountDialogForVerveCard() {
-        qrAmountDialogForVerveCard.show()
-        verveCardQrAmountDialogBinding.proceed.setOnClickListener {
-            if (verveCardQrAmountDialogBinding.amount.text.isNullOrEmpty()) {
-                verveCardQrAmountDialogBinding.amount.error = getString(R.string.amount_empty)
-            }
-            val amountDouble =
-                verveCardQrAmountDialogBinding.amount.text.toString().toDoubleOrNull()
-            amountToPayInDouble = amountDouble
-            verveCardQrAmountDialogBinding.amount.text?.clear()
-            qrAmountDialogForVerveCard.cancel()
-            qrAmountDialogForVerveCard.dismiss()
-            qrPinBlock.show(requireActivity().supportFragmentManager, STRING_PIN_BLOCK_DIALOG_TAG)
-        }
+        qrPinBlock.show(requireActivity().supportFragmentManager, STRING_PIN_BLOCK_DIALOG_TAG)
     }
+
+
 }

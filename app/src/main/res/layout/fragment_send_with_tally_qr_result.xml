@@ -55,7 +55,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/textView9"
+                android:id="@+id/tally_qr_amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_naira"
@@ -72,7 +72,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="@+id/textView7"
                 app:layout_constraintStart_toStartOf="@+id/textView7"
-                app:layout_constraintTop_toBottomOf="@+id/textView9">
+                app:layout_constraintTop_toBottomOf="@+id/tally_qr_amount">
 
                 <TextView
                     android:id="@+id/textView10"
@@ -112,7 +112,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_10"
-                android:hint="123784"
+                android:hint="Wallet Number"
                 android:visibility="visible"
                 app:backgroundTint="@color/white"
                 app:boxStrokeColor="@color/white"
@@ -125,11 +125,12 @@
                 app:layout_constraintTop_toBottomOf="@+id/enter_amount">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/full_name"
+                    android:id="@+id/tally_qr_number"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:inputType="none"
+                    android:focusableInTouchMode="false"
                     android:textColor="@android:color/background_dark"
                     android:textCursorDrawable="@color/black"
                     android:visibility="visible"
@@ -141,18 +142,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Customer Name"
+                android:text="PIN"
                 android:textColor="@color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_amount" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_card_number"
+                android:id="@+id/fragment_card_pin"
                 style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:hint="Idowu Toyosi"
+                android:hint="Enter your transaction PIN"
                 android:visibility="visible"
                 app:backgroundTint="@color/white"
                 app:boxStrokeColor="@color/white"
@@ -165,7 +166,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/card_number">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/email"
+                    android:id="@+id/pin"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
@@ -183,8 +184,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/fragment_card_number"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_card_number">
+                app:layout_constraintStart_toStartOf="@+id/fragment_card_pin"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_card_pin">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"

@@ -1,21 +1,31 @@
 package com.woleapp.netpos.qrgenerator.utils
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Typeface
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ClickableSpan
+import android.text.style.StyleSpan
 import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
+import com.google.gson.Gson
 import com.woleapp.netpos.qrgenerator.R
+import com.woleapp.netpos.qrgenerator.model.ErrorModel
 import com.woleapp.netpos.qrgenerator.model.Status
 import com.woleapp.netpos.qrgenerator.model.wallet.SendWithTallyNumberResponse
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import retrofit2.HttpException
 import java.text.DecimalFormat
 import java.util.*
 
@@ -35,7 +45,6 @@ object RandomUtils {
                     data?.let {
                         when (it.status) {
                             Status.SUCCESS -> {
-                                Log.d("ERROR", it.data.toString())
                                 loadingDialog.dismiss()
                                 if (
                                     it.data is SendWithTallyNumberResponse
@@ -66,9 +75,19 @@ object RandomUtils {
                     error?.let {
                         loadingDialog.cancel()
                         loadingDialog.dismiss()
-                        showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
+                        (it as? HttpException).let { httpException ->
+                            val errorMessage = httpException?.response()?.errorBody()?.string()
+                                ?: "{\"message\":\"Unexpected error\"}"
+                            val errorMsg =
+                                try {
+                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
+                                        ?: "Recipient is not a Tally user"
+                                } catch (e: Exception) {
+                                    "Error"
+                                }
+                            showSnackBar(this.requireView(), errorMsg)
+                        }
                     }
-
                 }
         )
     }
@@ -173,18 +192,55 @@ object RandomUtils {
         return String(decodedString)
     }
 
+    fun closeSoftKeyboard(context: Context, activity: Activity) {
+        activity.currentFocus?.let { view ->
+            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            imm?.hideSoftInputFromWindow(view.windowToken, 0)
+        }
+    }
+
+    @Throws(IndexOutOfBoundsException::class)
+    fun customSpannableString(
+        text: String,
+        startIndex: Int,
+        endIndex: Int,
+        clickAction: () -> Unit,
+    ): SpannableString {
+        val spannedText = SpannableString(text)
+        val styleSpan = StyleSpan(Typeface.BOLD)
+        val clickableSpan = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                clickAction()
+            }
+        }
+        if (startIndex < 0) throw IndexOutOfBoundsException("$startIndex must be at least 0")
+        if (text.isEmpty()) throw IndexOutOfBoundsException("$text can't be empty")
+        if (endIndex > text.length) throw IndexOutOfBoundsException("$endIndex can't be greater than the length of $text")
+        spannedText.setSpan(styleSpan, startIndex, endIndex, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        spannedText.setSpan(
+            clickableSpan,
+            startIndex,
+            endIndex,
+            Spanned.SPAN_INCLUSIVE_EXCLUSIVE,
+        )
+        return spannedText
+    }
+
+
     fun createClientDataForNonVerveCard(
         transID: String, cardNumber: String, expiryDate: String, cvv: String
     ): String = "$transID:LIVE:$cardNumber:$expiryDate:$cvv::NGN:QR"
 
     fun createClientDataForVerveCard(
         transID: String, cardNumber: String, expiryDate: String, cvv: String, pin: String
-    ): String = "$transID:LIVE:$cardNumber:$expiryDate:$cvv:$pin:NGN:QR"
+    ): String {
+        val verve = "$transID:LIVE:$cardNumber:$expiryDate:$cvv:$pin:NGN:QR"
+        Log.d("vervee", verve)
+        return verve
+    }
 
     fun Number.formatCurrency(currencySymbol: String = "\u20A6"): String {
         val format = DecimalFormat("#,###.00")
         return "$currencySymbol${format.format(this)}"
     }
-
-
 }

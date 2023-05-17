@@ -155,6 +155,7 @@
     <dimen name="text_size_28sp">28sp</dimen>
     <dimen name="text_size_29sp">29sp</dimen>
     <dimen name="text_size_30sp">30sp</dimen>
+    <dimen name="text_size_50sp">50sp</dimen>
     <dimen name="height_44dp">44dp</dimen>
     <dimen name="dimen_150dp">150dp</dimen>
     <dimen name="dimen_70dp">70dp</dimen>

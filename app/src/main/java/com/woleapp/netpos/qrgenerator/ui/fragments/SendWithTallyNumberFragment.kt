@@ -162,14 +162,13 @@ class SendWithTallyNumberFragment : Fragment() {
             transaction_pin = binding.enterTransactionPin.text?.trim().toString()
         )
         observeServerResponse(
-            walletViewModel.sendWithTallyNumber("Bearer ${Singletons().getTallyUserToken()!!}",sendWithTallyNumberRequest),
+            walletViewModel.sendWithTallyNumber(requireContext(),"Bearer ${Singletons().getTallyUserToken()!!}",sendWithTallyNumberRequest),
             loader,
             compositeDisposable,
             ioScheduler,
             mainThreadScheduler,
         ) {
             activity?.supportFragmentManager?.popBackStack()
-            showToast("YEEEEE")
         }
     }
 
