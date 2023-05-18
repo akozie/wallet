@@ -16,11 +16,16 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import com.google.gson.Gson
+import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.model.ErrorModel
+import com.woleapp.netpos.qrgenerator.model.QrModelRequest
 import com.woleapp.netpos.qrgenerator.model.Status
+import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutResponse
 import com.woleapp.netpos.qrgenerator.model.wallet.SendWithTallyNumberResponse
 import io.reactivex.Scheduler
 import io.reactivex.Single
@@ -116,6 +121,36 @@ object RandomUtils {
                     loadingDialog.cancel()
                     loadingDialog.dismiss()
                     showToast(getString(R.string.timeOut))
+                }
+            }
+        }
+    }
+
+    fun <T> Fragment.observeServerResponseOnce(
+        serverResponse: LiveData<Resource<T>>,
+        loadingDialog: AlertDialog,
+        fragmentManager: FragmentManager,
+        successAction: () -> Unit
+    ) {
+        serverResponse.observeOnce(this.viewLifecycleOwner) {
+            if (it != null){
+                when (it.status) {
+                    Status.SUCCESS -> {
+                        loadingDialog.dismiss()
+                        successAction()
+                    }
+                    Status.LOADING -> {
+                        loadingDialog.show()
+                    }
+                    Status.ERROR -> {
+                        loadingDialog.cancel()
+                        loadingDialog.dismiss()
+                    }
+                    Status.TIMEOUT -> {
+                        loadingDialog.cancel()
+                        loadingDialog.dismiss()
+                        showToast(getString(R.string.timeOut))
+                    }
                 }
             }
         }
@@ -232,10 +267,12 @@ object RandomUtils {
     ): String = "$transID:LIVE:$cardNumber:$expiryDate:$cvv::NGN:QR"
 
     fun createClientDataForVerveCard(
-        transID: String, cardNumber: String, expiryDate: String, cvv: String, pin: String
+        qrModelRequest: QrModelRequest, pin: String, transID: String
     ): String {
-        val verve = "$transID:LIVE:$cardNumber:$expiryDate:$cvv:$pin:NGN:QR"
-        Log.d("vervee", verve)
+        val verve = qrModelRequest.let {
+            "$transID:LIVE:${it.card_number}:${it.card_expiry}:${it.card_cvv}:$pin:NGN:QR"
+        }
+        Prefs.putString(SAVE_CUSTOMER_DETAILS, "${qrModelRequest.fullname}===${qrModelRequest.email}")
         return verve
     }
 
@@ -243,4 +280,14 @@ object RandomUtils {
         val format = DecimalFormat("#,###.00")
         return "$currencySymbol${format.format(this)}"
     }
+
+    fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>) {
+        observe(lifecycleOwner, object : Observer<T> {
+            override fun onChanged(t: T?) {
+                observer.onChanged(t)
+                removeObserver(this)
+            }
+        })
+    }
+
 }

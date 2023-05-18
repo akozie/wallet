@@ -331,11 +331,9 @@ class QRViewModel @Inject constructor(
             ))
             val clientDataString =
                 if (qrModelRequest.card_scheme.contains("verve", true)) createClientDataForVerveCard(
-                    it.transId,
-                    qrModelRequest.card_number,
-                    qrModelRequest.card_expiry,
-                    qrModelRequest.card_cvv,
-                    pin
+                qrModelRequest,
+                    pin,
+                    it.transId
                 )
                 else createClientDataForNonVerveCard(
                     it.transId,
@@ -343,8 +341,6 @@ class QRViewModel @Inject constructor(
                     qrModelRequest.card_expiry,
                     qrModelRequest.card_cvv
                 )
-
-
             val clientData = stringToBase64(clientDataString)
             val newClientData = clientData.replace("\n", "")
             qrRepository.pay(newClientData)
@@ -352,11 +348,9 @@ class QRViewModel @Inject constructor(
             .subscribe { data, error ->
                 data?.let {
                     if (it.has("TermUrl")){
-                        Log.d("VIEWMODELVERVERESP", "RESPONSEOBJECT")
                         val masterVisaResponse = gson.fromJson(it, PayResponse::class.java)
                         _payResponse.postValue(Resource.success(masterVisaResponse))
                     }else{
-                        Log.d("SERVERVERVERESP", "RESPONSEOBJECTVERVE")
                         val verveResponse = gson.fromJson(it, PostQrToServerVerveResponseModel::class.java)
                         _payVerveResponse.postValue(Resource.success(verveResponse))
                     }

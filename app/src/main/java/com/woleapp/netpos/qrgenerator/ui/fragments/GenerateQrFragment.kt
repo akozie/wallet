@@ -36,6 +36,7 @@ import com.woleapp.netpos.qrgenerator.ui.dialog.QrPasswordPinBlockDialog
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseOnce
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
@@ -334,7 +335,7 @@ class GenerateQrFragment : Fragment() {
             qrViewModel.displayQrStatus = 0
             qrViewModel.payQrCharges(checkOutModel, qrRequest)
         }
-        observeServerResponse(
+        observeServerResponseOnce(
             qrViewModel.payResponse,
             loader,
             requireActivity().supportFragmentManager
@@ -353,24 +354,25 @@ class GenerateQrFragment : Fragment() {
             }
         }
 
-        observeServerResponse(
+        observeServerResponseOnce(
             qrViewModel.payVerveResponse,
             loader,
             requireActivity().supportFragmentManager
         ) {
             Log.d("VERVERESP", "RESPONSEOBJECT")
             if (qrViewModel.payVerveResponse.value?.data?.code == "90") {
-                Log.d("SECONDVERVERESP", "RESPONSEOBJECT2")
                 showToast(qrViewModel.payVerveResponse.value?.data?.result.toString())
             } else {
-                Log.d("THIRDVERVERESP", "RESPONSEOBJECT333")
-                val action =
-                    GenerateQrFragmentDirections.actionGenerateQrFragmentToEnterOtpFragment()
-                findNavController().navigate(action)
+//                val action =
+//                    GenerateQrFragmentDirections.actionGenerateQrFragmentToEnterOtpFragment()
+//                findNavController().navigate(action)
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.fragmentContainerView, EnterOtpFragment())
+                    .addToBackStack(null)
+                    .commit()
             }
         }
     }
-
 
     private fun getQrRequestModel(): QrModelRequest =
         QrModelRequest(

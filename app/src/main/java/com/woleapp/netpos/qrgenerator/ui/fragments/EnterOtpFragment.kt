@@ -84,15 +84,7 @@ class EnterOtpFragment @Inject constructor() : Fragment() {
                             val transactionResponseFromVerve =
                                 viewModel.transactionResponseFromVerve.value!!.data!! as VerveOTPResponse
                             if (transactionResponseFromVerve.code == "00" || transactionResponseFromVerve.code == "90"){
-//                                val verveResponseFromBackend = Gson().fromJson(transactionResponseFromVerve,
-//                                    VerveOTPResponse::class.java
-//                                )
-                                Log.d("NEWRESULT", transactionResponseFromVerve.toString())
-//                                requireActivity().supportFragmentManager.setFragmentResult(
-//                                    QR_TRANSACTION_RESULT_REQUEST_KEY,
-//                                    bundleOf(QR_TRANSACTION_RESULT_BUNDLE_KEY to transactionResponseFromVerve)
-//                                )
-                                fragmentManager?.setFragmentResult(
+                                requireActivity().supportFragmentManager.setFragmentResult(
                                     QR_TRANSACTION_RESULT_REQUEST_KEY,
                                     bundleOf(QR_TRANSACTION_RESULT_BUNDLE_KEY to transactionResponseFromVerve)
                                 )
