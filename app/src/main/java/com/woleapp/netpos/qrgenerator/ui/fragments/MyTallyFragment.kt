@@ -106,13 +106,6 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
         binding.tallyRecycler.adapter = qrAdapter
     }
 
-//    private fun tallySetUps() {
-//        qrAdapter = TransactionAdapter(qrDataLists, this)
-//        binding.tallyRecycler.layoutManager =
-//            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-//        binding.tallyRecycler.adapter = qrAdapter
-//    }
-
 
     override fun onTransactionClicked(transaction: TransactionModel) {
         //

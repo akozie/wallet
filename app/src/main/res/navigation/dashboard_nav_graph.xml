@@ -95,6 +95,9 @@
         <action
             android:id="@+id/action_generateMoreQrFragment_to_webViewFragment2"
             app:destination="@id/webViewFragment2" />
+        <action
+            android:id="@+id/action_generateMoreQrFragment_to_qrPasswordPinBlockDialog2"
+            app:destination="@id/qrPasswordPinBlockDialog2" />
     </fragment>
     <fragment
         android:id="@+id/merchantDetailsFragment"
@@ -116,6 +119,9 @@
         <action
             android:id="@+id/action_responseModal2_to_displayQrFragment2"
             app:destination="@id/displayQrFragment2" />
+        <action
+            android:id="@+id/action_responseModal2_to_QRFragment2"
+            app:destination="@id/QRFragment2" />
     </dialog>
     <fragment
         android:id="@+id/myTallyFragment"
@@ -179,4 +185,8 @@
         android:name="com.woleapp.netpos.qrgenerator.ui.fragments.EnterOtpFragment"
         android:label="fragment_enter_otp"
         tools:layout="@layout/fragment_enter_otp" />
+    <dialog
+        android:id="@+id/qrPasswordPinBlockDialog2"
+        android:name="com.woleapp.netpos.qrgenerator.ui.dialog.QrPasswordPinBlockDialog"
+        android:label="QrPasswordPinBlockDialog" />
 </navigation>

@@ -32,4 +32,7 @@ class WalletRepository @Inject constructor(
     fun creditWallet(token: String, transactionAmount: String, transactionID: String) =
         walletService.creditWallet(token, CreditWalletRequest(transactionAmount, transactionID))
 
+    fun getSecurityQuestions(token: String) =
+        walletService.getSecurityQuestions(token)
+
 }

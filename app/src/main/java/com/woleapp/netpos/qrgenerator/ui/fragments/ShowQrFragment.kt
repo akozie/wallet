@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -20,6 +21,8 @@ import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.woleapp.netpos.qrgenerator.databinding.FragmentShowQrBinding
 import com.woleapp.netpos.qrgenerator.model.QrModelRequest
+import com.woleapp.netpos.qrgenerator.ui.activities.AuthenticationActivity
+import com.woleapp.netpos.qrgenerator.ui.activities.MainActivity
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import java.io.*
@@ -37,9 +40,17 @@ class ShowQrFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentShowQrBinding.inflate(inflater, container, false)
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    // Do custom work here
+                    startActivity(Intent(requireContext(), AuthenticationActivity::class.java))
+                    requireActivity().finish()
+                    // if you want onBackPressed() to be called as normal afterwards
+                }
+            })
         return binding.root
     }
 

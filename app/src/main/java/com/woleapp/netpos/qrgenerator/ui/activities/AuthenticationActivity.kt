@@ -13,14 +13,10 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class AuthenticationActivity @Inject constructor() : AppCompatActivity() {
-    private val generateQrViewModel by viewModels<QRViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_QRGenerator)
-        //installSplashScreen()
         super.onCreate(savedInstanceState)
-        generateQrViewModel.getCardSchemes()
-        generateQrViewModel.getCardBanks()
 
         if (Prefs.getString(PREF_USER, "").isNullOrEmpty()) {
             setContentView(R.layout.activity_authentication)

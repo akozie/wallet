@@ -88,6 +88,9 @@
         <action
             android:id="@+id/action_responseModal_to_showQrFragment"
             app:destination="@id/showQrFragment" />
+        <action
+            android:id="@+id/action_responseModal_to_signInOrGenerateQRFragment"
+            app:destination="@id/signInOrGenerateQRFragment" />
     </dialog>
     <fragment
         android:id="@+id/enterOtpFragment"

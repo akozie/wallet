@@ -1,5 +1,6 @@
 package com.woleapp.netpos.qrgenerator.ui.dialog
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -20,6 +21,8 @@ import com.woleapp.netpos.qrgenerator.databinding.TransactionStatusModalBinding
 import com.woleapp.netpos.qrgenerator.model.pay.ModalData
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
 import com.woleapp.netpos.qrgenerator.model.verve.VerveOTPResponse
+import com.woleapp.netpos.qrgenerator.ui.activities.AuthenticationActivity
+import com.woleapp.netpos.qrgenerator.ui.activities.MainActivity
 import com.woleapp.netpos.qrgenerator.utils.QR_TRANSACTION_RESULT_BUNDLE_KEY
 import com.woleapp.netpos.qrgenerator.utils.QR_TRANSACTION_RESULT_REQUEST_KEY
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
@@ -46,21 +49,16 @@ class ResponseModal @Inject constructor() : DialogFragment() {
     private var responseFromWebView: Any? = null
     private val transactionViewModel by activityViewModels<TransactionViewModel>()
     private val qrViewModel by activityViewModels<QRViewModel>()
-    private lateinit var outputStream: OutputStream
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setFragmentResultListener(QR_TRANSACTION_RESULT_REQUEST_KEY) { _, bundle ->
             responseFromWebView = bundle.getParcelable(QR_TRANSACTION_RESULT_BUNDLE_KEY)
             val webViewResponse = responseFromWebView
-            Log.d("RESULTMODALDATA", webViewResponse.toString())
             modalData = if (webViewResponse != null) {
-                Log.d("MODALDATARESP", "MODALDATARESULTRESP")
                 when (webViewResponse) {
                     is QrTransactionResponseModel -> {
-                        Log.d("MODALDATA", "MODALDATARESULT")
                         if (webViewResponse.code == "00") {
-                            Log.d("MODALDATA1", "MODALDATARESULT1")
                             viewGeneratedQR.visibility = View.VISIBLE
                             val getQrModel = Singletons().getSavedQrModelRequest()
                             getQrModel?.let {
@@ -73,9 +71,7 @@ class ResponseModal @Inject constructor() : DialogFragment() {
                         )
                     }
                     is VerveOTPResponse -> {
-                        Log.d("VERVEMODALDATA", "VERVEMODALDATARESULT")
                         if (webViewResponse.code == "00") {
-                            Log.d("VERVEMODALDATA1", "VERVEMODALDATARESULT1")
                             viewGeneratedQR.visibility = View.VISIBLE
                             val getQrModel = Singletons().getSavedQrModelRequest()
                             getQrModel?.let {
@@ -88,14 +84,12 @@ class ResponseModal @Inject constructor() : DialogFragment() {
                         )
                     }
                     else -> {
-                        Log.d("FAILEDMODALDATA", "FAILEDMODALDATARESULT")
                         ModalData(
                             false, 0.0
                         )
                     }
                 }
             } else {
-                Log.d("FAILEDMODALDATA11", "FAILEDMODALDATARESULT11")
                 ModalData(
                     false, 0.0
                 )
@@ -116,6 +110,7 @@ class ResponseModal @Inject constructor() : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        qrViewModel.payResponse.removeObservers(viewLifecycleOwner)
         initViews()
         dialog?.window?.apply {
             setBackgroundDrawableResource(R.drawable.curve_bg)
@@ -130,7 +125,15 @@ class ResponseModal @Inject constructor() : DialogFragment() {
         super.onResume()
         setData()
         cancelBtn.setOnClickListener {
-            dialog?.dismiss()
+            if (qrViewModel.displayQrStatus == 0){
+                dialog?.dismiss()
+                startActivity(Intent(requireContext(), AuthenticationActivity::class.java))
+                requireActivity().finish()
+            }else{
+                dialog?.dismiss()
+                startActivity(Intent(requireContext(), MainActivity::class.java))
+                requireActivity().finish()
+            }
         }
         downloadReceipt.setOnClickListener {
             if (responseFromWebView is QrTransactionResponseModel) {
@@ -139,7 +142,6 @@ class ResponseModal @Inject constructor() : DialogFragment() {
                     qrViewModel.showReceiptDialogForQrPayment()
                 }
             } else {
-                Log.d("VERVE", "VERVECLICKED")
                 responseFromWebView?.let { qrTransResponse ->
                     qrViewModel.setQrTransactionResponse((qrTransResponse as VerveOTPResponse).mapTOQrTransactionModel())
                     qrViewModel.showReceiptDialogForQrPayment()

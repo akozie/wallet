@@ -27,6 +27,7 @@ import com.woleapp.netpos.qrgenerator.model.QrModelRequest
 import com.woleapp.netpos.qrgenerator.model.Status
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutResponse
 import com.woleapp.netpos.qrgenerator.model.wallet.SendWithTallyNumberResponse
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -132,8 +133,7 @@ object RandomUtils {
         fragmentManager: FragmentManager,
         successAction: () -> Unit
     ) {
-        serverResponse.observeOnce(this.viewLifecycleOwner) {
-            if (it != null){
+        serverResponse.observe(this.viewLifecycleOwner) {
                 when (it.status) {
                     Status.SUCCESS -> {
                         loadingDialog.dismiss()
@@ -152,8 +152,8 @@ object RandomUtils {
                         showToast(getString(R.string.timeOut))
                     }
                 }
-            }
         }
+        serverResponse.observeOnce(this.viewLifecycleOwner, null)
     }
 
     fun <T> Fragment.observeServerResponse(
@@ -281,13 +281,19 @@ object RandomUtils {
         return "$currencySymbol${format.format(this)}"
     }
 
-    fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>) {
+//    fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>) {
+//        observe(lifecycleOwner) { t ->
+//            observer.onChanged(t)
+//            removeObservers(lifecycleOwner)
+//        }
+//    }
+
+    fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>?) {
         observe(lifecycleOwner, object : Observer<T> {
             override fun onChanged(t: T?) {
-                observer.onChanged(t)
+                observer?.onChanged(t)
                 removeObserver(this)
             }
         })
     }
-
 }

@@ -42,5 +42,10 @@ interface WalletService {
         @Body creditWalletRequest: CreditWalletRequest
     ): Single<GeneralWalletResponse>
 
+    @GET("transactions/getSecurityQuestions")
+    fun getSecurityQuestions(
+        @Header("Authorization") token: String
+    ): Single<GetSecurityQuestionResponse>
+
 
 }

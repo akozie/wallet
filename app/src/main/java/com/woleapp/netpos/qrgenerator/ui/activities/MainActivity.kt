@@ -141,6 +141,7 @@ class MainActivity : AppCompatActivity() {
             .setView(passwordDialogBinding.root)
             .setCancelable(false)
             .create()
+
         if (restorePrefData()) {
             inputPasswordDialog.dismiss()
             inputPasswordDialog.show()

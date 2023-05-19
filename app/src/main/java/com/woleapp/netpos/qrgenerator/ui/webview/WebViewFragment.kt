@@ -1,6 +1,7 @@
 package com.woleapp.netpos.qrgenerator.ui.webview
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,10 +34,11 @@ class WebViewFragment : Fragment() {
     lateinit var customWebViewClient: WebViewCallBack
 
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_web_view, container, false)
 
@@ -53,7 +55,6 @@ class WebViewFragment : Fragment() {
                 }
             }
         )
-
         return binding.root
     }
 
@@ -61,6 +62,7 @@ class WebViewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         webView = binding.webView
         qrViewModel.payResponse.observe(viewLifecycleOwner) { response ->
+            Log.d("NEWRESULT", response.data.toString())
             response.data?.let {
                 javaScriptInterface = JavaScriptInterface(
                     parentFragmentManager,

@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,8 +33,11 @@ import com.woleapp.netpos.qrgenerator.model.RowX
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
 import com.woleapp.netpos.qrgenerator.ui.dialog.QrPasswordPinBlockDialog
+import com.woleapp.netpos.qrgenerator.ui.webview.WebViewFragment
 import com.woleapp.netpos.qrgenerator.utils.*
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseOnce
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import java.io.File
 
@@ -63,6 +67,7 @@ class GenerateMoreQrFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
         requireActivity().supportFragmentManager.setFragmentResultListener(
             PIN_BLOCK_RK,
             requireActivity()
@@ -73,6 +78,21 @@ class GenerateMoreQrFragment : Fragment() {
                 val qrModelRequest = getQrRequestModel()
                 generateQrViewModel.displayQrStatus = 1
                 generateQrViewModel.payQrCharges(checkOutModel, qrModelRequest, it)
+                observeServerResponse(
+                    generateQrViewModel.payVerveResponse,
+                    loader,
+                    requireActivity().supportFragmentManager
+                ) {
+                    if (generateQrViewModel.payVerveResponse.value?.data?.code == "90") {
+                        showToast(generateQrViewModel.payVerveResponse.value?.data?.result.toString())
+                    } else {
+                        requireActivity().supportFragmentManager.beginTransaction()
+                            .replace(R.id.mainActivityfragmentContainerView, EnterOtpFragment())
+                            .addToBackStack(null)
+                            .remove(GenerateMoreQrFragment())
+                            .commit()
+                    }
+                }
             }
         }
     }
@@ -101,7 +121,6 @@ class GenerateMoreQrFragment : Fragment() {
                 showToast(message)
             }
         }
-        loader = RandomUtils.alertDialog(requireContext(), R.layout.layout_loading_dialog)
         initViews()
         generateQrViewModel.cardSchemeResponse.observe(viewLifecycleOwner) {
             val cardSchemeAdapter = CardSchemeAdapter(
@@ -321,26 +340,27 @@ class GenerateMoreQrFragment : Fragment() {
         val checkOutModel = getCheckOutModel()
         val qrRequest = getQrRequestModel()
         if (qrRequest.card_scheme.contains("verve", true)) {
-            QrPasswordPinBlockDialog().show(childFragmentManager, QR_PIN_PAD)
+            val action = GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToQrPasswordPinBlockDialog2()
+            findNavController().navigate(action)
         } else {
             generateQrViewModel.displayQrStatus = 1
             generateQrViewModel.payQrCharges(checkOutModel, qrRequest)
-        }
-        observeServerResponse(
-            generateQrViewModel.payResponse,
-            loader,
-            requireActivity().supportFragmentManager
-        ) {
-            if (generateQrViewModel.payResponse.value?.data?.code == "90") {
-                showToast(generateQrViewModel.payResponse.value?.data?.result.toString())
-            } else {
-                Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
-                if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment) {
-                    val action =
-                        GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToWebViewFragment2()
-                    findNavController().navigate(action)
+            observeServerResponseOnce(
+                generateQrViewModel.payResponse,
+                loader,
+                requireActivity().supportFragmentManager
+            ) {
+                if (generateQrViewModel.payResponse.value?.data?.code == "90") {
+                    showToast(generateQrViewModel.payResponse.value?.data?.result.toString())
                 } else {
-                    findNavController().popBackStack()
+                    Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
+                    if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment) {
+                        val action =
+                            GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToWebViewFragment2()
+                        findNavController().navigate(action)
+                    } else {
+                        findNavController().popBackStack()
+                    }
                 }
             }
         }
@@ -393,4 +413,5 @@ class GenerateMoreQrFragment : Fragment() {
             receiptPdf = createPdf(view, this)
         }
     }
+
 }

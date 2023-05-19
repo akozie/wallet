@@ -65,22 +65,41 @@ class GenerateQrFragment : Fragment() {
     private lateinit var formattedDate: String
     private lateinit var receiptPdf: File
     private lateinit var pdfView: LayoutQrReceiptPdfBinding
-    private val qrPinBlock: QrPasswordPinBlockDialog = QrPasswordPinBlockDialog()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        qrViewModel.getCardSchemes()
+        qrViewModel.getCardBanks()
         requireActivity().supportFragmentManager.setFragmentResultListener(
             PIN_BLOCK_RK,
             this
         ) { _, bundle ->
             val data = bundle.getString(PIN_BLOCK_BK)
             data?.let {
+                qrViewModel.payVerveResponse.removeObservers(viewLifecycleOwner)
                 val checkOutModel = getCheckOutModel()
                 val qrModelRequest = getQrRequestModel()
                 qrViewModel.displayQrStatus = 0
                 qrViewModel.payQrCharges(checkOutModel, qrModelRequest, it)
-
+                observeServerResponse(
+                    qrViewModel.payVerveResponse,
+                    loader,
+                    requireActivity().supportFragmentManager
+                ) {
+                    Log.d("VERVERESP", "RESPONSEOBJECT")
+                    if (qrViewModel.payVerveResponse.value?.data?.code == "90") {
+                        showToast(qrViewModel.payVerveResponse.value?.data?.result.toString())
+                    } else {
+                val action =
+                    GenerateQrFragmentDirections.actionGenerateQrFragmentToEnterOtpFragment()
+                findNavController().navigate(action)
+//                        parentFragmentManager.beginTransaction()
+//                            .replace(R.id.fragmentContainerView, EnterOtpFragment())
+//                            .addToBackStack(null)
+//                            .commit()
+                    }
+                }
             }
         }
     }
@@ -335,7 +354,7 @@ class GenerateQrFragment : Fragment() {
             qrViewModel.displayQrStatus = 0
             qrViewModel.payQrCharges(checkOutModel, qrRequest)
         }
-        observeServerResponseOnce(
+        observeServerResponse(
             qrViewModel.payResponse,
             loader,
             requireActivity().supportFragmentManager
@@ -351,25 +370,6 @@ class GenerateQrFragment : Fragment() {
                 } else {
                     findNavController().popBackStack()
                 }
-            }
-        }
-
-        observeServerResponseOnce(
-            qrViewModel.payVerveResponse,
-            loader,
-            requireActivity().supportFragmentManager
-        ) {
-            Log.d("VERVERESP", "RESPONSEOBJECT")
-            if (qrViewModel.payVerveResponse.value?.data?.code == "90") {
-                showToast(qrViewModel.payVerveResponse.value?.data?.result.toString())
-            } else {
-//                val action =
-//                    GenerateQrFragmentDirections.actionGenerateQrFragmentToEnterOtpFragment()
-//                findNavController().navigate(action)
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainerView, EnterOtpFragment())
-                    .addToBackStack(null)
-                    .commit()
             }
         }
     }
@@ -423,10 +423,5 @@ class GenerateQrFragment : Fragment() {
             receiptPdf = createPdf(view, this)
         }
     }
-
-    private fun showAmountDialogForVerveCard() {
-        qrPinBlock.show(requireActivity().supportFragmentManager, STRING_PIN_BLOCK_DIALOG_TAG)
-    }
-
 
 }

@@ -53,6 +53,10 @@ class WalletViewModel @Inject constructor(
         MutableLiveData()
     val creditWalletResponse: LiveData<Resource<GeneralWalletResponse>> get() = _creditWalletResponse
 
+    private var _getSecurityQuestionsResponse: MutableLiveData<Resource<GetSecurityQuestionResponse>> =
+        MutableLiveData()
+    val getSecurityQuestionsResponse: LiveData<Resource<GetSecurityQuestionResponse>> get() = _getSecurityQuestionsResponse
+
     private val _fetchWalletMessage = MutableLiveData<Event<String>>()
     val fetchWalletMessage: LiveData<Event<String>>
         get() = _fetchWalletMessage
@@ -214,6 +218,33 @@ class WalletViewModel @Inject constructor(
                 }
                 error?.let {
                     _creditWalletResponse.postValue(Resource.error(null))
+                    (it as? HttpException).let { httpException ->
+                        val errorMessage = httpException?.response()?.errorBody()?.string()
+                            ?: "{\"message\":\"Unexpected error\"}"
+//                        _fetchWalletMessage.value = Event(
+//                            try {
+//                                Gson().fromJson(errorMessage, ErrorModel::class.java).message
+//                                    ?: "Error"
+//                            } catch (e: Exception) {
+//                                "Error"
+//                            }
+//                        )
+                    }
+                }
+            })
+    }
+
+
+    fun getSecurityQuestions() {
+        _getSecurityQuestionsResponse.postValue(Resource.loading(null))
+        disposable.add(walletRepository.getSecurityQuestions("Bearer ${Singletons().getTallyUserToken()!!}")
+            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribe { data, error ->
+                data?.let {
+                    _getSecurityQuestionsResponse.postValue(Resource.success(it))
+                }
+                error?.let {
+                    _getSecurityQuestionsResponse.postValue(Resource.error(null))
                     (it as? HttpException).let { httpException ->
                         val errorMessage = httpException?.response()?.errorBody()?.string()
                             ?: "{\"message\":\"Unexpected error\"}"
