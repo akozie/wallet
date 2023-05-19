@@ -98,6 +98,9 @@
         <action
             android:id="@+id/action_generateMoreQrFragment_to_qrPasswordPinBlockDialog2"
             app:destination="@id/qrPasswordPinBlockDialog2" />
+        <action
+            android:id="@+id/action_generateMoreQrFragment_to_enterOtpFragment2"
+            app:destination="@id/enterOtpFragment2" />
     </fragment>
     <fragment
         android:id="@+id/merchantDetailsFragment"

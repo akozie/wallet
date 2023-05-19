@@ -37,6 +37,7 @@ import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseOnce
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.stringToBase64
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
@@ -82,6 +83,8 @@ class GenerateQrFragment : Fragment() {
                 val qrModelRequest = getQrRequestModel()
                 qrViewModel.displayQrStatus = 0
                 qrViewModel.payQrCharges(checkOutModel, qrModelRequest, it)
+                val userDetails = Gson().toJson(getQrRequestModel())
+                val encodeUserDetails = stringToBase64(userDetails)
                 observeServerResponse(
                     qrViewModel.payVerveResponse,
                     loader,
@@ -91,9 +94,9 @@ class GenerateQrFragment : Fragment() {
                     if (qrViewModel.payVerveResponse.value?.data?.code == "90") {
                         showToast(qrViewModel.payVerveResponse.value?.data?.result.toString())
                     } else {
-                val action =
-                    GenerateQrFragmentDirections.actionGenerateQrFragmentToEnterOtpFragment()
-                findNavController().navigate(action)
+                        Prefs.putString(PREF_GENERATE_QR, userDetails)
+                        val action = GenerateQrFragmentDirections.actionGenerateQrFragmentToEnterOtpFragment()
+                                    findNavController().navigate(action)
 //                        parentFragmentManager.beginTransaction()
 //                            .replace(R.id.fragmentContainerView, EnterOtpFragment())
 //                            .addToBackStack(null)
@@ -362,7 +365,6 @@ class GenerateQrFragment : Fragment() {
             if (qrViewModel.payResponse.value?.data?.code == "90") {
                 showToast(qrViewModel.payResponse.value?.data?.result.toString())
             } else {
-                Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
                 if (findNavController().currentDestination?.id == R.id.generateQrFragment) {
                     val action =
                         GenerateQrFragmentDirections.actionGenerateQrFragmentToWebViewFragment()

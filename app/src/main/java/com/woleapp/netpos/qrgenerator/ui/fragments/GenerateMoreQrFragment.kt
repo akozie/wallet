@@ -68,15 +68,17 @@ class GenerateMoreQrFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
+        generateQrViewModel.getCardSchemes()
+        generateQrViewModel.getCardBanks()
         requireActivity().supportFragmentManager.setFragmentResultListener(
             PIN_BLOCK_RK,
-            requireActivity()
+            this
         ) { _, bundle ->
             val data = bundle.getString(PIN_BLOCK_BK)
             data?.let {
                 val checkOutModel = getCheckOutModel()
                 val qrModelRequest = getQrRequestModel()
-                generateQrViewModel.displayQrStatus = 1
+                generateQrViewModel.displayQrStatus = 0
                 generateQrViewModel.payQrCharges(checkOutModel, qrModelRequest, it)
                 observeServerResponse(
                     generateQrViewModel.payVerveResponse,
@@ -86,11 +88,14 @@ class GenerateMoreQrFragment : Fragment() {
                     if (generateQrViewModel.payVerveResponse.value?.data?.code == "90") {
                         showToast(generateQrViewModel.payVerveResponse.value?.data?.result.toString())
                     } else {
-                        requireActivity().supportFragmentManager.beginTransaction()
-                            .replace(R.id.mainActivityfragmentContainerView, EnterOtpFragment())
-                            .addToBackStack(null)
-                            .remove(GenerateMoreQrFragment())
-                            .commit()
+                        Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
+                        val action =
+                            GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToEnterOtpFragment2()
+                        findNavController().navigate(action)
+//                        parentFragmentManager.beginTransaction()
+//                            .replace(R.id.fragmentContainerView, EnterOtpFragment())
+//                            .addToBackStack(null)
+//                            .commit()
                     }
                 }
             }
@@ -100,7 +105,7 @@ class GenerateMoreQrFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         pdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
         binding =
@@ -363,6 +368,8 @@ class GenerateMoreQrFragment : Fragment() {
                     }
                 }
             }
+
+
         }
     }
 
@@ -388,10 +395,14 @@ class GenerateMoreQrFragment : Fragment() {
             currency = "NGN"
         )
 
+
     private fun printQrTransactionUtil(qrTransaction: QrTransactionResponseModel) {
         receiptPdf = createPdf(binding, this)
         downloadPflImplForQrTransaction(qrTransaction)
-        showToast("File downloaded")
+        showSnackBar(
+            binding.root,
+            "File downloaded"
+        )
     }
 
     private fun downloadPflImplForQrTransaction(qrTransaction: QrTransactionResponseModel) {

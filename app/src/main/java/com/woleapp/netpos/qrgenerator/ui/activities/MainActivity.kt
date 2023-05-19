@@ -52,8 +52,8 @@ class MainActivity : AppCompatActivity() {
         setTheme(R.style.Theme_QRGenerator)
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        generateQrViewModel.getCardSchemes()
-        generateQrViewModel.getCardBanks()
+//        generateQrViewModel.getCardSchemes()
+//        generateQrViewModel.getCardBanks()
 //        fetchMerchantViewModel.getAllMerchant()
 
 

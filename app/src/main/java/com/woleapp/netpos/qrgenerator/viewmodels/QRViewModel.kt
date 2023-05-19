@@ -319,6 +319,7 @@ class QRViewModel @Inject constructor(
     fun payQrCharges(
         checkOutModel: CheckOutModel, qrModelRequest: QrModelRequest, pin: String = ""
     ) {
+        _payVerveResponse.postValue(Resource.loading(null))
         _payResponse.postValue(Resource.loading(null))
         disposable.add(qrRepository.checkOut(checkOutModel).flatMap {
             saveTransIDAndAmountResponse(CheckOutResponse(

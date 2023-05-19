@@ -112,6 +112,7 @@ object RandomUtils {
                     successAction()
                 }
                 Status.LOADING -> {
+                    Log.d("LOADING", "LOADINGRESULT")
                     loadingDialog.show()
                 }
                 Status.ERROR -> {
@@ -272,6 +273,7 @@ object RandomUtils {
         val verve = qrModelRequest.let {
             "$transID:LIVE:${it.card_number}:${it.card_expiry}:${it.card_cvv}:$pin:NGN:QR"
         }
+        Log.d("VERVEEEE", verve)
         Prefs.putString(SAVE_CUSTOMER_DETAILS, "${qrModelRequest.fullname}===${qrModelRequest.email}")
         return verve
     }
