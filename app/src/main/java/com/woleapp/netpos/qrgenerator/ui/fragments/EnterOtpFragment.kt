@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.chaos.view.PinView
 import com.google.gson.Gson
 import com.woleapp.netpos.qrgenerator.R
@@ -88,11 +89,11 @@ class EnterOtpFragment @Inject constructor() : Fragment() {
                                     QR_TRANSACTION_RESULT_REQUEST_KEY,
                                     bundleOf(QR_TRANSACTION_RESULT_BUNDLE_KEY to transactionResponseFromVerve)
                                 )
-                                requireActivity().supportFragmentManager.popBackStack()
                                 responseModal.show(
                                     requireActivity().supportFragmentManager,
                                     STRING_QR_RESPONSE_MODAL_DIALOG_TAG
                                 )
+                                findNavController().popBackStack()
                             }
                         }
                     }

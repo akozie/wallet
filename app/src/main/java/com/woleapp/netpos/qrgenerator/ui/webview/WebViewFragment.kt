@@ -12,6 +12,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentWebViewBinding
 import com.woleapp.netpos.qrgenerator.di.customDependencies.JavaScriptInterface
@@ -50,7 +51,7 @@ class WebViewFragment : Fragment() {
                     if (webView.canGoBack()) {
                         webView.goBack()
                     } else {
-                        requireActivity().supportFragmentManager.popBackStack()
+                        findNavController().popBackStack()
                     }
                 }
             }
@@ -72,11 +73,14 @@ class WebViewFragment : Fragment() {
                     it.ACSUrl,
                     it.transId,
                     it.redirectHtml
-                )
+                ){
+                    requireActivity().runOnUiThread {
+                        findNavController().popBackStack()
+                    }
+                }
             }
             setUpWebView(webView)
         }
-
     }
 
     private fun setUpWebView(webView: WebView) {

@@ -4,6 +4,9 @@ import android.util.Log
 import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
+import androidx.navigation.Navigation
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.google.gson.Gson
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
@@ -18,7 +21,8 @@ class JavaScriptInterface(
     private val cReq: String,
     private val acsUrl: String,
     private val transId: String,
-    private val redirectHtml: String
+    private val redirectHtml: String,
+    private val popBackStackCallBack: ()-> Unit
 ) {
     private val context = fragmentManager.fragments.first().requireContext()
     private val loader = RandomUtils.alertDialog(context, R.layout.layout_loading_dialog)
@@ -40,36 +44,23 @@ class JavaScriptInterface(
             webViewResponse,
             QrTransactionResponseModel::class.java
         )
-        Log.d("BEFORE", "BEROFRE00")
-        if (responseFromWebView.code == "00" || responseFromWebView.code == "90"){
-            Log.d("BEFORELOAD", "BEROFRELOADER00")
+        if (responseFromWebView.code == "00" || responseFromWebView.code == "90"|| responseFromWebView.code == "80"){
             if (loader.isShowing){
-                Log.d("BEFOREDISMISS", "BEROFREDISMISS00")
                 fragmentManager.fragments.first().requireActivity().runOnUiThread {
                     loader.dismiss()
                 }
-
-              //  loader.dismiss()
-                Log.d("AFTER", "AFTERLOADER")
             }
             fragmentManager.setFragmentResult(
                 QR_TRANSACTION_RESULT_REQUEST_KEY,
                 bundleOf(QR_TRANSACTION_RESULT_BUNDLE_KEY to responseFromWebView)
             )
-            Log.d("POPBACKBEFORE", "POPBACKBEFORE")
-            fragmentManager.popBackStack()
-            Log.d("POPBACKAFTER", "POPBACKAFTER00")
+            popBackStackCallBack.invoke()
             val responseModal = ResponseModal()
-            Log.d("RESPONSEBEFORE", "RESPONSEBEFORE11")
             responseModal.show(fragmentManager, STRING_QR_RESPONSE_MODAL_DIALOG_TAG)
-            Log.d("RESPONSEAFTER", "RESPONSEAFTER00")
         }else{
-            Log.d("SHOWBEFORE", "SHOWLOADER")
-         //   loader.show()
             fragmentManager.fragments.first().requireActivity().runOnUiThread {
                 loader.show()
             }
-            Log.d("SHOWAFTER", "SHOWAFTERLOADER")
         }
     }
 }

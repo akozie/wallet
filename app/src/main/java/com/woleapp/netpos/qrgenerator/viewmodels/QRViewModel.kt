@@ -37,7 +37,7 @@ import javax.inject.Inject
 @HiltViewModel
 class QRViewModel @Inject constructor(
     private val qrRepository: QRRepository,
-    private val disposable : CompositeDisposable,
+    private val disposable: CompositeDisposable,
     private val gson: Gson
 ) : ViewModel() {
 
@@ -66,7 +66,8 @@ class QRViewModel @Inject constructor(
     private val _payResponse: MutableLiveData<Resource<PayResponse>> = MutableLiveData()
     val payResponse: LiveData<Resource<PayResponse>> get() = _payResponse
 
-    private val _payVerveResponse: MutableLiveData<Resource<PostQrToServerVerveResponseModel>> = MutableLiveData()
+    private val _payVerveResponse: MutableLiveData<Resource<PostQrToServerVerveResponseModel>> =
+        MutableLiveData()
     val payVerveResponse: LiveData<Resource<PostQrToServerVerveResponseModel>> get() = _payVerveResponse
 
     private var _transactionResponse: MutableLiveData<Resource<TransactionResponse>> =
@@ -79,8 +80,6 @@ class QRViewModel @Inject constructor(
 
 
     private val _isVerveCard: MutableLiveData<Boolean> = MutableLiveData(false)
-
-
 
 
     private val _generateQrMessage = MutableLiveData<Event<String>>()
@@ -319,20 +318,31 @@ class QRViewModel @Inject constructor(
     fun payQrCharges(
         checkOutModel: CheckOutModel, qrModelRequest: QrModelRequest, pin: String = ""
     ) {
-        _payVerveResponse.postValue(Resource.loading(null))
-        _payResponse.postValue(Resource.loading(null))
+        if (_isVerveCard.value == true){
+            Log.d("VERVE", "VERVERESULT")
+            _payVerveResponse.postValue(Resource.loading(null))
+        }else{
+            Log.d("MASTERCARD", "MASTERCARDRESULT")
+            _payResponse.postValue(Resource.loading(null))
+        }
         disposable.add(qrRepository.checkOut(checkOutModel).flatMap {
-            saveTransIDAndAmountResponse(CheckOutResponse(
-                it.amount,
-                it.customerId,
-                it.domain,
-                it.merchantId,
-                it.status,
-                it.transId
-            ))
+            saveTransIDAndAmountResponse(
+                CheckOutResponse(
+                    it.amount,
+                    it.customerId,
+                    it.domain,
+                    it.merchantId,
+                    it.status,
+                    it.transId
+                )
+            )
             val clientDataString =
-                if (qrModelRequest.card_scheme.contains("verve", true)) createClientDataForVerveCard(
-                qrModelRequest,
+                if (qrModelRequest.card_scheme.contains(
+                        "verve",
+                        true
+                    )
+                ) createClientDataForVerveCard(
+                    qrModelRequest,
                     pin,
                     it.transId
                 )
@@ -348,36 +358,49 @@ class QRViewModel @Inject constructor(
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
-                    if (it.has("TermUrl")){
+                    if (it.has("TermUrl")) {
                         val masterVisaResponse = gson.fromJson(it, PayResponse::class.java)
                         _payResponse.postValue(Resource.success(masterVisaResponse))
-                    }else{
-                        val verveResponse = gson.fromJson(it, PostQrToServerVerveResponseModel::class.java)
+                    } else {
+                        val verveResponse =
+                            gson.fromJson(it, PostQrToServerVerveResponseModel::class.java)
                         _payVerveResponse.postValue(Resource.success(verveResponse))
+                    }
+                } ?: run {
+                    if (_isVerveCard.value == true){
+                        _payVerveResponse.postValue(Resource.error(null))
+                    }else{
+                        _payResponse.postValue(Resource.error(null))
                     }
                 }
                 error?.let {
-                    if (_isVerveCard.value == true){
+                    if (_isVerveCard.value == true) {
                         _payVerveResponse.postValue(Resource.error(null))
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _payMessage.value = Event(
                                 try {
-                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
+                                    Gson().fromJson(
+                                        errorMessage,
+                                        ErrorModel::class.java
+                                    ).message
                                 } catch (e: Exception) {
                                     "Error"
                                 }
                             )
                         }
-                    }else{
+                    } else {
                         _payResponse.postValue(Resource.error(null))
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _payMessage.value = Event(
                                 try {
-                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
+                                    Gson().fromJson(
+                                        errorMessage,
+                                        ErrorModel::class.java
+                                    ).message
                                 } catch (e: Exception) {
                                     "Error"
                                 }
@@ -425,13 +448,6 @@ class QRViewModel @Inject constructor(
         }
     }
 
-//    fun retrieveQrPostPayloadFromSharedPrefs(): PostQrToServerModel? {
-//        val payload = Prefs.getString(RESEND_PAYLOAD_FOR_VERVE, "")
-//        return if (!payload.isNullOrEmpty()) {
-//            gson.fromJson(payload, PostQrToServerModel::class.java)
-//        } else null
-//    }
-
     // FOR QR
     fun setQrTransactionResponse(qrTransactionResponse: QrTransactionResponseModel) {
         _qrTransactionResponseFromWebView.value = qrTransactionResponse
@@ -447,7 +463,7 @@ class QRViewModel @Inject constructor(
         Prefs.putString(TRANS_ID_AND_AMOUNT, gson.toJson(transIDAndAmount))
     }
 
-    fun setIsVerveCard(data: Boolean){
+    fun setIsVerveCard(data: Boolean) {
         _isVerveCard.postValue(data)
     }
 

@@ -26,14 +26,11 @@ import com.woleapp.netpos.qrgenerator.adapter.BankCardAdapter
 import com.woleapp.netpos.qrgenerator.adapter.CardSchemeAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentGenerateMoreQrBinding
 import com.woleapp.netpos.qrgenerator.databinding.LayoutQrReceiptPdfBinding
-import com.woleapp.netpos.qrgenerator.model.CardScheme
 import com.woleapp.netpos.qrgenerator.model.QrModelRequest
 import com.woleapp.netpos.qrgenerator.model.Row
 import com.woleapp.netpos.qrgenerator.model.RowX
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
-import com.woleapp.netpos.qrgenerator.ui.dialog.QrPasswordPinBlockDialog
-import com.woleapp.netpos.qrgenerator.ui.webview.WebViewFragment
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
@@ -89,13 +86,12 @@ class GenerateMoreQrFragment : Fragment() {
                         showToast(generateQrViewModel.payVerveResponse.value?.data?.result.toString())
                     } else {
                         Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
-                        val action =
-                            GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToEnterOtpFragment2()
-                        findNavController().navigate(action)
-//                        parentFragmentManager.beginTransaction()
-//                            .replace(R.id.fragmentContainerView, EnterOtpFragment())
-//                            .addToBackStack(null)
-//                            .commit()
+                  //      val action = GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToEnterOtpFragment2()
+//                        findNavController().navigate(R.id.action_generateMoreQrFragment_to_enterOtpFragment2)
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.mainActivityfragmentContainerView, EnterOtpFragment())
+                            .addToBackStack(null)
+                            .commit()
                     }
                 }
             }
@@ -345,9 +341,16 @@ class GenerateMoreQrFragment : Fragment() {
         val checkOutModel = getCheckOutModel()
         val qrRequest = getQrRequestModel()
         if (qrRequest.card_scheme.contains("verve", true)) {
-            val action = GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToQrPasswordPinBlockDialog2()
-            findNavController().navigate(action)
+            generateQrViewModel.setIsVerveCard(true)
+            if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment) {
+                val action = GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToQrPasswordPinBlockDialog2()
+                findNavController().navigate(action)
+            }
+//            else {
+//                findNavController().popBackStack()
+//            }
         } else {
+            generateQrViewModel.setIsVerveCard(false)
             generateQrViewModel.displayQrStatus = 1
             generateQrViewModel.payQrCharges(checkOutModel, qrRequest)
             observeServerResponseOnce(
@@ -360,16 +363,16 @@ class GenerateMoreQrFragment : Fragment() {
                 } else {
                     Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
                     if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment) {
+                        Log.d("WEBNAV", "WEBVIEWFRAGMENT")
                         val action =
                             GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToWebViewFragment2()
                         findNavController().navigate(action)
-                    } else {
+                    }
+                    else {
                         findNavController().popBackStack()
                     }
                 }
             }
-
-
         }
     }
 

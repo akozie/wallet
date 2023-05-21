@@ -124,14 +124,12 @@ class ResponseModal @Inject constructor() : DialogFragment() {
         cancelBtn.setOnClickListener {
             if (qrViewModel.displayQrStatus == 0){
                 dialog?.dismiss()
-                Prefs.remove(PREF_GENERATE_QR)
-                startActivity(Intent(requireContext(), AuthenticationActivity::class.java))
-                requireActivity().finish()
+//                requireActivity().finish()
+//                startActivity(Intent(requireContext(), AuthenticationActivity::class.java))
             }else{
                 dialog?.dismiss()
-                Prefs.remove(PREF_GENERATE_QR)
-                startActivity(Intent(requireContext(), MainActivity::class.java))
-                requireActivity().finish()
+//                startActivity(Intent(requireContext(), MainActivity::class.java))
+//                requireActivity().finish()
             }
         }
         downloadReceipt.setOnClickListener {
@@ -170,10 +168,8 @@ class ResponseModal @Inject constructor() : DialogFragment() {
             qrViewModel.generateQrResponse, requireActivity().supportFragmentManager
         ) {
             if (qrViewModel.displayQrStatus == 0) {
-                Prefs.remove(PREF_GENERATE_QR)
                 findNavController().navigate(R.id.showQrFragment)
             } else {
-                Prefs.remove(PREF_GENERATE_QR)
                 findNavController().navigate(R.id.displayQrFragment2)
             }
         }

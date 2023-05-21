@@ -369,7 +369,8 @@ class GenerateQrFragment : Fragment() {
                     val action =
                         GenerateQrFragmentDirections.actionGenerateQrFragmentToWebViewFragment()
                     findNavController().navigate(action)
-                } else {
+                }
+                else {
                     findNavController().popBackStack()
                 }
             }
