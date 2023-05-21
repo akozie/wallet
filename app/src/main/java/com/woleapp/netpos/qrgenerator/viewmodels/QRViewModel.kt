@@ -13,6 +13,7 @@ import com.woleapp.netpos.qrgenerator.model.*
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutResponse
 import com.woleapp.netpos.qrgenerator.model.pay.PayResponse
+import com.woleapp.netpos.qrgenerator.model.pay.PayResponseErrorModel
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
 import com.woleapp.netpos.qrgenerator.model.verve.PostQrToServerVerveResponseModel
 import com.woleapp.netpos.qrgenerator.model.verve.SendOtpForVerveCardModel
@@ -288,7 +289,6 @@ class QRViewModel @Inject constructor(
             })
     }
 
-
     fun getEachTransaction(qrCodeID: String) {
         _transactionResponse.postValue(Resource.loading(null))
         disposable.add(qrRepository.getAllTransaction(qrCodeID).subscribeOn(Schedulers.io())
@@ -314,17 +314,99 @@ class QRViewModel @Inject constructor(
             })
     }
 
+//    fun payQrCharges(
+//        checkOutModel: CheckOutModel, qrModelRequest: QrModelRequest, pin: String = ""
+//    ) {
+//        if (_isVerveCard.value == true){
+//            _payVerveResponse.postValue(Resource.loading(null))
+//        }else{
+//            _payResponse.postValue(Resource.loading(null))
+//        }
+//        disposable.add(qrRepository.checkOut(checkOutModel).flatMap {
+//            saveTransIDAndAmountResponse(
+//                CheckOutResponse(
+//                    it.amount,
+//                    it.customerId,
+//                    it.domain,
+//                    it.merchantId,
+//                    it.status,
+//                    it.transId
+//                )
+//            )
+//            val clientDataString =
+//                if (qrModelRequest.card_scheme.contains(
+//                        "verve",
+//                        true
+//                    )
+//                ) createClientDataForVerveCard(
+//                    qrModelRequest,
+//                    pin,
+//                    it.transId
+//                )
+//                else createClientDataForNonVerveCard(
+//                    it.transId,
+//                    qrModelRequest.card_number,
+//                    qrModelRequest.card_expiry,
+//                    qrModelRequest.card_cvv
+//                )
+//            val clientData = stringToBase64(clientDataString)
+//            val newClientData = clientData.replace("\n", "")
+//            qrRepository.pay(newClientData)
+//        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+//            .subscribe { data, error ->
+//                data?.let {
+//                    if (it.has("TermUrl")) {
+//                        val masterVisaResponse = gson.fromJson(it, PayResponse::class.java)
+//                        _payResponse.postValue(Resource.success(masterVisaResponse))
+//                    } else {
+//                        val verveResponse =
+//                            gson.fromJson(it, PostQrToServerVerveResponseModel::class.java)
+//                        _payVerveResponse.postValue(Resource.success(verveResponse))
+//                    }
+//                } ?: run {
+//                    if (_isVerveCard.value == true){
+//                        _payVerveResponse.postValue(Resource.error(null))
+//                    }else{
+//                        _payResponse.postValue(Resource.error(null))
+//                    }
+//                }
+//                error?.let {
+//                    if (_isVerveCard.value == true) {
+//                        _payVerveResponse.postValue(Resource.error(null))
+//                        (it as? HttpException).let { httpException ->
+//                            val errorMessage = httpException?.response()?.errorBody()?.string()
+//                                ?: "{\"message\":\"Unexpected error\"}"
+//                            _payMessage.value = Event(
+//                                try {
+//                                    Gson().fromJson(errorMessage, PayResponseErrorModel::class.java).result
+//                                } catch (e: Exception) {
+//                                    "Gateway Time-out"
+//                                }
+//                            )
+//                        }
+//                    } else {
+//                        _payResponse.postValue(Resource.error(null))
+//                        (it as? HttpException).let { httpException ->
+//                            val errorMessage = httpException?.response()?.errorBody()?.string()
+//                                ?: "{\"message\":\"Unexpected error\"}"
+//                            _payMessage.value = Event(
+//                                try {
+//                                    Gson().fromJson(errorMessage, PayResponseErrorModel::class.java).result
+//                                } catch (e: Exception) {
+//                                    "Gateway Time-out"
+//                                }
+//                            )
+//                        }
+//                    }
+//                }
+//            })
+//    }
 
     fun payQrCharges(
         checkOutModel: CheckOutModel, qrModelRequest: QrModelRequest, pin: String = ""
     ) {
-        if (_isVerveCard.value == true){
-            Log.d("VERVE", "VERVERESULT")
-            _payVerveResponse.postValue(Resource.loading(null))
-        }else{
-            Log.d("MASTERCARD", "MASTERCARDRESULT")
+
             _payResponse.postValue(Resource.loading(null))
-        }
         disposable.add(qrRepository.checkOut(checkOutModel).flatMap {
             saveTransIDAndAmountResponse(
                 CheckOutResponse(
@@ -361,52 +443,91 @@ class QRViewModel @Inject constructor(
                     if (it.has("TermUrl")) {
                         val masterVisaResponse = gson.fromJson(it, PayResponse::class.java)
                         _payResponse.postValue(Resource.success(masterVisaResponse))
-                    } else {
-                        val verveResponse =
-                            gson.fromJson(it, PostQrToServerVerveResponseModel::class.java)
-                        _payVerveResponse.postValue(Resource.success(verveResponse))
-                    }
-                } ?: run {
-                    if (_isVerveCard.value == true){
-                        _payVerveResponse.postValue(Resource.error(null))
-                    }else{
-                        _payResponse.postValue(Resource.error(null))
+                        val failedResponse = gson.fromJson(it, PayResponseErrorModel::class.java)
+                        if (failedResponse.code == "90"){
+                            _payMessage.value = Event(
+                                Resource.success(failedResponse).data!!.result
+                            )
+                        }
                     }
                 }
                 error?.let {
-                    if (_isVerveCard.value == true) {
-                        _payVerveResponse.postValue(Resource.error(null))
-                        (it as? HttpException).let { httpException ->
-                            val errorMessage = httpException?.response()?.errorBody()?.string()
-                                ?: "{\"message\":\"Unexpected error\"}"
-                            _payMessage.value = Event(
-                                try {
-                                    Gson().fromJson(
-                                        errorMessage,
-                                        ErrorModel::class.java
-                                    ).message
-                                } catch (e: Exception) {
-                                    "Error"
-                                }
-                            )
-                        }
-                    } else {
                         _payResponse.postValue(Resource.error(null))
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _payMessage.value = Event(
                                 try {
-                                    Gson().fromJson(
-                                        errorMessage,
-                                        ErrorModel::class.java
-                                    ).message
+                                    Gson().fromJson(errorMessage, PayResponseErrorModel::class.java).result
                                 } catch (e: Exception) {
-                                    "Error"
+                                    "Gateway Time-out"
                                 }
                             )
                         }
+                }
+            })
+    }
+
+    fun payQrChargesForVerve(
+        checkOutModel: CheckOutModel, qrModelRequest: QrModelRequest, pin: String = ""
+    ) {
+            _payVerveResponse.postValue(Resource.loading(null))
+        disposable.add(qrRepository.checkOut(checkOutModel).flatMap {
+            saveTransIDAndAmountResponse(
+                CheckOutResponse(
+                    it.amount,
+                    it.customerId,
+                    it.domain,
+                    it.merchantId,
+                    it.status,
+                    it.transId
+                )
+            )
+            val clientDataString =
+                if (qrModelRequest.card_scheme.contains(
+                        "verve",
+                        true
+                    )
+                ) createClientDataForVerveCard(
+                    qrModelRequest,
+                    pin,
+                    it.transId
+                )
+                else createClientDataForNonVerveCard(
+                    it.transId,
+                    qrModelRequest.card_number,
+                    qrModelRequest.card_expiry,
+                    qrModelRequest.card_cvv
+                )
+            val clientData = stringToBase64(clientDataString)
+            val newClientData = clientData.replace("\n", "")
+            qrRepository.pay(newClientData)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribe { data, error ->
+                data?.let {
+                        val verveResponse =
+                            gson.fromJson(it, PostQrToServerVerveResponseModel::class.java)
+                        _payVerveResponse.postValue(Resource.success(verveResponse))
+                    val failedResponse = gson.fromJson(it, PayResponseErrorModel::class.java)
+                    if (failedResponse.code == "90"){
+                        _payMessage.value = Event(
+                            Resource.success(failedResponse).data!!.result
+                        )
                     }
+                }
+                error?.let {
+                        _payVerveResponse.postValue(Resource.error(null))
+                        (it as? HttpException).let { httpException ->
+                            val errorMessage = httpException?.response()?.errorBody()?.string()
+                                ?: "{\"message\":\"Unexpected error\"}"
+                            _payMessage.value = Event(
+                                try {
+                                    Gson().fromJson(errorMessage, PayResponseErrorModel::class.java).result
+                                } catch (e: Exception) {
+                                    "Gateway Time-out"
+                                }
+                            )
+                        }
                 }
             })
     }

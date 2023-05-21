@@ -82,25 +82,24 @@ class GenerateQrFragment : Fragment() {
                 val checkOutModel = getCheckOutModel()
                 val qrModelRequest = getQrRequestModel()
                 qrViewModel.displayQrStatus = 0
-                qrViewModel.payQrCharges(checkOutModel, qrModelRequest, it)
+                qrViewModel.payQrChargesForVerve(checkOutModel, qrModelRequest, it)
                 val userDetails = Gson().toJson(getQrRequestModel())
                 val encodeUserDetails = stringToBase64(userDetails)
-                observeServerResponse(
+                observeServerResponseOnce(
                     qrViewModel.payVerveResponse,
                     loader,
                     requireActivity().supportFragmentManager
                 ) {
-                    Log.d("VERVERESP", "RESPONSEOBJECT")
                     if (qrViewModel.payVerveResponse.value?.data?.code == "90") {
-                        showToast(qrViewModel.payVerveResponse.value?.data?.result.toString())
+                     //   showToast(qrViewModel.payVerveResponse.value?.data?.result.toString())
                     } else {
                         Prefs.putString(PREF_GENERATE_QR, userDetails)
-                        val action = GenerateQrFragmentDirections.actionGenerateQrFragmentToEnterOtpFragment()
-                                    findNavController().navigate(action)
-//                        parentFragmentManager.beginTransaction()
-//                            .replace(R.id.fragmentContainerView, EnterOtpFragment())
-//                            .addToBackStack(null)
-//                            .commit()
+                        if (findNavController().currentDestination?.id == R.id.generateQrFragment){
+                            val action = GenerateQrFragmentDirections.actionGenerateQrFragmentToEnterOtpFragment()
+                            findNavController().navigate(action)
+                        }else{
+                            findNavController().navigate(R.id.enterOtpFragment)
+                        }
                     }
                 }
             }
@@ -131,6 +130,11 @@ class GenerateQrFragment : Fragment() {
             }
         }
         qrViewModel.registerMessage.observe(viewLifecycleOwner) {
+            it.getContentIfNotHandled()?.let { message ->
+                showToast(message)
+            }
+        }
+        qrViewModel.payMessage.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
                 showToast(message)
             }
@@ -350,8 +354,12 @@ class GenerateQrFragment : Fragment() {
         val qrRequest = getQrRequestModel()
         if (qrRequest.card_scheme.contains("verve", true)) {
             qrViewModel.setIsVerveCard(true)
-            val action = GenerateQrFragmentDirections.actionGenerateQrFragmentToQrPasswordPinBlockDialog()
-            findNavController().navigate(action)
+            if (findNavController().currentDestination?.id == R.id.generateQrFragment){
+                val action = GenerateQrFragmentDirections.actionGenerateQrFragmentToQrPasswordPinBlockDialog()
+                findNavController().navigate(action)
+            }else{
+                findNavController().popBackStack()
+            }
         } else {
             qrViewModel.setIsVerveCard(false)
             qrViewModel.displayQrStatus = 0
@@ -363,8 +371,9 @@ class GenerateQrFragment : Fragment() {
             requireActivity().supportFragmentManager
         ) {
             if (qrViewModel.payResponse.value?.data?.code == "90") {
-                showToast(qrViewModel.payResponse.value?.data?.result.toString())
+                //  showToast(generateQrViewModel.payResponse.value?.data?.result.toString())
             } else {
+                Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
                 if (findNavController().currentDestination?.id == R.id.generateQrFragment) {
                     val action =
                         GenerateQrFragmentDirections.actionGenerateQrFragmentToWebViewFragment()

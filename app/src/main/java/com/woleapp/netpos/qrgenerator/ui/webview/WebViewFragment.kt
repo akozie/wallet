@@ -35,7 +35,6 @@ class WebViewFragment : Fragment() {
     lateinit var customWebViewClient: WebViewCallBack
 
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -62,6 +61,7 @@ class WebViewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         webView = binding.webView
+
         qrViewModel.payResponse.observe(viewLifecycleOwner) { response ->
             Log.d("NEWRESULT", response.data.toString())
             response.data?.let {
@@ -73,11 +73,7 @@ class WebViewFragment : Fragment() {
                     it.ACSUrl,
                     it.transId,
                     it.redirectHtml
-                ){
-                    requireActivity().runOnUiThread {
-                        findNavController().popBackStack()
-                    }
-                }
+                )
             }
             setUpWebView(webView)
         }

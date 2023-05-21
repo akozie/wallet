@@ -21,8 +21,7 @@ class JavaScriptInterface(
     private val cReq: String,
     private val acsUrl: String,
     private val transId: String,
-    private val redirectHtml: String,
-    private val popBackStackCallBack: ()-> Unit
+    private val redirectHtml: String
 ) {
     private val context = fragmentManager.fragments.first().requireContext()
     private val loader = RandomUtils.alertDialog(context, R.layout.layout_loading_dialog)
@@ -35,7 +34,6 @@ class JavaScriptInterface(
 
     @JavascriptInterface
     fun webViewCallback(webViewResponse: String) {
-        Log.d("CALLBACK", webViewResponse)
       val responseFromWebView = Gson().fromJson(
             webViewResponse,
             QrTransactionResponseModel::class.java
@@ -44,7 +42,8 @@ class JavaScriptInterface(
             webViewResponse,
             QrTransactionResponseModel::class.java
         )
-        if (responseFromWebView.code == "00" || responseFromWebView.code == "90"|| responseFromWebView.code == "80"){
+
+        if (responseFromWebView.code == "00" || responseFromWebView.code == "90" || responseFromWebView.code == "80"){
             if (loader.isShowing){
                 fragmentManager.fragments.first().requireActivity().runOnUiThread {
                     loader.dismiss()
@@ -54,7 +53,7 @@ class JavaScriptInterface(
                 QR_TRANSACTION_RESULT_REQUEST_KEY,
                 bundleOf(QR_TRANSACTION_RESULT_BUNDLE_KEY to responseFromWebView)
             )
-            popBackStackCallBack.invoke()
+            fragmentManager.popBackStack()
             val responseModal = ResponseModal()
             responseModal.show(fragmentManager, STRING_QR_RESPONSE_MODAL_DIALOG_TAG)
         }else{
