@@ -91,7 +91,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
             .setView(enterOTPBinding.root)
             .setCancelable(false)
             .create()
-        fetchWallet()
+        //fetchWallet()
 
         enterOTPBinding.proceed.setOnClickListener {
             otp = enterOTPBinding.otpEdittext.text?.trim().toString()

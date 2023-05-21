@@ -12,6 +12,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentWebViewBinding
 import com.woleapp.netpos.qrgenerator.di.customDependencies.JavaScriptInterface
@@ -61,22 +62,25 @@ class WebViewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         webView = binding.webView
-        qrViewModel.payResponse.observe(viewLifecycleOwner) { response ->
-            Log.d("NEWRESULT", response.data.toString())
-            response.data?.let {
-                javaScriptInterface = JavaScriptInterface(
-                    parentFragmentManager,
-                    it.TermUrl,
-                    it.MD,
-                    it.PaReq,
-                    it.ACSUrl,
-                    it.transId,
-                    it.redirectHtml
-                )
+//        if (qrViewModel.payResponse.value == null) {
+//            findNavController().popBackStack()
+//        }else{
+            qrViewModel.payResponse.observe(viewLifecycleOwner) { response ->
+                Log.d("NEWRESULT", response.data.toString())
+                response.data?.let {
+                    javaScriptInterface = JavaScriptInterface(
+                        parentFragmentManager,
+                        it.TermUrl,
+                        it.MD,
+                        it.PaReq,
+                        it.ACSUrl,
+                        it.transId,
+                        it.redirectHtml
+                    )
+                }
+                setUpWebView(webView)
             }
-            setUpWebView(webView)
-        }
-
+    //    }
     }
 
     private fun setUpWebView(webView: WebView) {

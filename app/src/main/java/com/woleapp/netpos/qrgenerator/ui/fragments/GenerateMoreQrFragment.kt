@@ -78,20 +78,24 @@ class GenerateMoreQrFragment : Fragment() {
             data?.let {
                 val checkOutModel = getCheckOutModel()
                 val qrModelRequest = getQrRequestModel()
-                generateQrViewModel.displayQrStatus = 0
+                generateQrViewModel.displayQrStatus = 1
                 generateQrViewModel.payQrCharges(checkOutModel, qrModelRequest, it)
-                observeServerResponse(
+                observeServerResponseOnce(
                     generateQrViewModel.payVerveResponse,
                     loader,
                     requireActivity().supportFragmentManager
                 ) {
                     if (generateQrViewModel.payVerveResponse.value?.data?.code == "90") {
-                        showToast(generateQrViewModel.payVerveResponse.value?.data?.result.toString())
+                  //      showToast(generateQrViewModel.payVerveResponse.value?.data?.result.toString())
                     } else {
                         Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
-                        val action =
-                            GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToEnterOtpFragment2()
-                        findNavController().navigate(action)
+                        if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment){
+                            val action =
+                                GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToEnterOtpFragment2()
+                            findNavController().navigate(action)
+                        }else{
+                            findNavController().navigate(R.id.enterOtpFragment2)
+                        }
 //                        parentFragmentManager.beginTransaction()
 //                            .replace(R.id.fragmentContainerView, EnterOtpFragment())
 //                            .addToBackStack(null)
@@ -126,6 +130,11 @@ class GenerateMoreQrFragment : Fragment() {
                 showToast(message)
             }
         }
+        generateQrViewModel.payMessage.observe(viewLifecycleOwner) {
+            it.getContentIfNotHandled()?.let { message ->
+                showToast(message)
+            }
+        }
         initViews()
         generateQrViewModel.cardSchemeResponse.observe(viewLifecycleOwner) {
             val cardSchemeAdapter = CardSchemeAdapter(
@@ -151,7 +160,12 @@ class GenerateMoreQrFragment : Fragment() {
 
 
         submitBtn.setOnClickListener {
+            if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment){
+                clearLiveData()
             generateQr()
+            }else{
+                findNavController().popBackStack()
+            }
         }
 
         cardExpiryDate.addTextChangedListener(object : TextWatcher {
@@ -345,18 +359,24 @@ class GenerateMoreQrFragment : Fragment() {
         val checkOutModel = getCheckOutModel()
         val qrRequest = getQrRequestModel()
         if (qrRequest.card_scheme.contains("verve", true)) {
-            val action = GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToQrPasswordPinBlockDialog2()
-            findNavController().navigate(action)
+            generateQrViewModel.setIsVerveCard(true)
+            if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment){
+                val action = GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToQrPasswordPinBlockDialog2()
+                findNavController().navigate(action)
+            }else{
+                findNavController().popBackStack()
+            }
         } else {
+            generateQrViewModel.setIsVerveCard(false)
             generateQrViewModel.displayQrStatus = 1
             generateQrViewModel.payQrCharges(checkOutModel, qrRequest)
-            observeServerResponseOnce(
+            observeServerResponse(
                 generateQrViewModel.payResponse,
                 loader,
                 requireActivity().supportFragmentManager
             ) {
                 if (generateQrViewModel.payResponse.value?.data?.code == "90") {
-                    showToast(generateQrViewModel.payResponse.value?.data?.result.toString())
+                  //  showToast(generateQrViewModel.payResponse.value?.data?.result.toString())
                 } else {
                     Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
                     if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment) {
@@ -368,8 +388,6 @@ class GenerateMoreQrFragment : Fragment() {
                     }
                 }
             }
-
-
         }
     }
 
@@ -423,6 +441,12 @@ class GenerateMoreQrFragment : Fragment() {
         ) {
             receiptPdf = createPdf(view, this)
         }
+    }
+
+    private fun clearLiveData(){
+        generateQrViewModel.payVerveResponse.removeObservers(viewLifecycleOwner)
+    //    generateQrViewModel.payResponse.removeObservers(viewLifecycleOwner)
+        generateQrViewModel.transactionResponseFromVerve.removeObservers(viewLifecycleOwner)
     }
 
 }

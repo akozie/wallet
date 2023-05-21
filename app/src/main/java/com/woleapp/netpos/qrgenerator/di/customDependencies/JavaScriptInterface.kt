@@ -31,7 +31,6 @@ class JavaScriptInterface(
 
     @JavascriptInterface
     fun webViewCallback(webViewResponse: String) {
-        Log.d("CALLBACK", webViewResponse)
       val responseFromWebView = Gson().fromJson(
             webViewResponse,
             QrTransactionResponseModel::class.java
@@ -40,36 +39,24 @@ class JavaScriptInterface(
             webViewResponse,
             QrTransactionResponseModel::class.java
         )
-        Log.d("BEFORE", "BEROFRE00")
-        if (responseFromWebView.code == "00" || responseFromWebView.code == "90"){
-            Log.d("BEFORELOAD", "BEROFRELOADER00")
+        if (responseFromWebView.code == "00" || responseFromWebView.code == "90" || responseFromWebView.code == "80"){
             if (loader.isShowing){
-                Log.d("BEFOREDISMISS", "BEROFREDISMISS00")
                 fragmentManager.fragments.first().requireActivity().runOnUiThread {
                     loader.dismiss()
                 }
 
-              //  loader.dismiss()
-                Log.d("AFTER", "AFTERLOADER")
             }
             fragmentManager.setFragmentResult(
                 QR_TRANSACTION_RESULT_REQUEST_KEY,
                 bundleOf(QR_TRANSACTION_RESULT_BUNDLE_KEY to responseFromWebView)
             )
-            Log.d("POPBACKBEFORE", "POPBACKBEFORE")
             fragmentManager.popBackStack()
-            Log.d("POPBACKAFTER", "POPBACKAFTER00")
             val responseModal = ResponseModal()
-            Log.d("RESPONSEBEFORE", "RESPONSEBEFORE11")
             responseModal.show(fragmentManager, STRING_QR_RESPONSE_MODAL_DIALOG_TAG)
-            Log.d("RESPONSEAFTER", "RESPONSEAFTER00")
         }else{
-            Log.d("SHOWBEFORE", "SHOWLOADER")
-         //   loader.show()
             fragmentManager.fragments.first().requireActivity().runOnUiThread {
                 loader.show()
             }
-            Log.d("SHOWAFTER", "SHOWAFTERLOADER")
         }
     }
 }

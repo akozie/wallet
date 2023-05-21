@@ -13,6 +13,7 @@ import com.woleapp.netpos.qrgenerator.model.*
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutResponse
 import com.woleapp.netpos.qrgenerator.model.pay.PayResponse
+import com.woleapp.netpos.qrgenerator.model.pay.PayResponseErrorModel
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
 import com.woleapp.netpos.qrgenerator.model.verve.PostQrToServerVerveResponseModel
 import com.woleapp.netpos.qrgenerator.model.verve.SendOtpForVerveCardModel
@@ -289,7 +290,6 @@ class QRViewModel @Inject constructor(
             })
     }
 
-
     fun getEachTransaction(qrCodeID: String) {
         _transactionResponse.postValue(Resource.loading(null))
         disposable.add(qrRepository.getAllTransaction(qrCodeID).subscribeOn(Schedulers.io())
@@ -315,12 +315,14 @@ class QRViewModel @Inject constructor(
             })
     }
 
-
     fun payQrCharges(
         checkOutModel: CheckOutModel, qrModelRequest: QrModelRequest, pin: String = ""
     ) {
-        _payVerveResponse.postValue(Resource.loading(null))
-        _payResponse.postValue(Resource.loading(null))
+        if (_isVerveCard.value == true){
+            _payVerveResponse.postValue(Resource.loading(null))
+        }else{
+            _payResponse.postValue(Resource.loading(null))
+        }
         disposable.add(qrRepository.checkOut(checkOutModel).flatMap {
             saveTransIDAndAmountResponse(CheckOutResponse(
                 it.amount,
@@ -364,9 +366,9 @@ class QRViewModel @Inject constructor(
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _payMessage.value = Event(
                                 try {
-                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
+                                    Gson().fromJson(errorMessage, PayResponseErrorModel::class.java).result
                                 } catch (e: Exception) {
-                                    "Error"
+                                    "Gateway Time-out"
                                 }
                             )
                         }
@@ -377,9 +379,9 @@ class QRViewModel @Inject constructor(
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _payMessage.value = Event(
                                 try {
-                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
+                                    Gson().fromJson(errorMessage, PayResponseErrorModel::class.java).result
                                 } catch (e: Exception) {
-                                    "Error"
+                                    "Gateway Time-out"
                                 }
                             )
                         }
