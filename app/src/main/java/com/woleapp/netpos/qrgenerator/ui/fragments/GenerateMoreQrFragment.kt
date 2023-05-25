@@ -446,10 +446,4 @@ class GenerateMoreQrFragment : Fragment() {
         }
     }
 
-    private fun clearLiveData(){
-        generateQrViewModel.payVerveResponse.removeObservers(viewLifecycleOwner)
-    //    generateQrViewModel.payResponse.removeObservers(viewLifecycleOwner)
-        generateQrViewModel.transactionResponseFromVerve.removeObservers(viewLifecycleOwner)
-    }
-
 }

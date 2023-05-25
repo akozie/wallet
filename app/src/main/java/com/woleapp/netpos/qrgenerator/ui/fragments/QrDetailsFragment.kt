@@ -64,13 +64,16 @@ class QrDetailsFragment : Fragment() {
         }
         if (qrDetailsDataList.isEmpty()) {
             binding.noTransaction.visibility = View.VISIBLE
+            qrDetailRecyclerview.visibility = View.GONE
         } else {
+            binding.noTransaction.visibility = View.GONE
+            qrDetailRecyclerview.visibility = View.VISIBLE
             qrDetailAdapter = QrDetailsAdapter(qrDetailsDataList)
             qrDetailRecyclerview.adapter = qrDetailAdapter
             qrDetailRecyclerview.layoutManager =
                 LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
 
         }
-
+        qrViewModel.transactionResponse.removeObservers(viewLifecycleOwner)
     }
 }

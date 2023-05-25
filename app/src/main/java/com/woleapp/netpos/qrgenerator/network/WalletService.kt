@@ -45,7 +45,17 @@ interface WalletService {
     @GET("transactions/getSecurityQuestions")
     fun getSecurityQuestions(
         @Header("Authorization") token: String
-    ): Single<GetSecurityQuestionResponse>
+    ): Single<List<GetSecurityQuestionResponseItem>>
 
+    @POST("transactions/PinOtpVerification")
+    fun getOtpVerificationToUpdatePin(
+        @Header("Authorization") token: String
+    ): Single<OtpVerificationToUpdatePinResponse>
+
+    @POST("transactions/updateTransactionPin")
+    fun updateTransactionPin(
+        @Header("Authorization") token: String,
+        @Body updateTransactionPinRequest: UpdateTransactionPinRequest
+    ): Single<GeneralWalletResponse>
 
 }

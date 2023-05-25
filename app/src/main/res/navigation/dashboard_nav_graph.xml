@@ -36,6 +36,9 @@
         <action
             android:id="@+id/action_transactionsFragment_to_myTallyFragment"
             app:destination="@id/myTallyFragment" />
+        <action
+            android:id="@+id/action_transactionsFragment_to_transferFragment"
+            app:destination="@id/transferFragment" />
     </fragment>
     <fragment
         android:id="@+id/transactionHistoryFragment"
@@ -192,4 +195,16 @@
         android:id="@+id/qrPasswordPinBlockDialog2"
         android:name="com.woleapp.netpos.qrgenerator.ui.dialog.QrPasswordPinBlockDialog"
         android:label="QrPasswordPinBlockDialog" />
+    <fragment
+        android:id="@+id/transferFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.TransferFragment"
+        android:label="fragment_transfer"
+        tools:layout="@layout/fragment_transfer" >
+        <action
+            android:id="@+id/action_transferFragment_to_sendWithTallyQrFragment"
+            app:destination="@id/sendWithTallyQrFragment" />
+        <action
+            android:id="@+id/action_transferFragment_to_sendWithTallyNumberFragment"
+            app:destination="@id/sendWithTallyNumberFragment" />
+    </fragment>
 </navigation>

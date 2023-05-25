@@ -64,7 +64,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
        // dummyList()
         getUserTransactions(5)
         // loader = binding.myTallyProgressbar
-        Singletons().getTallyWalletBalance()?.balance?.let {
+        Singletons().getTallyWalletBalance()?.available_balance?.let {
             tallyWalletBalance = it
         }
 
@@ -76,6 +76,10 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
         binding.displayMyQr.setOnClickListener {
             val action =
                 TransactionsFragmentDirections.actionTransactionsFragmentToDisplayWalletQrFragment()
+            findNavController().navigate(action)
+        }
+        binding.transferButton.setOnClickListener {
+            val action = TransactionsFragmentDirections.actionTransactionsFragmentToTransferFragment()
             findNavController().navigate(action)
         }
 
@@ -91,10 +95,14 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
             .setView(enterOTPBinding.root)
             .setCancelable(false)
             .create()
-        //fetchWallet()
+        fetchWallet()
 
         enterOTPBinding.proceed.setOnClickListener {
             otp = enterOTPBinding.otpEdittext.text?.trim().toString()
+            if (otp.isEmpty()){
+                showToast("Please enter OTP")
+                return@setOnClickListener
+            }
             verifyWalletOTP(token, otp)
         }
     }
@@ -124,10 +132,10 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
             requireActivity().supportFragmentManager
         ) {
             walletViewModel.fetchWalletResponse.value?.let {
-                if (it.data?.balance == null) {
+                if (it.data?.available_balance == null) {
                     enterOTPDialog.show()
                 } else {
-                    binding.walletBalance.text = it.data.balance.formatCurrency()
+                    binding.walletBalance.text = it.data.available_balance.formatCurrency()
                     binding.walletNumber.text = it.data.phone_no
                 }
             }

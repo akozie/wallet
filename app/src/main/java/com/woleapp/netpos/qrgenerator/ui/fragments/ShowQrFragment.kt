@@ -168,7 +168,7 @@ class ShowQrFragment : Fragment() {
             e.printStackTrace()
         }
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-        Toast.makeText(requireContext(), "Successfuly Saved", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "File successfully Saved", Toast.LENGTH_SHORT).show()
         try {
             outputStream.flush()
         } catch (e: IOException) {

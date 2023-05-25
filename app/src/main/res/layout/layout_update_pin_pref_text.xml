@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
 
@@ -16,7 +16,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:text="Set PIN"
+            android:text="Update PIN"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/guideline2"
@@ -25,39 +25,26 @@
             app:layout_constraintTop_toTopOf="parent" />
 
 
-
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.2" />
+            app:layout_constraintGuide_percent="0.15" />
+
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/fragment_security_questions"
-            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            android:id="@+id/security_questions_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible"
-            app:hintEnabled="true"
-            android:layout_marginTop="20dp"
-            android:hint="Select security questions"
-            android:textColorHint="@color/black"
-            app:boxStrokeWidth="@dimen/margin_0dp"
-            app:boxStrokeColor="@color/white"
-            app:endIconDrawable="@drawable/ic_arrow_down_24"
-            app:endIconTint="@color/black"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/guideline2">
+            android:hint="Select security question"
+            android:layout_marginTop="@dimen/margin_10dp"
+            app:layout_constraintTop_toBottomOf="@id/guideline2">
 
-            <AutoCompleteTextView
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/security_questions"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:inputType="none"
-                android:focusable="false"
-                app:backgroundTint="@color/white" />
+                android:layout_height="match_parent" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -66,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter your answer"
-            app:layout_constraintTop_toBottomOf="@id/fragment_security_questions">
+            app:layout_constraintTop_toBottomOf="@id/security_questions_layout">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/security_answers"
@@ -75,57 +62,72 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/password_wrapper"
+            android:id="@+id/transaction_otp_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter your OTP"
+            app:layout_constraintTop_toBottomOf="@id/security_answers_layout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/transaction_otp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/transaction_pin_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="PIN"
             app:passwordToggleEnabled="true"
-            app:layout_constraintTop_toBottomOf="@id/security_answers_layout">
+            app:layout_constraintTop_toBottomOf="@id/transaction_otp_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/reprint_password_edittext"
+                android:id="@+id/transaction_pin_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:inputType="numberPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/confirm_password_wrapper"
+            android:id="@+id/confirm_pin_wrapper"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Confirm PIN"
             app:passwordToggleEnabled="true"
-            app:layout_constraintTop_toBottomOf="@id/password_wrapper">
+            app:layout_constraintTop_toBottomOf="@id/transaction_pin_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/confirm_reprint_password_edittext"
+                android:id="@+id/confirm_pin_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:inputType="numberPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/save"
+            android:id="@+id/pin_update_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_10dp"
             android:background="@color/orange"
-            android:text="Save"
+            android:text="Update PIN"
             android:textColor="@color/white"
             app:cornerRadius="@dimen/margin_10dp"
             app:layout_constraintBottom_toTopOf="@+id/guideline4"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/confirm_password_wrapper" />
+            app:layout_constraintTop_toBottomOf="@id/confirm_pin_wrapper" />
+
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.8" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintGuide_percent="0.9" />
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

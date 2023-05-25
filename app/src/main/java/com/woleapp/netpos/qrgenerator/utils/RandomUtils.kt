@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
@@ -36,6 +37,35 @@ import java.text.DecimalFormat
 import java.util.*
 
 object RandomUtils {
+
+    fun <T> observeServerResponseActivity(
+        context: Context,
+        lifecycle: LifecycleOwner,
+        serverResponse: LiveData<Resource<T>>,
+        loadingDialog: AlertDialog,
+        fragmentManager: FragmentManager,
+        successAction: () -> Unit,
+    ) {
+        serverResponse.observe(lifecycle) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    loadingDialog.dismiss()
+                        successAction()
+                }
+                Status.LOADING -> {
+                    loadingDialog.show()
+                }
+                Status.ERROR -> {
+                    loadingDialog.dismiss()
+                    Toast.makeText(context, R.string.an_error_occurred, Toast.LENGTH_SHORT).show()
+                }
+                Status.TIMEOUT -> {
+                    loadingDialog.dismiss()
+                    Toast.makeText(context, R.string.timeOut, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     fun <T> Fragment.observeServerResponse(
         serverResponse: Single<Resource<T>>,

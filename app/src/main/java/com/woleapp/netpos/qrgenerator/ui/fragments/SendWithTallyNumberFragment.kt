@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.adapter.FrequentBeneficiariesAdapter
@@ -41,9 +42,8 @@ class SendWithTallyNumberFragment : Fragment() {
     private lateinit var frequentBeneficiariesList: ArrayList<FrequentBeneficiariesModel>
     private val walletViewModel by activityViewModels<WalletViewModel>()
     private lateinit var loader: AlertDialog
-    private var modalData: ModalData? = null
-    private lateinit var enterOTPDialog: AlertDialog
-    private lateinit var enterOTPBinding: LayoutEnterOtpBinding
+   // private lateinit var enterOTPDialog: AlertDialog
+  //  private lateinit var enterOTPBinding: LayoutEnterOtpBinding
     private lateinit var transactionStatusDialog: AlertDialog
     private lateinit var transactionStatusBinding: SuccessLayoutBinding
 
@@ -70,18 +70,18 @@ class SendWithTallyNumberFragment : Fragment() {
             false
         )
 
-        enterOTPBinding = LayoutEnterOtpBinding.inflate(
-            LayoutInflater.from(requireContext()),
-            null,
-            false
-        ).apply {
-            lifecycleOwner = this@SendWithTallyNumberFragment
-            executePendingBindings()
-        }
-        enterOTPDialog = AlertDialog.Builder(requireContext())
-            .setView(enterOTPBinding.root)
-            .setCancelable(true)
-            .create()
+//        enterOTPBinding = LayoutEnterOtpBinding.inflate(
+//            LayoutInflater.from(requireContext()),
+//            null,
+//            false
+//        ).apply {
+//            lifecycleOwner = this@SendWithTallyNumberFragment
+//            executePendingBindings()
+//        }
+//        enterOTPDialog = AlertDialog.Builder(requireContext())
+//            .setView(enterOTPBinding.root)
+//            .setCancelable(true)
+//            .create()
 
         transactionStatusBinding = SuccessLayoutBinding.inflate(
             LayoutInflater.from(requireContext()),
@@ -104,37 +104,33 @@ class SendWithTallyNumberFragment : Fragment() {
         loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
         beneficiariesList()
         qrSetUp()
-        initViews()
+        //initViews()
         binding.btnProcessWalletTransfer.setOnClickListener {
             sendWithTallyNumber()
         }
 
-        Singletons().getTallyWalletBalance()?.balance?.let {
+        Singletons().getTallyWalletBalance()?.available_balance?.let {
             binding.availableBalance.text = it.formatCurrency()
         }
 
-        binding.setTransactionPin.setOnClickListener {
-            enterOTPDialog.show()
-        }
-        enterOTPBinding.proceed.setOnClickListener {
-            val transactionPin = enterOTPBinding.otpEdittext.text?.trim().toString()
-            setTransactionPin(transactionPin)
-        }
+//        binding.setTransactionPin.setOnClickListener {
+//            enterOTPDialog.show()
+//        }
+//        enterOTPBinding.proceed.setOnClickListener {
+//            val transactionPin = enterOTPBinding.otpEdittext.text?.trim().toString()
+//          //  setTransactionPin(transactionPin)
+//        }
         transactionStatusBinding.home.setOnClickListener {
             transactionStatusDialog.dismiss()
         }
     }
 
-    private fun initViews() {
-        enterOTPBinding.passwordWrapper.hint = "Enter PIN"
-        enterOTPBinding.proceed.setText("SET PIN")
-        enterOTPBinding.otpEdittext.filters = arrayOf(InputFilter.LengthFilter(4))
-    }
-
-    //        private fun findNavController(): NavController? {
-//        val navHostFragment = (requireActivity() as? MainActivity)?.supportFragmentManager?.findFragmentById(R.id.fragmentContainerView) as? NavHostFragment
-//        return navHostFragment?.navController
+//    private fun initViews() {
+//        enterOTPBinding.passwordWrapper.hint = "Enter PIN"
+//        enterOTPBinding.proceed.setText("SET PIN")
+//        enterOTPBinding.otpEdittext.filters = arrayOf(InputFilter.LengthFilter(4))
 //    }
+
     private fun qrSetUp() {
         frequentBeneficiariesAdapter = FrequentBeneficiariesAdapter(frequentBeneficiariesList)
         binding.beneficiariesRecyclerview.layoutManager =
@@ -162,30 +158,16 @@ class SendWithTallyNumberFragment : Fragment() {
             transaction_pin = binding.enterTransactionPin.text?.trim().toString()
         )
         observeServerResponse(
-            walletViewModel.sendWithTallyNumber(requireContext(),"Bearer ${Singletons().getTallyUserToken()!!}",sendWithTallyNumberRequest),
+            walletViewModel.sendWithTallyNumber("Bearer ${Singletons().getTallyUserToken()!!}",sendWithTallyNumberRequest),
             loader,
             compositeDisposable,
             ioScheduler,
             mainThreadScheduler,
         ) {
-            activity?.supportFragmentManager?.popBackStack()
+            findNavController().popBackStack()
         }
     }
 
 
-    private fun setTransactionPin(transactionPin: String) {
-        walletViewModel.setTransactionPin(transactionPin)
-        observeServerResponse(
-            walletViewModel.setPINResponse,
-            loader,
-            requireActivity().supportFragmentManager
-        ) {
-            walletViewModel.setPINResponse.value?.let {
-                if (it.data?.status == "success") {
-                    showToast(it.data.message)
-                    enterOTPDialog.dismiss()
-                }
-            }
-        }
-    }
+
 }

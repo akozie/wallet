@@ -7,8 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.woleapp.netpos.qrgenerator.R
@@ -58,6 +60,11 @@ class SendWithTallyQrResultFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        walletViewModel.fetchWalletMessage.observe(this) {
+            it.getContentIfNotHandled()?.let { message ->
+                showToast(message)
+            }
+        }
         loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
         initViews()
         val creditAmount = Singletons().getAmountAndTallyNumber()?.amount
@@ -85,17 +92,17 @@ class SendWithTallyQrResultFragment : Fragment() {
             transaction_pin = binding.pin.text?.trim().toString()
         )
         observeServerResponse(
-            walletViewModel.sendWithTallyNumber(requireContext(),"Bearer ${Singletons().getTallyUserToken()!!}",sendWithTallyNumberRequest),
+            walletViewModel.sendWithTallyNumber("Bearer ${Singletons().getTallyUserToken()!!}",sendWithTallyNumberRequest),
             loader,
             compositeDisposable,
             ioScheduler,
             mainThreadScheduler,
         ) {
-           // activity?.supportFragmentManager?.popBackStack()
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.mainActivityfragmentContainerView, MyTallyFragment())
-                .addToBackStack(null)
-                .commit()
+            findNavController().popBackStack()
+//            parentFragmentManager.beginTransaction()
+//                .replace(R.id.mainActivityfragmentContainerView, MyTallyFragment())
+//                .addToBackStack(null)
+//                .commit()
         }
     }
 }

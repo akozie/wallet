@@ -5,10 +5,8 @@ import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import com.google.gson.Gson
-import com.woleapp.netpos.qrgenerator.BuildConfig
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
-import com.woleapp.netpos.qrgenerator.ui.dialog.ResponseModal
 import com.woleapp.netpos.qrgenerator.ui.dialog.TallyWalletResponseModal
 import com.woleapp.netpos.qrgenerator.utils.*
 
@@ -38,23 +36,20 @@ class TallyWalletJavaScriptInterface(
             webViewResponse,
             QrTransactionResponseModel::class.java
         )
-        val registeredUserResponseFromWebView = Gson().fromJson(
-            webViewResponse,
-            QrTransactionResponseModel::class.java
-        )
-        if (responseFromWebView.code == "00" || responseFromWebView.code == "90"){
-            if (loader.isShowing){
-                loader.dismiss()
+        if (responseFromWebView.code == "00" || responseFromWebView.code == "90" || responseFromWebView.code == "80") {
+            if (loader.isShowing) {
+                fragmentManager.fragments.first().requireActivity().runOnUiThread {
+                    loader.dismiss()
+                }
             }
             fragmentManager.setFragmentResult(
                 TALLY_WALLET_QR_TRANSACTION_RESULT_REQUEST_KEY,
                 bundleOf(TALLY_WALLET_QR_TRANSACTION_RESULT_BUNDLE_KEY to responseFromWebView)
             )
-
             fragmentManager.popBackStack()
             val responseModal = TallyWalletResponseModal()
             responseModal.show(fragmentManager, STRING_QR_RESPONSE_MODAL_DIALOG_TAG)
-        }else{
+        } else {
             loader.show()
         }
     }

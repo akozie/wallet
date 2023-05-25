@@ -202,7 +202,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_30dp"
                 android:layout_weight="1"
-                app:layout_constraintBottom_toBottomOf="@+id/constraintLayout8"
+                android:layout_marginBottom="?actionBarSize"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/constraintLayout5"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout5">
 
@@ -233,37 +234,6 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraintLayout8"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginTop="@dimen/margin_30dp"
-                android:layout_marginBottom="?actionBarSize"
-                android:layout_weight="1"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/constraintLayout7"
-                app:layout_constraintStart_toStartOf="@+id/constraintLayout5"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayout5">
-
-
-                <TextView
-                    android:id="@+id/set_transaction_pin"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="start"
-                    android:layout_marginStart="@dimen/margin_10"
-                    android:textSize="@dimen/text_size_17sp"
-                    android:layout_marginEnd="@dimen/margin_10"
-                    android:text="Don't have or forgot your transaction pin?"
-                    android:textColor="@color/orange"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

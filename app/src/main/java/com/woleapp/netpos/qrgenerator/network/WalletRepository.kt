@@ -21,9 +21,9 @@ class WalletRepository @Inject constructor(
 
 
 
-    fun setTransactionPin(token: String, transactionPin: String) = walletService.setTransactionPin(
+    fun setTransactionPin(token: String, transactionPin: String, securityQuestion: String, securityAnswer: String) = walletService.setTransactionPin(
         token,
-        SetPINRequest(transactionPin)
+        SetPINRequest(transactionPin, securityQuestion, securityAnswer)
     )
 
     fun getUserTransactions(token: String, recordsNumber: Int) =
@@ -34,5 +34,11 @@ class WalletRepository @Inject constructor(
 
     fun getSecurityQuestions(token: String) =
         walletService.getSecurityQuestions(token)
+
+    fun getOtpVerificationToUpdatePin(token: String) =
+        walletService.getOtpVerificationToUpdatePin(token)
+
+    fun updateTransactionPin(token: String, newPin: String, otp: String, securityAnswer: String, securityQuestion: String) =
+        walletService.updateTransactionPin(token, UpdateTransactionPinRequest(newPin,otp, securityAnswer, securityQuestion))
 
 }
