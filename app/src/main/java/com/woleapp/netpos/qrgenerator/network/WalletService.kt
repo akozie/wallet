@@ -3,6 +3,7 @@ package com.woleapp.netpos.qrgenerator.network
 import com.woleapp.netpos.qrgenerator.model.wallet.*
 import com.woleapp.netpos.qrgenerator.model.wallet.request.*
 import io.reactivex.Single
+import retrofit2.Response
 import retrofit2.http.*
 
 interface WalletService {
@@ -22,7 +23,7 @@ interface WalletService {
     fun sendWithTallyNumber(
         @Header("Authorization") token: String,
         @Body sendWithTallyNumberRequest: SendWithTallyNumberRequest
-    ): Single<SendWithTallyNumberResponse>
+    ): Single<Response<SendWithTallyNumberResponse>>
 
     @POST("transactions/setTransactionPin")
     fun setTransactionPin(
@@ -40,7 +41,7 @@ interface WalletService {
     fun creditWallet(
         @Header("Authorization") token: String,
         @Body creditWalletRequest: CreditWalletRequest
-    ): Single<GeneralWalletResponse>
+    ): Single<CreditWalletCardResponse>
 
     @GET("transactions/getSecurityQuestions")
     fun getSecurityQuestions(
@@ -57,5 +58,11 @@ interface WalletService {
         @Header("Authorization") token: String,
         @Body updateTransactionPinRequest: UpdateTransactionPinRequest
     ): Single<GeneralWalletResponse>
+
+        @GET("transactions/userSecurityQuestion")
+    fun getSelectedQuestion(
+        @Header("Authorization") token: String
+    ): Single<GetSelectedQuestionResponse>
+
 
 }

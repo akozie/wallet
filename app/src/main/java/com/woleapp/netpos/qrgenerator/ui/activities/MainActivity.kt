@@ -11,9 +11,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.adapter.SecurityQuestionsAdapter
@@ -21,15 +18,11 @@ import com.woleapp.netpos.qrgenerator.databinding.ActivityMainBinding
 import com.woleapp.netpos.qrgenerator.databinding.LayoutEnterPasswordBinding
 import com.woleapp.netpos.qrgenerator.databinding.LayoutReprintPasswordPrefTextBinding
 import com.woleapp.netpos.qrgenerator.databinding.LayoutUpdatePinPrefTextBinding
-import com.woleapp.netpos.qrgenerator.model.Row
-import com.woleapp.netpos.qrgenerator.model.wallet.GetSecurityQuestionResponse
 import com.woleapp.netpos.qrgenerator.model.wallet.GetSecurityQuestionResponseItem
-import com.woleapp.netpos.qrgenerator.ui.fragments.RequestPaymentFragment
-import com.woleapp.netpos.qrgenerator.ui.fragments.SendWithTallyNumberFragment
-import com.woleapp.netpos.qrgenerator.ui.fragments.SendWithTallyQrFragment
 import com.woleapp.netpos.qrgenerator.utils.PIN_PASSWORD
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseActivity
+import com.woleapp.netpos.qrgenerator.utils.Singletons
 import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -48,6 +41,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var getSecurityQuestion: AutoCompleteTextView
     private lateinit var securityQuestionAnswer: String
     private lateinit var loader: android.app.AlertDialog
+    private var securityQuestion: Int? = 0
+    private lateinit var listOfQuestions: GetSecurityQuestionResponseItem
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_QRGenerator)
@@ -108,7 +103,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         updatePinBinding.pinUpdateButton.setOnClickListener {
-            val securityQuestion = updatePinBinding.securityQuestions.text.toString()
+            val selectedSecurityQuestion = securityQuestion
             val securityAnswer = updatePinBinding.securityAnswers.text.toString()
             val otp = updatePinBinding.transactionOtp.text.toString()
             val newPin = updatePinBinding.transactionPinEdittext.text.toString()
@@ -135,13 +130,16 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "PIN do not match", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            updateTransactionPin(newPin, otp, securityAnswer, securityQuestion)
+            if (selectedSecurityQuestion != null) {
+                updateTransactionPin(newPin, otp, securityAnswer, selectedSecurityQuestion)
+            }
         }
 
         passwordSetBinding.save.setOnClickListener {
             val transactionPIN = passwordSetBinding.reprintPasswordEdittext.text.toString()
             val securityQuestion = passwordSetBinding.securityQuestions.text.toString()
             val securityAnswer = passwordSetBinding.securityAnswers.text.toString()
+            val questionID = listOfQuestions.id
             if (transactionPIN.isEmpty()) {
                 Toast.makeText(this, "PIN cannot be empty", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -156,7 +154,7 @@ class MainActivity : AppCompatActivity() {
                     .show()
                 return@setOnClickListener
             }
-            setTransactionPin(transactionPIN, securityQuestion, securityAnswer)
+            setTransactionPin(transactionPIN, questionID.toString(), securityQuestion, securityAnswer)
         }
 
         getSecurityQuestion = passwordSetBinding.securityQuestions
@@ -170,8 +168,9 @@ class MainActivity : AppCompatActivity() {
 
         getSecurityQuestion.onItemClickListener = object : AdapterView.OnItemClickListener {
             override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val category = adapterView?.getItemAtPosition(p2) as GetSecurityQuestionResponseItem
-                securityQuestionAnswer = category.question
+                 listOfQuestions =
+                    adapterView?.getItemAtPosition(p2) as GetSecurityQuestionResponseItem
+                securityQuestionAnswer = listOfQuestions.question
             }
         }
 
@@ -189,6 +188,7 @@ class MainActivity : AppCompatActivity() {
 
         passwordDialogBinding.update.setOnClickListener {
             getOtpVerificationToUpdatePin()
+            getSelectedQuestion()
             updatePinDialog.show()
             inputPasswordDialog.dismiss()
         }
@@ -219,17 +219,17 @@ class MainActivity : AppCompatActivity() {
         super.onBackPressed()
     }
 
-    private fun navigateToDestination(fragment: Fragment) {
-        val fragmentManager: FragmentManager = supportFragmentManager
-
-        val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-        fragmentTransaction.replace(
-            R.id.mainActivityfragmentContainerView,
-            fragment
-        )
-        fragmentTransaction.addToBackStack(null)
-        fragmentTransaction.commit()
-    }
+//    private fun navigateToDestination(fragment: Fragment) {
+//        val fragmentManager: FragmentManager = supportFragmentManager
+//
+//        val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+//        fragmentTransaction.replace(
+//            R.id.mainActivityfragmentContainerView,
+//            fragment
+//        )
+//        fragmentTransaction.addToBackStack(null)
+//        fragmentTransaction.commit()
+//    }
 
     private fun restorePrefData(): Boolean {
         val pref: SharedPreferences? = application?.getSharedPreferences(
@@ -253,10 +253,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun setTransactionPin(
         transactionPin: String,
+        securityQuestionId: String,
         securityQuestion: String,
         securityAnswer: String
     ) {
-        qrViewModel.setTransactionPin(transactionPin, securityQuestion, securityAnswer)
+        qrViewModel.setTransactionPin(transactionPin, securityQuestionId, securityQuestion, securityAnswer)
         observeServerResponseActivity(
             this,
             this,
@@ -266,7 +267,7 @@ class MainActivity : AppCompatActivity() {
         ) {
             qrViewModel.setPINResponse.value?.let {
                 if (it.data?.status == "success") {
-                    Toast.makeText(this, it.data.message, Toast.LENGTH_SHORT).show()
+                  //  Toast.makeText(this, it.data.message, Toast.LENGTH_SHORT).show()
                 }
             }
             Prefs.putString(
@@ -277,6 +278,9 @@ class MainActivity : AppCompatActivity() {
             passwordSetBinding.confirmReprintPasswordEdittext.setText("")
             passwordSetBinding.reprintPasswordEdittext.setText("")
             passwordSetDialog.cancel()
+            val header = Singletons().getTallyUserToken()!!
+            val token = "Bearer $header"
+            qrViewModel.fetchWallet(token)
         }
     }
 
@@ -300,7 +304,7 @@ class MainActivity : AppCompatActivity() {
         newPin: String,
         otp: String,
         securityAnswer: String,
-        securityQuestion: String
+        securityQuestion: Int
     ) {
         qrViewModel.updateTransactionPin(newPin, otp, securityAnswer, securityQuestion)
         observeServerResponseActivity(
@@ -312,7 +316,7 @@ class MainActivity : AppCompatActivity() {
         ) {
             val otpResponse = qrViewModel.updatePinResponse.value
             otpResponse?.let {
-                Toast.makeText(this, otpResponse.message, Toast.LENGTH_SHORT).show()
+             //   Toast.makeText(this, otpResponse.message, Toast.LENGTH_SHORT).show()
             }
             Prefs.putString(
                 PIN_PASSWORD,
@@ -322,6 +326,24 @@ class MainActivity : AppCompatActivity() {
             updatePinBinding.confirmPinEdittext.setText("")
             updatePinBinding.transactionPinEdittext.setText("")
             updatePinDialog.cancel()
+        }
+    }
+
+    private fun getSelectedQuestion(
+    ) {
+        qrViewModel.getSelectedQuestion()
+        observeServerResponseActivity(
+            this,
+            this,
+            qrViewModel.getSelectedQuestionResponse,
+            loader,
+            supportFragmentManager
+        ) {
+            val selectedQuestion = qrViewModel.getSelectedQuestionResponse.value?.data
+            selectedQuestion?.let {
+                updatePinBinding.securityQuestions.setText(it.question)
+                securityQuestion = it.question_id
+            }
         }
     }
 }

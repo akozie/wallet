@@ -1,6 +1,7 @@
 package com.woleapp.netpos.qrgenerator.ui.webview
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -8,8 +9,10 @@ import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
+import androidx.activity.OnBackPressedCallback
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentTallyWalletWebViewBinding
 import com.woleapp.netpos.qrgenerator.databinding.FragmentWebViewBinding
@@ -17,14 +20,15 @@ import com.woleapp.netpos.qrgenerator.di.customDependencies.JavaScriptInterface
 import com.woleapp.netpos.qrgenerator.di.customDependencies.TallyWalletJavaScriptInterface
 import com.woleapp.netpos.qrgenerator.di.customDependencies.WebViewCallBack
 import com.woleapp.netpos.qrgenerator.utils.STRING_TAG_JAVASCRIPT_INTERFACE_TAG
+import com.woleapp.netpos.qrgenerator.utils.STRING_TAG_WALLET_JAVASCRIPT_INTERFACE_TAG
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TallyWalletWebViewFragment : Fragment() {
+class TallyWalletWebViewFragment  : Fragment() {
 
-    private lateinit var binding: FragmentTallyWalletWebViewBinding
+    private lateinit var binding: FragmentWebViewBinding
     private lateinit var webView: WebView
     private lateinit var webSettings: WebSettings
     private val qrViewModel by activityViewModels<QRViewModel>()
@@ -37,15 +41,30 @@ class TallyWalletWebViewFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        binding =  DataBindingUtil.inflate(inflater,R.layout.fragment_tally_wallet_web_view, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_web_view, container, false)
+
+        // Handle Back Press
+        activity?.onBackPressedDispatcher?.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (webView.canGoBack()) {
+                        webView.goBack()
+                    } else {
+                        findNavController().popBackStack()
+                    }
+                }
+            }
+        )
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        webView = binding.tallyWebView
+        webView = binding.webView
+
         qrViewModel.payResponse.observe(viewLifecycleOwner) { response ->
             response.data?.let {
                 javaScriptInterface = TallyWalletJavaScriptInterface(
@@ -60,7 +79,6 @@ class TallyWalletWebViewFragment : Fragment() {
             }
             setUpWebView(webView)
         }
-
     }
 
     private fun setUpWebView(webView: WebView) {
@@ -73,7 +91,7 @@ class TallyWalletWebViewFragment : Fragment() {
         webView.apply {
             webViewClient = customWebViewClient
             webChromeClient = WebChromeClient()
-            addJavascriptInterface(javaScriptInterface, STRING_TAG_JAVASCRIPT_INTERFACE_TAG)
+            addJavascriptInterface(javaScriptInterface, STRING_TAG_WALLET_JAVASCRIPT_INTERFACE_TAG)
             loadUrl("file:///android_asset/3ds_pay.html")
         }
     }

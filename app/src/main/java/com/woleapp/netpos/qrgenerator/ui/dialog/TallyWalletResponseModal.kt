@@ -18,6 +18,7 @@ import com.woleapp.netpos.qrgenerator.databinding.LayoutQrReceiptPdfBinding
 import com.woleapp.netpos.qrgenerator.databinding.TransactionStatusModalBinding
 import com.woleapp.netpos.qrgenerator.model.pay.ModalData
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
+import com.woleapp.netpos.qrgenerator.model.verve.VerveOTPResponse
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
@@ -34,35 +35,60 @@ class TallyWalletResponseModal @Inject constructor() : DialogFragment() {
     private lateinit var lottieIcon: LottieAnimationView
     private lateinit var statusTv: TextView
     private lateinit var cancelBtn: ImageView
-    private lateinit var downloadReceipt: Button
+    private lateinit var goHome: Button
     private lateinit var amountTv: TextView
     private var modalData: ModalData? = null
     private lateinit var pdfView: LayoutQrReceiptPdfBinding
-    private var responseFromWebView: QrTransactionResponseModel? = null
+    private var responseFromWebView: Any? = null
     private val transactionViewModel by activityViewModels<TransactionViewModel>()
     private val qrViewModel by activityViewModels<QRViewModel>()
     private val walletViewModel by activityViewModels<WalletViewModel>()
     private lateinit var outputStream: OutputStream
+    private lateinit var token: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setFragmentResultListener(TALLY_WALLET_QR_TRANSACTION_RESULT_REQUEST_KEY) { _, bundle ->
-            responseFromWebView =
-                bundle.getParcelable(TALLY_WALLET_QR_TRANSACTION_RESULT_BUNDLE_KEY)
-            modalData =
-                if (responseFromWebView is QrTransactionResponseModel && responseFromWebView != null) {
-                    if (responseFromWebView!!.code == "00") {
-                 //       transactionViewModel.saveQrTransaction(responseFromWebView!!)
-                        val transID = Singletons().getTransAmountAndId()?.transId!!
-                        val transAmount = Singletons().getTransAmountAndId()?.amount!!
-                        addMoneyToBalance(transAmount, transID)
+            responseFromWebView = bundle.getParcelable(TALLY_WALLET_QR_TRANSACTION_RESULT_BUNDLE_KEY)
+            val webViewResponse = responseFromWebView
+            modalData = if (webViewResponse != null) {
+                when (webViewResponse) {
+                    is QrTransactionResponseModel -> {
+                        if (webViewResponse.code == "00") {
+                         //   viewGeneratedQR.visibility = View.VISIBLE
+                            val transID = Singletons().getTransAmountAndId()?.transId!!
+                          //  val transAmount = Singletons().getTransAmountAndId()?.amount!!
+                            addMoneyToBalance(transID)
+                        }
+                        ModalData(
+                            webViewResponse.code == "00", webViewResponse.amount.toDouble()
+                        )
                     }
-                    ModalData(
-                        responseFromWebView!!.code == "00",
-                        responseFromWebView!!.amount.toDouble()
-                    )
-                } else ModalData(false, 0.0)
+                    is VerveOTPResponse -> {
+                        if (webViewResponse.code == "00") {
+                         //   viewGeneratedQR.visibility = View.VISIBLE
+                            val transID = Singletons().getTransAmountAndId()?.transId!!
+                          //  val transAmount = Singletons().getTransAmountAndId()?.amount!!
+                            addMoneyToBalance(transID)
+                        }
+                        ModalData(
+                            webViewResponse.code == "00", webViewResponse.amount.toDouble()
+                        )
+                    }
+                    else -> {
+                        ModalData(
+                            false, 0.0
+                        )
+                    }
+                }
+            } else {
+                ModalData(
+                    false, 0.0
+                )
+            }
         }
+
     }
 
     override fun onCreateView(
@@ -82,7 +108,8 @@ class TallyWalletResponseModal @Inject constructor() : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
-        downloadReceipt.text = "GO HOME"
+        goHome.visibility = View.VISIBLE
+        goHome.text = "GO HOME"
         dialog?.window?.apply {
             setBackgroundDrawableResource(R.drawable.curve_bg)
             isCancelable = false
@@ -97,15 +124,21 @@ class TallyWalletResponseModal @Inject constructor() : DialogFragment() {
         super.onResume()
         setData()
         cancelBtn.setOnClickListener {
-            dialog?.dismiss()
+            if (qrViewModel.displayQrStatus == 0){
+                dialog?.dismiss()
+//                Prefs.remove(PREF_GENERATE_QR)
+//                startActivity(Intent(requireContext(), AuthenticationActivity::class.java))
+//                requireActivity().finish()
+            }else{
+                dialog?.dismiss()
+//                Prefs.remove(PREF_GENERATE_QR)
+//                startActivity(Intent(requireContext(), MainActivity::class.java))
+//                requireActivity().finish()
+            }
         }
-        downloadReceipt.setOnClickListener {
-//            responseFromWebView?.let { qrTransResponse ->
-//                qrViewModel.setQrTransactionResponse(qrTransResponse)
-//                qrViewModel.showReceiptDialogForQrPayment()
-//            }
+        goHome.setOnClickListener {
             dialog?.dismiss()
-            requireActivity().supportFragmentManager.popBackStack()
+            findNavController().popBackStack()
         }
     }
 
@@ -115,18 +148,21 @@ class TallyWalletResponseModal @Inject constructor() : DialogFragment() {
             statusTv = successFailed
             cancelBtn = cancelButton
             amountTv = qrAmount
-            downloadReceipt = printReceipt
+            goHome = printReceipt
         }
     }
 
-    private fun addMoneyToBalance(transactionAmount: String, transactionID: String) {
-        walletViewModel.creditWallet(transactionAmount, transactionID)
+    private fun addMoneyToBalance(transactionID: String) {
+        walletViewModel.creditWallet(transactionID)
+        val header = Singletons().getTallyUserToken()!!
+        token = "Bearer $header"
         observeServerResponse(
             walletViewModel.creditWalletResponse,
             requireActivity().supportFragmentManager
         ) {
             walletViewModel.creditWalletResponse.value?.data?.let {
                 showToast(it.message)
+                walletViewModel.fetchWallet(token)
             }
         }
     }

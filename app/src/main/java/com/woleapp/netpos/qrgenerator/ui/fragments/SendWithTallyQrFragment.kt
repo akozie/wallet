@@ -27,10 +27,8 @@ import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentSendWithTallyQrBinding
 import com.woleapp.netpos.qrgenerator.model.AmountAndTallyNumber
-import com.woleapp.netpos.qrgenerator.utils.AMOUNT_AND_TALLY_NUMBER
-import com.woleapp.netpos.qrgenerator.utils.PREF_USER
-import com.woleapp.netpos.qrgenerator.utils.REQUEST_CAMERA_CODE_PERMISSION
-import com.woleapp.netpos.qrgenerator.utils.showToast
+import com.woleapp.netpos.qrgenerator.utils.*
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.IOException
 
@@ -41,7 +39,6 @@ class SendWithTallyQrFragment : Fragment() {
     private lateinit var barcodeDetector: BarcodeDetector
     private lateinit var cameraSource: CameraSource
     private lateinit var scannedValue: String
-    private lateinit var creditAmount: EditText
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,7 +51,10 @@ class SendWithTallyQrFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-         creditAmount = binding.creditAmount
+        Singletons().getTallyWalletBalance()?.available_balance?.let {
+            binding.availableBalance.text = it.formatCurrency()
+        }
+
         if (ContextCompat.checkSelfPermission(
                 requireContext(), Manifest.permission.CAMERA
             ) != PackageManager.PERMISSION_GRANTED
@@ -128,19 +128,18 @@ class SendWithTallyQrFragment : Fragment() {
                         binding.barcodeLine.clearAnimation()
                         shakeItBaby(requireContext())
                         val result = AmountAndTallyNumber(
-                             creditAmount.text.trim().toString(),
+                             "0",
                             scannedValue
                         )
                         Prefs.putString(AMOUNT_AND_TALLY_NUMBER, Gson().toJson(result))
-                        val amount = creditAmount.text.trim()
-                        if (amount.isNullOrEmpty()){
-                            showToast("Amount can't be empty")
-                        }else {
+//                        val amount = creditAmount.text.trim()
+//                        if (amount.isNullOrEmpty()){
+//                            showToast("Amount can't be empty")
+//                        }else {
                             parentFragmentManager.beginTransaction()
                                 .replace(R.id.mainActivityfragmentContainerView, SendWithTallyQrResultFragment())
                                 .addToBackStack(null)
                                 .commit()
-                        }
                     }
 
                 } else {

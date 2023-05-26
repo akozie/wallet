@@ -12,7 +12,8 @@ class WalletRepository @Inject constructor(
 
     fun fetchWallet(token: String) = walletService.fetchWallet(token)
 
-    fun verifyWalletOTP(token: String, otp: String) = walletService.verifyWalletOTP(token, VerifyOTPRequest(otp))
+    fun verifyWalletOTP(token: String, otp: String) =
+        walletService.verifyWalletOTP(token, VerifyOTPRequest(otp))
 
     fun sendWithTallyNumber(
         token: String,
@@ -20,17 +21,22 @@ class WalletRepository @Inject constructor(
     ) = walletService.sendWithTallyNumber(token, sendWithTallyNumberRequest)
 
 
-
-    fun setTransactionPin(token: String, transactionPin: String, securityQuestion: String, securityAnswer: String) = walletService.setTransactionPin(
+    fun setTransactionPin(
+        token: String,
+        transactionPin: String,
+        securityQuestionId: String,
+        securityQuestion: String,
+        securityAnswer: String
+    ) = walletService.setTransactionPin(
         token,
-        SetPINRequest(transactionPin, securityQuestion, securityAnswer)
+        SetPINRequest(transactionPin, securityQuestionId, securityQuestion, securityAnswer)
     )
 
     fun getUserTransactions(token: String, recordsNumber: Int) =
         walletService.getUserTransactions(token, TallyWalletUserTransactionRequest(recordsNumber))
 
-    fun creditWallet(token: String, transactionAmount: String, transactionID: String) =
-        walletService.creditWallet(token, CreditWalletRequest(transactionAmount, transactionID))
+    fun creditWallet(token: String, transactionID: String) =
+        walletService.creditWallet(token, CreditWalletRequest(transactionID))
 
     fun getSecurityQuestions(token: String) =
         walletService.getSecurityQuestions(token)
@@ -38,7 +44,19 @@ class WalletRepository @Inject constructor(
     fun getOtpVerificationToUpdatePin(token: String) =
         walletService.getOtpVerificationToUpdatePin(token)
 
-    fun updateTransactionPin(token: String, newPin: String, otp: String, securityAnswer: String, securityQuestion: String) =
-        walletService.updateTransactionPin(token, UpdateTransactionPinRequest(newPin,otp, securityAnswer, securityQuestion))
+    fun updateTransactionPin(
+        token: String,
+        newPin: String,
+        otp: String,
+        securityAnswer: String,
+        securityQuestion: Int
+    ) =
+        walletService.updateTransactionPin(
+            token,
+            UpdateTransactionPinRequest(newPin, otp, securityAnswer, securityQuestion)
+        )
+
+    fun getSelectedQuestion(token: String) =
+        walletService.getSelectedQuestion(token)
 
 }

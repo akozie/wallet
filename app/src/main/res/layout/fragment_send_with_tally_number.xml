@@ -87,7 +87,7 @@
                     android:id="@+id/available_balance"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="N 4,000"
+                    android:text=""
                     android:textColor="@color/black"
                     android:textSize="@dimen/text_size_10sp"
                     app:layout_constraintStart_toEndOf="@+id/textView10"
@@ -101,6 +101,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_30dp"
+                android:visibility="gone"
                 android:background="@color/background_color"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout3">
 
@@ -185,7 +186,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
-                        android:inputType="number"
+                        android:inputType="numberPassword"
                         android:textColor="@android:color/background_dark"
                         android:textCursorDrawable="@color/black"
                         android:visibility="visible"

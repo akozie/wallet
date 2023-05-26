@@ -57,7 +57,7 @@ object RandomUtils {
                 }
                 Status.ERROR -> {
                     loadingDialog.dismiss()
-                    Toast.makeText(context, R.string.an_error_occurred, Toast.LENGTH_SHORT).show()
+                 //   Toast.makeText(context, R.string.an_error_occurred, Toast.LENGTH_SHORT).show()
                 }
                 Status.TIMEOUT -> {
                     loadingDialog.dismiss()
@@ -67,13 +67,75 @@ object RandomUtils {
         }
     }
 
+//    fun <T> Fragment.observeServerResponse(
+//        serverResponse: Single<Resource<T>>,
+//        loadingDialog: AlertDialog,
+//        compositeDisposable: CompositeDisposable,
+//        ioScheduler: Scheduler,
+//        mainThreadSchedulers: Scheduler,
+//        successAction: () -> Unit
+//    ) {
+//        compositeDisposable.add(
+//            serverResponse.subscribeOn(ioScheduler).observeOn(mainThreadSchedulers)
+//                .subscribe { data, error ->
+//                    data?.let {
+//                        when (it.status) {
+//                            Status.SUCCESS -> {
+//                                loadingDialog.dismiss()
+//                                if (
+//                                    it.data is SendWithTallyNumberResponse
+//                                ) {
+//                                    successAction()
+//                                } else {
+//                                    showSnackBar(
+//                                        this.requireView(),
+//                                        getString(R.string.an_error_occurred)
+//                                    )
+//                                }
+//                            }
+//                            Status.LOADING -> {
+//                                loadingDialog.show()
+//                            }
+//                            Status.ERROR -> {
+//                                loadingDialog.cancel()
+//                                loadingDialog.dismiss()
+//                            }
+//                            Status.TIMEOUT -> {
+//                                loadingDialog.cancel()
+//                                loadingDialog.dismiss()
+//                                showSnackBar(this.requireView(), getString(R.string.timeOut))
+//                            }
+//                        }
+//
+//                    }
+//                    error?.let {
+//                        loadingDialog.cancel()
+//                        loadingDialog.dismiss()
+//                        (it as? HttpException).let { httpException ->
+//                            val errorMessage = httpException?.response()?.errorBody()?.string()
+//                                ?: "{\"message\":\"Unexpected error\"}"
+//                            val errorMsg =
+//                                try {
+//                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
+//                                        ?: "Recipient is not a Tally user"
+//                                } catch (e: Exception) {
+//                                    "Error"
+//                                }
+//                            showSnackBar(this.requireView(), errorMsg)
+//                        }
+//                    }
+//                }
+//        )
+//    }
+//
+
     fun <T> Fragment.observeServerResponse(
         serverResponse: Single<Resource<T>>,
         loadingDialog: AlertDialog,
         compositeDisposable: CompositeDisposable,
         ioScheduler: Scheduler,
         mainThreadSchedulers: Scheduler,
-        successAction: () -> Unit
+        successAction: () -> Unit,
     ) {
         compositeDisposable.add(
             serverResponse.subscribeOn(ioScheduler).observeOn(mainThreadSchedulers)
@@ -89,7 +151,7 @@ object RandomUtils {
                                 } else {
                                     showSnackBar(
                                         this.requireView(),
-                                        getString(R.string.an_error_occurred)
+                                        getString(R.string.an_error_occurred),
                                     )
                                 }
                             }
@@ -97,34 +159,19 @@ object RandomUtils {
                                 loadingDialog.show()
                             }
                             Status.ERROR -> {
-                                loadingDialog.cancel()
                                 loadingDialog.dismiss()
                             }
                             Status.TIMEOUT -> {
-                                loadingDialog.cancel()
                                 loadingDialog.dismiss()
                                 showSnackBar(this.requireView(), getString(R.string.timeOut))
                             }
                         }
-
                     }
                     error?.let {
-                        loadingDialog.cancel()
                         loadingDialog.dismiss()
-                        (it as? HttpException).let { httpException ->
-                            val errorMessage = httpException?.response()?.errorBody()?.string()
-                                ?: "{\"message\":\"Unexpected error\"}"
-                            val errorMsg =
-                                try {
-                                    Gson().fromJson(errorMessage, ErrorModel::class.java).message
-                                        ?: "Recipient is not a Tally user"
-                                } catch (e: Exception) {
-                                    "Error"
-                                }
-                            showSnackBar(this.requireView(), errorMsg)
-                        }
+                        showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
                     }
-                }
+                },
         )
     }
 

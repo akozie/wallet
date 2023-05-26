@@ -147,6 +147,12 @@
         <action
             android:id="@+id/action_addToBalanceFragment_to_tallyWalletWebViewFragment"
             app:destination="@id/tallyWalletWebViewFragment" />
+        <action
+            android:id="@+id/action_addToBalanceFragment_to_walletEnterOtpFragment"
+            app:destination="@id/walletEnterOtpFragment" />
+        <action
+            android:id="@+id/action_addToBalanceFragment_to_qrPasswordPinBlockDialog2"
+            app:destination="@id/qrPasswordPinBlockDialog2" />
     </fragment>
     <fragment
         android:id="@+id/sendWithTallyQrFragment"
@@ -207,4 +213,9 @@
             android:id="@+id/action_transferFragment_to_sendWithTallyNumberFragment"
             app:destination="@id/sendWithTallyNumberFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/walletEnterOtpFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.WalletEnterOtpFragment"
+        android:label="fragment_wallet_enter_otp"
+        tools:layout="@layout/fragment_wallet_enter_otp" />
 </navigation>

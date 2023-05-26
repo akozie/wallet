@@ -1,6 +1,5 @@
 package com.woleapp.netpos.qrgenerator.di.customDependencies
 
-import android.util.Log
 import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
@@ -31,7 +30,6 @@ class TallyWalletJavaScriptInterface(
 
     @JavascriptInterface
     fun webViewCallback(webViewResponse: String) {
-        Log.d("CALLBACKSTRING", webViewResponse)
         val responseFromWebView = Gson().fromJson(
             webViewResponse,
             QrTransactionResponseModel::class.java
@@ -48,9 +46,12 @@ class TallyWalletJavaScriptInterface(
             )
             fragmentManager.popBackStack()
             val responseModal = TallyWalletResponseModal()
-            responseModal.show(fragmentManager, STRING_QR_RESPONSE_MODAL_DIALOG_TAG)
+            responseModal.show(fragmentManager, STRING_QR_WALLET_RESPONSE_MODAL_DIALOG_TAG)
         } else {
-            loader.show()
+            fragmentManager.fragments.first().requireActivity().runOnUiThread {
+                loader.show()
+            }
         }
     }
 }
+

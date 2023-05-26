@@ -134,7 +134,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
             walletViewModel.fetchWalletResponse.value?.let {
                 if (it.data?.available_balance == null) {
                     enterOTPDialog.show()
-                } else {
+                } else if (it.data.available_balance >= 0) {
                     binding.walletBalance.text = it.data.available_balance.formatCurrency()
                     binding.walletNumber.text = it.data.phone_no
                 }
@@ -173,9 +173,10 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
             walletViewModel.getUserTransactionResponse.value?.let {result ->
                 if (result.data.isNullOrEmpty()){
                     binding.noTransactionYet.visibility = View.VISIBLE
-                    binding.myTallyProgressbar.visibility = View.GONE
+               //     binding.myTallyProgressbar.visibility = View.GONE
+                    return@observeServerResponse
                 }
-                result.data?.let {resp ->
+                result.data.let { resp ->
                     qrDataList = arrayListOf()
                     resp.forEach {
                         qrDataList.add(it)

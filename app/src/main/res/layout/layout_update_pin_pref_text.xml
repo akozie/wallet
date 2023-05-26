@@ -37,14 +37,15 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Select security question"
             android:layout_marginTop="@dimen/margin_10dp"
             app:layout_constraintTop_toBottomOf="@id/guideline2">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/security_questions"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:inputType="none"
+                android:focusableInTouchMode="false"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -80,7 +81,7 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="PIN"
+            android:hint="Transaction PIN"
             app:passwordToggleEnabled="true"
             app:layout_constraintTop_toBottomOf="@id/transaction_otp_layout">
 
@@ -96,7 +97,7 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Confirm PIN"
+            android:hint="Confirm Transaction PIN"
             app:passwordToggleEnabled="true"
             app:layout_constraintTop_toBottomOf="@id/transaction_pin_layout">
 
@@ -111,7 +112,7 @@
             android:id="@+id/pin_update_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_10dp"
+            android:layout_marginTop="@dimen/margin_30dp"
             android:background="@color/orange"
             android:text="Update PIN"
             android:textColor="@color/white"

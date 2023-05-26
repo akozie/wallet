@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.adapter.FrequentBeneficiariesAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentSendWithTallyNumberBinding
@@ -22,7 +23,9 @@ import com.woleapp.netpos.qrgenerator.model.wallet.request.SendWithTallyNumberRe
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
+import com.woleapp.netpos.qrgenerator.utils.SAVE_CUSTOMER_DETAILS
 import com.woleapp.netpos.qrgenerator.utils.Singletons
+import com.woleapp.netpos.qrgenerator.utils.WALLET_RESPONSE
 import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -46,6 +49,9 @@ class SendWithTallyNumberFragment : Fragment() {
   //  private lateinit var enterOTPBinding: LayoutEnterOtpBinding
     private lateinit var transactionStatusDialog: AlertDialog
     private lateinit var transactionStatusBinding: SuccessLayoutBinding
+    private lateinit var destinationAccount: String
+    private lateinit var transactionAmount: String
+    private lateinit var transactionPIN: String
 
     @Inject
     lateinit var compositeDisposable: CompositeDisposable
@@ -164,6 +170,8 @@ class SendWithTallyNumberFragment : Fragment() {
             ioScheduler,
             mainThreadScheduler,
         ) {
+            val walletResponse = Prefs.getString(WALLET_RESPONSE, "")
+            showToast(walletResponse)
             findNavController().popBackStack()
         }
     }

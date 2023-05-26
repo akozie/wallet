@@ -38,6 +38,7 @@ import com.woleapp.netpos.qrgenerator.ui.dialog.QrPasswordPinBlockDialog
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseOnce
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import java.io.File
 
@@ -65,17 +66,37 @@ class AddToBalanceFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
+        generateQrViewModel.getCardSchemes()
+        generateQrViewModel.getCardBanks()
         requireActivity().supportFragmentManager.setFragmentResultListener(
             PIN_BLOCK_RK,
-            requireActivity()
+            this
         ) { _, bundle ->
             val data = bundle.getString(PIN_BLOCK_BK)
             data?.let {
-                showToast(it)
+                generateQrViewModel.payVerveResponse.removeObservers(viewLifecycleOwner)
                 val checkOutModel = getCheckOutModel()
                 val qrModelRequest = getQrRequestModel()
                 generateQrViewModel.displayQrStatus = 1
-                generateQrViewModel.payQrCharges(checkOutModel, qrModelRequest, it)
+                generateQrViewModel.payQrChargesForVerve(checkOutModel, qrModelRequest, it)
+                val userDetails = Gson().toJson(getQrRequestModel())
+                observeServerResponseOnce(
+                    generateQrViewModel.payVerveResponse,
+                    loader,
+                    requireActivity().supportFragmentManager
+                ) {
+                    if (generateQrViewModel.payVerveResponse.value?.data?.code == "90") {
+                        //   showToast(qrViewModel.payVerveResponse.value?.data?.result.toString())
+                    } else {
+                        if (findNavController().currentDestination?.id == R.id.addToBalanceFragment){
+                            val action = AddToBalanceFragmentDirections.actionAddToBalanceFragmentToWalletEnterOtpFragment()
+                            findNavController().navigate(action)
+                        }else{
+                            findNavController().navigate(R.id.walletEnterOtpFragment)
+                        }
+                    }
+                }
             }
         }
     }
@@ -86,6 +107,7 @@ class AddToBalanceFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
+        pdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_add_to_balance, container, false)
         return binding.root
     }
@@ -95,7 +117,7 @@ class AddToBalanceFragment : Fragment() {
         generateQrViewModel.showQrPrintDialog.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 val qrTransaction = Gson().fromJson(it, QrTransactionResponseModel::class.java)
-               // printQrTransactionUtil(qrTransaction)
+                printQrTransactionUtil(qrTransaction)
             }
         }
         generateQrViewModel.generateQrMessage.observe(viewLifecycleOwner) {
@@ -103,7 +125,11 @@ class AddToBalanceFragment : Fragment() {
                 showToast(message)
             }
         }
-        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
+        generateQrViewModel.payMessage.observe(viewLifecycleOwner) {
+            it.getContentIfNotHandled()?.let { message ->
+                showToast(message)
+            }
+        }
         initViews()
         generateQrViewModel.cardSchemeResponse.observe(viewLifecycleOwner) {
             val cardSchemeAdapter = CardSchemeAdapter(
@@ -274,9 +300,16 @@ class AddToBalanceFragment : Fragment() {
     private fun checkOut() {
         val checkOutModel = getCheckOutModel()
         val qrRequest = getQrRequestModel()
-        if (qrRequest.card_scheme == CardScheme.VERVE.type) {
-            QrPasswordPinBlockDialog().show(childFragmentManager, QR_PIN_PAD)
+        if (qrRequest.card_scheme.contains("verve", true)) {
+            generateQrViewModel.setIsVerveCard(true)
+            if (findNavController().currentDestination?.id == R.id.addToBalanceFragment){
+                val action = AddToBalanceFragmentDirections.actionAddToBalanceFragmentToQrPasswordPinBlockDialog2()
+                findNavController().navigate(action)
+            }else{
+                findNavController().popBackStack()
+            }
         } else {
+            generateQrViewModel.setIsVerveCard(false)
             generateQrViewModel.displayQrStatus = 1
             generateQrViewModel.payQrCharges(checkOutModel, qrRequest)
         }
@@ -286,14 +319,14 @@ class AddToBalanceFragment : Fragment() {
             requireActivity().supportFragmentManager
         ) {
             if (generateQrViewModel.payResponse.value?.data?.code == "90") {
-                showToast(generateQrViewModel.payResponse.value?.data?.result.toString())
+                //
             } else {
-                Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
                 if (findNavController().currentDestination?.id == R.id.addToBalanceFragment) {
                     val action =
                         AddToBalanceFragmentDirections.actionAddToBalanceFragmentToTallyWalletWebViewFragment()
                     findNavController().navigate(action)
-                } else {
+                }
+                else {
                     findNavController().popBackStack()
                 }
             }
@@ -321,4 +354,34 @@ class AddToBalanceFragment : Fragment() {
             amount = creditAmount.text.toString().trim().toDouble(),
             currency = "NGN"
         )
+
+    private fun printQrTransactionUtil(qrTransaction: QrTransactionResponseModel) {
+        receiptPdf = createPdf(binding, this)
+        downloadPflImplForQrTransaction(qrTransaction)
+        showSnackBar(
+            binding.root,
+            "File downloaded"
+        )
+    }
+
+    private fun downloadPflImplForQrTransaction(qrTransaction: QrTransactionResponseModel) {
+        initViewsForPdfLayout(
+            pdfView,
+            qrTransaction
+        )
+        getPermissionAndCreatePdf(pdfView)
+    }
+
+    private fun getPermissionAndCreatePdf(view: ViewDataBinding) {
+        genericPermissionHandler(
+            requireActivity(),
+            requireContext(),
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            115,
+            "You need to grant permission to save this file"
+        ) {
+            receiptPdf = createPdf(view, this)
+        }
+    }
+
 }

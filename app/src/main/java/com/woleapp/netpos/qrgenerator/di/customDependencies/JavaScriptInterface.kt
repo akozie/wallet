@@ -1,12 +1,8 @@
 package com.woleapp.netpos.qrgenerator.di.customDependencies
 
-import android.util.Log
 import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
-import androidx.navigation.Navigation
-import androidx.navigation.Navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import com.google.gson.Gson
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
@@ -34,17 +30,12 @@ class JavaScriptInterface(
 
     @JavascriptInterface
     fun webViewCallback(webViewResponse: String) {
-      val responseFromWebView = Gson().fromJson(
+        val responseFromWebView = Gson().fromJson(
             webViewResponse,
             QrTransactionResponseModel::class.java
         )
-        val registeredUserResponseFromWebView = Gson().fromJson(
-            webViewResponse,
-            QrTransactionResponseModel::class.java
-        )
-
-        if (responseFromWebView.code == "00" || responseFromWebView.code == "90" || responseFromWebView.code == "80"){
-            if (loader.isShowing){
+        if (responseFromWebView.code == "00" || responseFromWebView.code == "90" || responseFromWebView.code == "80") {
+            if (loader.isShowing) {
                 fragmentManager.fragments.first().requireActivity().runOnUiThread {
                     loader.dismiss()
                 }
@@ -56,7 +47,7 @@ class JavaScriptInterface(
             fragmentManager.popBackStack()
             val responseModal = ResponseModal()
             responseModal.show(fragmentManager, STRING_QR_RESPONSE_MODAL_DIALOG_TAG)
-        }else{
+        } else {
             fragmentManager.fragments.first().requireActivity().runOnUiThread {
                 loader.show()
             }

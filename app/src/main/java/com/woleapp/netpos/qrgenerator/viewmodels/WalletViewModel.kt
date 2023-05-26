@@ -10,6 +10,7 @@ import com.google.gson.Gson
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.model.ErrorModel
 import com.woleapp.netpos.qrgenerator.model.User
+import com.woleapp.netpos.qrgenerator.model.pay.PayResponse
 import com.woleapp.netpos.qrgenerator.model.pay.PayResponseErrorModel
 import com.woleapp.netpos.qrgenerator.model.wallet.*
 import com.woleapp.netpos.qrgenerator.model.wallet.request.SendWithTallyNumberRequest
@@ -50,9 +51,9 @@ class WalletViewModel @Inject constructor(
         MutableLiveData()
     val getUserTransactionResponse: LiveData<Resource<TallyWalletUserTransactionsResponse>> get() = _getUserTransactionResponse
 
-    private var _creditWalletResponse: MutableLiveData<Resource<GeneralWalletResponse>> =
+    private var _creditWalletResponse: MutableLiveData<Resource<CreditWalletCardResponse>> =
         MutableLiveData()
-    val creditWalletResponse: LiveData<Resource<GeneralWalletResponse>> get() = _creditWalletResponse
+    val creditWalletResponse: LiveData<Resource<CreditWalletCardResponse>> get() = _creditWalletResponse
 
     private var _getSecurityQuestionsResponse: MutableLiveData<Resource<List<GetSecurityQuestionResponseItem>>> =
         MutableLiveData()
@@ -65,6 +66,10 @@ class WalletViewModel @Inject constructor(
     private var _updatePinResponse: MutableLiveData<Resource<GeneralWalletResponse>> =
         MutableLiveData()
     val updatePinResponse: LiveData<Resource<GeneralWalletResponse>> get() = _updatePinResponse
+
+    private var _getSelectedQuestionResponse: MutableLiveData<Resource<GetSelectedQuestionResponse>> =
+        MutableLiveData()
+    val getSelectedQuestionResponse: LiveData<Resource<GetSelectedQuestionResponse>> get() = _getSelectedQuestionResponse
 
 
 
@@ -83,7 +88,7 @@ class WalletViewModel @Inject constructor(
                 data?.let {
                     Prefs.putString(PREF_TALLY_WALLET, Gson().toJson(it))
                     _fetchWalletResponse.postValue(Resource.success(it))
-                    _fetchWalletMessage.value = Event(Resource.success(it).message)
+              //      _fetchWalletMessage.value = Event(Resource.success(it).message)
                 }
                 error?.let {
                     _fetchWalletResponse.postValue(Resource.error(null))
@@ -132,23 +137,22 @@ class WalletViewModel @Inject constructor(
     fun sendWithTallyNumber(token: String, sendWithTallyNumberRequest: SendWithTallyNumberRequest) =
         walletRepository.sendWithTallyNumber(token, sendWithTallyNumberRequest)
             .flatMap {
-                if (it.status == "Success") {
-                    _fetchWalletMessage.value = Event(Resource.success(it).message)
-                    Single.just(Resource.success(it))
+                if (it.isSuccessful) {
+                    Prefs.putString(WALLET_RESPONSE, it.body()?.message)
+                    Single.just(Resource.success(it.body()))
                 } else {
-                    _fetchWalletMessage.value = Event(Resource.success(it).message)
-                    Single.just(Resource.error(it))
+                    Single.just(Resource.error(it.errorBody()))
                 }
             }
 
-    fun setTransactionPin(transactionPin: String,securityQuestion: String, securityAnswer: String) {
+    fun setTransactionPin(transactionPin: String, securityQuestionId: String, securityQuestion: String, securityAnswer: String) {
         _setPINResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.setTransactionPin("Bearer ${Singletons().getTallyUserToken()!!}",transactionPin, securityQuestion, securityAnswer)
+        disposable.add(walletRepository.setTransactionPin("Bearer ${Singletons().getTallyUserToken()!!}",transactionPin, securityQuestionId, securityQuestion, securityAnswer)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
                     _setPINResponse.postValue(Resource.success(it))
-                    _fetchWalletMessage.value = Event(Resource.success(it).message)
+                    _fetchWalletMessage.value = Event(Resource.success(it).data!!.message)
                 }
                 error?.let {
                     _setPINResponse.postValue(Resource.error(null))
@@ -192,14 +196,14 @@ class WalletViewModel @Inject constructor(
             })
     }
 
-    fun creditWallet(transactionAmount: String, transactionID: String) {
+    fun creditWallet(transactionID: String) {
         _creditWalletResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.creditWallet("Bearer ${Singletons().getTallyUserToken()!!}", transactionAmount, transactionID)
+        disposable.add(walletRepository.creditWallet("Bearer ${Singletons().getTallyUserToken()!!}", transactionID)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
                     _creditWalletResponse.postValue(Resource.success(it))
-                    _fetchWalletMessage.value = Event(Resource.success(it).message)
+                    _fetchWalletMessage.value = Event(Resource.success(it).data!!.message)
                 }
                 error?.let {
                     _creditWalletResponse.postValue(Resource.error(null))
@@ -225,7 +229,7 @@ class WalletViewModel @Inject constructor(
             .subscribe { data, error ->
                 data?.let {
                     _getOtpToUpdatePinResponse.postValue(Resource.success(it))
-                    _fetchWalletMessage.value = Event(Resource.success(it).message)
+               //     _fetchWalletMessage.value = Event(Resource.success(it).data!!.message)
                 }
                 error?.let {
                     _getOtpToUpdatePinResponse.postValue(Resource.error(null))
@@ -274,17 +278,43 @@ class WalletViewModel @Inject constructor(
             })
     }
 
-    fun updateTransactionPin(newPin: String, otp: String, securityAnswer: String, securityQuestion: String) {
+    fun updateTransactionPin(newPin: String, otp: String, securityAnswer: String, securityQuestion: Int) {
         _updatePinResponse.postValue(Resource.loading(null))
         disposable.add(walletRepository.updateTransactionPin("Bearer ${Singletons().getTallyUserToken()!!}", newPin, otp, securityAnswer, securityQuestion)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
                     _updatePinResponse.postValue(Resource.success(it))
-                    _fetchWalletMessage.value = Event(Resource.success(it).message)
+                    _fetchWalletMessage.value = Event(Resource.success(it).data!!.message)
                 }
                 error?.let {
                     _updatePinResponse.postValue(Resource.error(null))
+                    (it as? HttpException).let { httpException ->
+                        val errorMessage = httpException?.response()?.errorBody()?.string()
+                            ?: "{\"message\":\"Unexpected error\"}"
+                        _fetchWalletMessage.value = Event(
+                            try {
+                                Gson().fromJson(errorMessage, ErrorModel::class.java).message
+                            } catch (e: Exception) {
+                                "Gateway Time-out"
+                            }
+                        )
+                    }
+                }
+            })
+    }
+
+    fun getSelectedQuestion() {
+        _getSelectedQuestionResponse.postValue(Resource.loading(null))
+        disposable.add(walletRepository.getSelectedQuestion("Bearer ${Singletons().getTallyUserToken()!!}")
+            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribe { data, error ->
+                data?.let {
+                    _getSelectedQuestionResponse.postValue(Resource.success(it))
+                 //   _fetchWalletMessage.value = Event(Resource.success(it).message)
+                }
+                error?.let {
+                    _getSelectedQuestionResponse.postValue(Resource.error(null))
                     (it as? HttpException).let { httpException ->
                         val errorMessage = httpException?.response()?.errorBody()?.string()
                             ?: "{\"message\":\"Unexpected error\"}"

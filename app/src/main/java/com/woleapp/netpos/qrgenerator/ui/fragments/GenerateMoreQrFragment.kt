@@ -371,17 +371,17 @@ class GenerateMoreQrFragment : Fragment() {
             generateQrViewModel.setIsVerveCard(false)
             generateQrViewModel.displayQrStatus = 1
             generateQrViewModel.payQrCharges(checkOutModel, qrRequest)
+        }
             observeServerResponse(
                 generateQrViewModel.payResponse,
                 loader,
                 requireActivity().supportFragmentManager
             ) {
                 if (generateQrViewModel.payResponse.value?.data?.code == "90") {
-                  //  showToast(generateQrViewModel.payResponse.value?.data?.result.toString())
+                    //
                 } else {
                     Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
                     if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment) {
-                        Log.d("WEBNAV", "WEBVIEWFRAGMENT")
                         val action =
                             GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToWebViewFragment2()
                         findNavController().navigate(action)
@@ -392,7 +392,6 @@ class GenerateMoreQrFragment : Fragment() {
                 }
             }
         }
-    }
 
     private fun getQrRequestModel(): QrModelRequest =
         QrModelRequest(
