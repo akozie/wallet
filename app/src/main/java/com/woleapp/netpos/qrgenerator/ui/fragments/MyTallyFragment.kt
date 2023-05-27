@@ -82,6 +82,11 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
             val action = TransactionsFragmentDirections.actionTransactionsFragmentToTransferFragment()
             findNavController().navigate(action)
         }
+        binding.generateQrButton.setOnClickListener {
+            val action =
+                TransactionsFragmentDirections.actionTransactionsFragmentToGenerateMoreQrFragment()
+            findNavController().navigate(action)
+        }
 
         enterOTPBinding = LayoutEnterOtpBinding.inflate(
             LayoutInflater.from(requireContext()),

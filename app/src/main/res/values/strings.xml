@@ -27,9 +27,13 @@
     <string name="thirty_days">30 days</string>
     <string name="timeOut">Time Out</string>
 
+    <string name="all_please_confirm_password">Please Confirm Your Password</string>
+    <string name="all_password_mismatch">Password mismatch</string>
     <string name="all_please_enter_password">Please Enter Your Password</string>
     <string name="all_please_enter_full_name">Please Enter Your Full Name</string>
     <string name="all_please_enter_email">Please Enter Your Email</string>
+    <string name="all_please_enter_mobile_no">Please Enter Your Phone number</string>
+    <string name="all_please_full_name">Please Enter Your Name</string>
     <string name="all_please_enter_phone_number">Please Enter Your Phone Number</string>
     <string name="all_please_enter_issuing_bank">Please Select Your Issuing Bank</string>
     <string name="all_please_enter_amount">Please Enter Your amount</string>
@@ -88,5 +92,6 @@
     <string name="otp_here">Enter the OTP sent to you Here…</string>
     <string name="resend_code">Didn\'t Receive Code? Resend it</string>
     <string name="otp_resent">A fresh OTP has been sent to you…</string>
+    <string name="confirm_password">Confirm Password</string>
 
 </resources>

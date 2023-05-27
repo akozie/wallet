@@ -3,12 +3,12 @@ package com.woleapp.netpos.qrgenerator.ui.fragments
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
@@ -41,18 +41,20 @@ class DisplayWalletQrFragment : Fragment() {
         Singletons().getCurrentlyLoggedInUser()?.fullname?.let {
             userName.text = it
         }
+
         val writer = QRCodeWriter()
         try {
             val bitMatrix = writer.encode(data, BarcodeFormat.QR_CODE, 512, 512)
             val width = bitMatrix.width
             val height = bitMatrix.height
             val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
-            for (x in 0 until width){
-                for (y in 0 until height){
+            for (x in 0 until width) {
+                for (y in 0 until height) {
                     bmp.setPixel(x, y, if (bitMatrix[x, y]) Color.BLACK else Color.WHITE)
                 }
             }
             binding.displayWalletQr.setImageBitmap(bmp)
-        } catch (e: WriterException){}
+        } catch (e: WriterException) {
+        }
     }
 }

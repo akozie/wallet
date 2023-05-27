@@ -375,4 +375,9 @@ object RandomUtils {
             }
         })
     }
+
+    fun validatePasswordMismatch(password: String, confirmPassword: String): Boolean {
+        return password == confirmPassword
+    }
+
 }

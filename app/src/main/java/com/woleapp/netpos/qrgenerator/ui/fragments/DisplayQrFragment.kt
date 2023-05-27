@@ -2,13 +2,16 @@ package com.woleapp.netpos.qrgenerator.ui.fragments
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
+import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentDisplayQrBinding
 import com.woleapp.netpos.qrgenerator.model.GenerateQRResponse
 import com.woleapp.netpos.qrgenerator.model.QrModel
@@ -53,7 +56,7 @@ class DisplayQrFragment : Fragment() {
         } else {
             Glide.with(requireContext()).load(qrCode).into(binding.qrCode)
         }
+
+
     }
-
-
 }

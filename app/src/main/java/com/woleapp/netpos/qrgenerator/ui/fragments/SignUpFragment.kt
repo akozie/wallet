@@ -15,6 +15,7 @@ import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentSignUpBinding
 import com.woleapp.netpos.qrgenerator.model.RegisterRequest
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.validatePasswordMismatch
 import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,6 +30,7 @@ class SignUpFragment : Fragment() {
     private lateinit var emailAddress: TextInputEditText
     private lateinit var phoneNumber: TextInputEditText
     private lateinit var passwordView: TextInputEditText
+    private lateinit var reEnterPassword: TextInputEditText
     private lateinit var signupButton: Button
     private val qrViewModel by viewModels<QRViewModel>()
     private lateinit var loader: ProgressBar
@@ -54,7 +56,6 @@ class SignUpFragment : Fragment() {
         initViews()
         signupButton.setOnClickListener {
             signup()
-            signupButton.isEnabled = false
         }
     }
 
@@ -64,21 +65,44 @@ class SignUpFragment : Fragment() {
             phoneNumber = signUpMobileNumber
             passwordView = signUpPassword
             emailAddress = signUpEmail
+            reEnterPassword = confirmPassword
             signupButton = signUpButton
         }
     }
 
     private fun signup() {
         when {
+            fullName.text.toString().isEmpty() -> {
+                binding.fragmentEnterFullName.error =
+                    getString(R.string.all_please_full_name)
+                binding.fragmentEnterFullName.errorIconDrawable = null
+            }
             emailAddress.text.toString().isEmpty() -> {
                 binding.fragmentEnterEmail.error =
                     getString(R.string.all_please_enter_email)
                 binding.fragmentEnterEmail.errorIconDrawable = null
             }
+            phoneNumber.text.toString().isEmpty() -> {
+                binding.fragmentEnterMobileNumber.error =
+                    getString(R.string.all_please_enter_mobile_no)
+                binding.fragmentEnterMobileNumber.errorIconDrawable = null
+            }
             passwordView.text.toString().isEmpty() -> {
                 binding.fragmentEnterPassword.error =
                     getString(R.string.all_please_enter_password)
                 binding.fragmentEnterPassword.errorIconDrawable = null
+            }
+            reEnterPassword.text.toString().isEmpty() -> {
+                binding.fragmentConfirmEnterPassword.error =
+                    getString(R.string.all_please_confirm_password)
+                binding.fragmentConfirmEnterPassword.errorIconDrawable =
+                    null
+            }
+            !validatePasswordMismatch(passwordView.text.toString(), reEnterPassword.text.toString()) -> {
+                binding.fragmentConfirmEnterPassword.error =
+                    getString(R.string.all_password_mismatch)
+                binding.fragmentConfirmEnterPassword.errorIconDrawable =
+                    null
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
@@ -159,10 +183,35 @@ class SignUpFragment : Fragment() {
                 }
             }
         }
+        reEnterPassword.doOnTextChanged { _, _, _, _ ->
+            when {
+                reEnterPassword.text.toString().trim().isEmpty() -> {
+                    binding.fragmentConfirmEnterPassword.error =
+                        getString(R.string.all_please_confirm_password)
+                    isValidated = false
+                }
+                !validatePasswordMismatch(
+                    binding.signUpPassword.text.toString().trim(),
+                    binding.confirmPassword.text.toString().trim()
+                ) -> {
+                    binding.fragmentConfirmEnterPassword.error =
+                        getString(R.string.all_password_mismatch)
+                    binding.fragmentConfirmEnterPassword.errorIconDrawable =
+                        null
+                    isValidated = false
+                }
+                else -> {
+                    binding.fragmentConfirmEnterPassword.error = null
+                    isValidated = true
+                }
+            }
+        }
         return isValidated
     }
 
     private fun register() {
+
+        signupButton.isEnabled = false
         val registerRequest = RegisterRequest(
             fullname = fullName.text.toString().trim(),
             email = emailAddress.text.toString().trim(),
@@ -177,6 +226,7 @@ class SignUpFragment : Fragment() {
             loader,
             requireActivity().supportFragmentManager
         ) {
+            signupButton.isEnabled = true
             val action = SignUpFragmentDirections.actionSignUpFragmentToSignInFragment()
             findNavController().navigate(action)
         }
