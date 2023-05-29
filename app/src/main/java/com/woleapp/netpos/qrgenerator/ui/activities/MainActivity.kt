@@ -57,29 +57,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-//        val sendWithTallyQrFragment = SendWithTallyQrFragment()
-//        binding.scanWithTallyQr.setOnClickListener {
-//            if (sendWithTallyQrFragment.isAdded) {
-//                return@setOnClickListener
-//            }
-//            navigateToDestination(sendWithTallyQrFragment)
-//        }
-//
-//        val sendWithTallyNumber = SendWithTallyNumberFragment()
-//        binding.sendWithTallyNumber.setOnClickListener {
-//            if (sendWithTallyNumber.isAdded) {
-//                return@setOnClickListener
-//            }
-//            navigateToDestination(sendWithTallyNumber)
-//        }
-//
-//        val requestPayment = RequestPaymentFragment()
-//        binding.requestPayment.setOnClickListener {
-//            if (requestPayment.isAdded) {
-//                return@setOnClickListener
-//            }
-//            navigateToDestination(requestPayment)
-//        }
 
         passwordDialogBinding =
             LayoutEnterPasswordBinding.inflate(LayoutInflater.from(this), null, false)
