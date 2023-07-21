@@ -21,6 +21,7 @@ import com.woleapp.netpos.qrgenerator.adapter.paging.TransactionPagingAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentTransactionBinding
 import com.woleapp.netpos.qrgenerator.db.AppDatabase
 import com.woleapp.netpos.qrgenerator.model.TransactionModel
+import com.woleapp.netpos.qrgenerator.model.wallet.FetchQrTokenResponseItem
 import com.woleapp.netpos.qrgenerator.ui.activities.AuthenticationActivity
 import com.woleapp.netpos.qrgenerator.utils.PREF_USER
 import com.woleapp.netpos.qrgenerator.utils.Singletons
@@ -39,29 +40,32 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionClick {
     private val mViewModel by activityViewModels<TransactionViewModel>()
     private lateinit var mAdapter: TransactionPagingAdapter
     private lateinit var loader: ProgressBar
+   // private lateinit var qrCode: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentTransactionBinding.inflate(inflater, container, false)
+        qrCodeID = arguments?.getParcelable<FetchQrTokenResponseItem>("DETAILSQR")?.qr_code_id.toString()
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         loader = binding.progressBar
-        val userId = Singletons().getCurrentlyLoggedInUser()?.id.toString()
-        val num = AppDatabase.getDatabaseInstance(requireContext()).getQrDao()
-            .getUserQrCodes(userId)
-        if (num.isEmpty()) {
-            qrCodeID = null
-        } else {
-            num.forEach {
-                qrCodeID = it.qr_code_id
-            }
-        }
+//        val userId = Singletons().getCurrentlyLoggedInUser()?.id.toString()
+//        val num = AppDatabase.getDatabaseInstance(requireContext()).getQrDao()
+//            .getUserQrCodes(userId)
+//        if (num.isEmpty()) {
+//            qrCodeID = null
+//        } else {
+//            num.forEach {
+//                qrCodeID = it.qr_code_id
+//            }
+//        }
 
         if (qrCodeID.isNullOrEmpty()) {
             loader.visibility = View.GONE
@@ -69,30 +73,11 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionClick {
         } else {
             transactionSetUp()
         }
-        binding.signOut.setOnClickListener {
-            AlertDialog.Builder(context)
-                .setTitle("Logout")
-                .setMessage("Are you sure you want to logout?") // Specifying a listener allows you to take an action before dismissing the dialog.
-                // The dialog is automatically dismissed when a dialog button is clicked.
-                .setPositiveButton(
-                    R.string.yes,
-                    DialogInterface.OnClickListener { dialog, which ->
-                        // Continue with delete operation
-                        Prefs.remove(PREF_USER)
-                        startActivity(
-                            Intent(requireContext(), AuthenticationActivity::class.java).apply {
-                                flags =
-                                    Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            }
-                        )
-                    }) // A null listener allows the button to dismiss the dialog and take no further action.
-                .setNegativeButton(R.string.no, null)
-                .show()
-        }
-        userEmail = Singletons().getCurrentlyLoggedInUser()?.email.toString()
+        userEmail = Singletons().getCurrentlyLoggedInUser()?.fullname.toString()
         binding.userEmail.text = userEmail
 
         binding.retry.setOnClickListener {
+            loader.visibility =View.VISIBLE
             transactionSetUp()
         }
     }
@@ -122,7 +107,6 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionClick {
                 }
             }
         }
-
     }
 
 
@@ -131,5 +115,6 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionClick {
             TransactionsFragmentDirections.actionTransactionsFragmentToTransactionDetailsFragment()
         findNavController().navigate(action)
     }
+
 }
 

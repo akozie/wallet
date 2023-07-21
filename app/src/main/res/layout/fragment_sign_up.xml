@@ -1,177 +1,260 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:background="@drawable/sign_in_background"
-tools:context=".ui.fragments.SignUpFragment">
-
-<!-- TODO: Update blank fragment layout -->
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_margin="@dimen/margin_50dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <ImageView
-        android:id="@+id/imageView5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/sign_in_header"
-        android:layout_marginTop="@dimen/corner_radius_100dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    android:layout_height="match_parent"
+    android:background="@drawable/sign_in_background"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true"
+    tools:context=".ui.fragments.SignUpFragment">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/fragment_enter_full_name"
-        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+
+    <!-- TODO: Update blank fragment layout -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_80dp"
-        android:hint="@string/enter_full_name"
-        app:backgroundTint="@color/white"
-        app:boxStrokeColor="@color/white"
-        app:boxStrokeWidth="@dimen/margin_0dp"
-        app:hintEnabled="true"
-        app:errorTextColor="@color/white"
-        app:layout_constraintEnd_toEndOf="@+id/imageView5"
-        app:layout_constraintStart_toStartOf="@+id/imageView5"
-        app:layout_constraintTop_toBottomOf="@+id/imageView5">
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/margin_50dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/sign_up_full_name"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:maxLines="1"
-            android:textColor="@android:color/background_dark"
-            android:textCursorDrawable="@color/black"
-            android:visibility="visible"
-            app:backgroundTint="@color/white" />
-    </com.google.android.material.textfield.TextInputLayout>
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.1" />
+        <ImageView
+            android:id="@+id/imageView5"
+            android:layout_width="200dp"
+            android:layout_height="80dp"
+            android:src="@drawable/tally_logo_white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/guideline2" />
 
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/fragment_enter_email"
-        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/enter_email"
-        android:layout_marginTop="@dimen/margin_10dp"
-        app:backgroundTint="@color/white"
-        app:boxStrokeColor="@color/white"
-        app:boxStrokeWidth="@dimen/margin_0dp"
-        app:errorTextColor="@color/white"
-        app:hintEnabled="true"
-        app:layout_constraintEnd_toEndOf="@+id/fragment_enter_full_name"
-        app:layout_constraintStart_toStartOf="@+id/fragment_enter_full_name"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_enter_full_name">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/sign_up_email"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:maxLines="1"
-            android:textColor="@android:color/background_dark"
-            android:textCursorDrawable="@color/black"
-            android:visibility="visible"
-            app:backgroundTint="@color/white" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/fragment_enter_mobile_number"
-        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/enter_mobile_number"
-        android:layout_marginTop="@dimen/margin_10dp"
-        app:backgroundTint="@color/white"
-        app:boxStrokeColor="@color/white"
-        app:boxStrokeWidth="@dimen/margin_0dp"
-        app:errorTextColor="@color/white"
-        app:hintEnabled="true"
-        app:layout_constraintEnd_toEndOf="@+id/fragment_enter_full_name"
-        app:layout_constraintStart_toStartOf="@+id/fragment_enter_full_name"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_enter_email">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/sign_up_mobile_number"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:maxLines="1"
-            android:inputType="number"
-            android:textColor="@android:color/background_dark"
-            android:textCursorDrawable="@color/black"
-            android:visibility="visible"
-            app:backgroundTint="@color/white" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/fragment_enter_password"
-        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_10dp"
-        android:hint="@string/enter_password"
-        app:backgroundTint="@color/white"
-        app:boxStrokeColor="@color/white"
-        app:boxStrokeWidth="@dimen/margin_0dp"
-        app:hintEnabled="true"
-        app:errorTextColor="@color/white"
-        app:passwordToggleEnabled="true"
-        app:layout_constraintEnd_toEndOf="@+id/fragment_enter_mobile_number"
-        app:layout_constraintStart_toStartOf="@+id/fragment_enter_mobile_number"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_enter_mobile_number">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/sign_up_password"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:maxLines="1"
-            android:inputType="textPassword"
-            android:textColor="@android:color/background_dark"
-            android:visibility="visible"
-            app:backgroundTint="@color/white" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <RelativeLayout
-        android:id="@+id/relativeLayout2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        app:layout_constraintEnd_toEndOf="@+id/fragment_enter_password"
-        app:layout_constraintStart_toStartOf="@+id/fragment_enter_password"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_enter_password">
-
-        <ProgressBar
-            android:id="@+id/sign_up_progressBar"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:visibility="gone"
-            android:layout_alignTop="@+id/sign_up_button"
-            android:layout_alignEnd="@+id/sign_up_button"
-            android:layout_alignRight="@+id/sign_up_button"
-            android:layout_alignBottom="@+id/sign_up_button"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="10dp"
-            android:elevation="7dp" />
-
-        <Button
-            android:id="@+id/sign_up_button"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_enter_full_name"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:background="@drawable/second_button"
-            android:text="@string/sign_up"
-            android:textColor="@color/white" />
+            android:layout_marginTop="@dimen/margin_60dp"
+            android:hint="@string/enter_full_name"
+            app:hintTextColor="@android:color/black"
+            app:backgroundTint="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:boxStrokeWidth="@dimen/margin_0dp"
+            app:errorTextColor="@color/white"
+            app:hintEnabled="true"
+            app:layout_constraintEnd_toEndOf="@+id/imageView5"
+            app:layout_constraintStart_toStartOf="@+id/imageView5"
+            app:layout_constraintTop_toBottomOf="@+id/imageView5">
 
-    </RelativeLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/sign_up_full_name"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                style="@style/CustomHintTextStyle"
+                android:textColor="@android:color/background_dark"
+                android:textCursorDrawable="@color/black"
+                android:visibility="visible"
+                app:backgroundTint="@color/white" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_enter_email"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:hint="@string/enter_email"
+            app:hintTextColor="@android:color/black"
+            app:backgroundTint="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:boxStrokeWidth="@dimen/margin_0dp"
+            app:errorTextColor="@color/white"
+            app:hintEnabled="true"
+            app:layout_constraintEnd_toEndOf="@+id/fragment_enter_full_name"
+            app:layout_constraintStart_toStartOf="@+id/fragment_enter_full_name"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_enter_full_name">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/sign_up_email"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                style="@style/CustomHintTextStyle"
+                android:inputType="textEmailAddress"
+                android:textColor="@android:color/background_dark"
+                android:textCursorDrawable="@color/black"
+                android:visibility="visible"
+                app:backgroundTint="@color/white" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:id="@+id/fragment_enter_mobile_number_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/margin_5dp"
+            app:layout_constraintEnd_toEndOf="@+id/fragment_enter_full_name"
+            app:layout_constraintStart_toStartOf="@+id/fragment_enter_full_name"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_enter_email">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_enter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:inputType="number"
+                    android:text="+234"
+                    android:enabled="false"
+                    android:textColor="@android:color/background_dark"
+                    android:textCursorDrawable="@color/black"
+                    android:visibility="visible"
+                    app:backgroundTint="@color/white" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_enter_mobile_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Phone number"
+                android:layout_marginStart="@dimen/margin_10dp"
+                app:backgroundTint="@color/white"
+                app:boxStrokeColor="@color/white"
+                app:boxStrokeWidth="@dimen/margin_0dp"
+                app:hintTextColor="@color/white"
+                app:errorTextColor="@color/white"
+                app:hintEnabled="true">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/sign_up_mobile_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:inputType="number"
+                    android:maxLines="1"
+                    android:maxLength="10"
+                    android:textColor="@android:color/background_dark"
+                    android:textCursorDrawable="@color/black"
+                    android:visibility="visible"
+                    app:backgroundTint="@color/white" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_enter_password"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:hint="@string/enter_password"
+            app:backgroundTint="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:boxStrokeWidth="@dimen/margin_0dp"
+            app:errorTextColor="@color/white"
+            app:hintEnabled="true"
+            app:hintTextColor="@color/white"
+            app:layout_constraintEnd_toEndOf="@+id/fragment_enter_mobile_number_layout"
+            app:layout_constraintStart_toStartOf="@+id/fragment_enter_mobile_number_layout"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_enter_mobile_number_layout"
+            app:passwordToggleEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/sign_up_password"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:textColor="@android:color/background_dark"
+                android:visibility="visible"
+                app:backgroundTint="@color/white" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_confirm_enter_password"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_5dp"
+            android:hint="@string/confirm_password"
+            app:backgroundTint="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:boxStrokeWidth="@dimen/margin_0dp"
+            app:hintTextColor="@color/white"
+            app:errorTextColor="@color/white"
+            app:hintEnabled="true"
+            app:layout_constraintEnd_toEndOf="@+id/fragment_enter_password"
+            app:layout_constraintStart_toStartOf="@+id/fragment_enter_password"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_enter_password"
+            app:passwordToggleEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/confirm_password"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:textColor="@android:color/background_dark"
+                android:visibility="visible"
+                app:backgroundTint="@color/white" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:layout_constraintEnd_toEndOf="@+id/fragment_confirm_enter_password"
+            app:layout_constraintStart_toStartOf="@+id/fragment_confirm_enter_password"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_confirm_enter_password"
+            app:layout_constraintBottom_toTopOf="@+id/guideline4">
+
+            <ProgressBar
+                android:id="@+id/sign_up_progressBar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignTop="@+id/sign_up_button"
+                android:layout_alignEnd="@+id/sign_up_button"
+                android:layout_alignBottom="@+id/sign_up_button"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="10dp"
+                android:elevation="7dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/sign_up_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:textStyle="bold"
+                android:background="@drawable/second_button"
+                android:text="@string/sign_up"
+                android:textColor="@color/white" />
+
+        </RelativeLayout>
+
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.9" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.core.widget.NestedScrollView>

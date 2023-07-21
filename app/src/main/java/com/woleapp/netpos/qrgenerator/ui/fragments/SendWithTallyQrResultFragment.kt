@@ -1,11 +1,15 @@
 package com.woleapp.netpos.qrgenerator.ui.fragments
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -15,12 +19,11 @@ import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentSendWithTallyQrResultBinding
 import com.woleapp.netpos.qrgenerator.model.wallet.request.SendWithTallyNumberRequest
+import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.isOnline
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
-import com.woleapp.netpos.qrgenerator.utils.Singletons
-import com.woleapp.netpos.qrgenerator.utils.WALLET_RESPONSE
-import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.Scheduler
@@ -36,7 +39,9 @@ class SendWithTallyQrResultFragment : Fragment() {
     private lateinit var walletNumber: TextInputEditText
     private lateinit var loader: AlertDialog
     private val walletViewModel by activityViewModels<WalletViewModel>()
-
+    private var verified = false
+    private lateinit var networkConnectivityHelper: NetworkConnectivityHelper
+    private lateinit var connectivity: Connectivity
     @Inject
     lateinit var compositeDisposable: CompositeDisposable
 
@@ -59,33 +64,66 @@ class SendWithTallyQrResultFragment : Fragment() {
             container,
             false
         )
+        networkConnectivityHelper = NetworkConnectivityHelper(requireContext())
+        connectivity = Connectivity(requireContext())
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
+    @SuppressLint("CheckResult")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Singletons().getTallyWalletBalance()?.available_balance?.let {
+
+        Singletons().getTallyWalletBalance()?.info?.available_balance?.let {
             binding.availableBalance.text = it.formatCurrency()
         }
-        walletViewModel.fetchWalletMessage.observe(viewLifecycleOwner) {
-            it.getContentIfNotHandled()?.let { message ->
-                showToast(message)
-            }
-        }
+
         loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
         initViews()
         val creditWalletNumber = Singletons().getAmountAndTallyNumber()?.tallyNumber
         walletNumber.setText(creditWalletNumber)
 
-        binding.btnGenerateQr.setOnClickListener {
-            sendWithTallyNumber()
+        Singletons().getTallyWalletBalance()?.info?.verified?.let {
+            verified = it
+        }
+
+        binding.btnProcessWalletTransfer.setOnClickListener {
+            if (binding.enterDescAccount.text?.trim().toString().isEmpty()) {
+                showToast("Please enter destination account")
+                return@setOnClickListener
+            }
+            if (binding.enterDescAccount.text?.trim().toString().length < 11) {
+                showToast("The destination account must not be less than 11")
+                return@setOnClickListener
+            }
+            if (binding.tallyQrAmount.text?.trim().toString().isEmpty()) {
+                showToast("Please enter wallet amount")
+                return@setOnClickListener
+            }
+            if (binding.enterTransactionPin.text?.trim().toString().isEmpty()) {
+                showToast("Please enter transaction PIN")
+                return@setOnClickListener
+            }
+            if (binding.enterTransactionPin.text?.trim().toString().length < 4) {
+                showToast("The transaction pin must not be less than 4")
+                return@setOnClickListener
+            }
+            if (!verified) {
+                showToast("Please you need to verify your number")
+                return@setOnClickListener
+            }
+                if (isOnline(requireContext())) {
+                    sendWithTallyNumber()
+                } else {
+                    showToast("This device is not connected to the internet")
+                }
         }
     }
 
     private fun initViews() {
         with(binding) {
             amount = tallyQrAmount
-            walletNumber = tallyQrNumber
+            walletNumber = enterDescAccount
         }
     }
 
@@ -94,10 +132,11 @@ class SendWithTallyQrResultFragment : Fragment() {
         val sendWithTallyNumberRequest = SendWithTallyNumberRequest(
             dest_account = walletNumber.text?.trim().toString(),
             transaction_amount = amount.text.trim().toString(),
-            transaction_pin = binding.pin.text?.trim().toString()
+            transaction_pin = binding.enterTransactionPin.text?.trim().toString()
         )
         observeServerResponse(
             walletViewModel.sendWithTallyNumber(
+                requireContext(),
                 "Bearer ${Singletons().getTallyUserToken()!!}",
                 sendWithTallyNumberRequest
             ),
@@ -109,10 +148,6 @@ class SendWithTallyQrResultFragment : Fragment() {
             val walletResponse = Prefs.getString(WALLET_RESPONSE, "")
             showToast(walletResponse)
             findNavController().popBackStack()
-//            parentFragmentManager.beginTransaction()
-//                .replace(R.id.mainActivityfragmentContainerView, MyTallyFragment())
-//                .addToBackStack(null)
-//                .commit()
         }
     }
 }

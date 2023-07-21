@@ -27,6 +27,7 @@
         android:textStyle="italic"
         android:textSize="@dimen/text_size_14sp"
         android:layout_marginBottom="@dimen/margin_5dp"
+        android:textColor="@color/black"
         android:text="Tally is PCIDSS Compliant"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

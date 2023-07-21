@@ -15,8 +15,11 @@ import com.woleapp.netpos.qrgenerator.adapter.QrDetailsAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentQrDetailsBinding
 import com.woleapp.netpos.qrgenerator.model.QrModel
 import com.woleapp.netpos.qrgenerator.model.Transaction
+import com.woleapp.netpos.qrgenerator.model.wallet.FetchQrTokenResponseItem
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseOnce
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 
 
@@ -30,13 +33,17 @@ class QrDetailsFragment : Fragment() {
     private lateinit var qrDetailAdapter: QrDetailsAdapter
     private lateinit var qrDetailRecyclerview: RecyclerView
     private lateinit var qrDetailsDataList: List<Transaction>
+    private lateinit var qrCode: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentQrDetailsBinding.inflate(inflater, container, false)
+        qrViewModel.transactionResponse.removeObservers(viewLifecycleOwner)
+        qrCode = arguments?.getParcelable<FetchQrTokenResponseItem>("DETAILSQR")?.qr_code_id.toString()
+        qrViewModel.getEachTransaction(qrCode)
         return binding.root
     }
 
@@ -45,23 +52,27 @@ class QrDetailsFragment : Fragment() {
         qrViewPager2 = binding.qrPager
         qrDetailRecyclerview = binding.recyclerview
 
-        loader = RandomUtils.alertDialog(requireContext(), R.layout.layout_loading_dialog)
-        val qrCode = arguments?.getParcelable<QrModel>("DETAILSQR")?.qr_code_id
-        qrViewModel.getEachTransaction(qrCode!!)
+        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
+        qrViewModel.transactionResponse.removeObservers(viewLifecycleOwner)
+        getQrTransactions()
+    }
+
+    private fun getQrTransactions() {
+        qrViewModel.transactionResponse.removeObservers(viewLifecycleOwner)
         observeServerResponse(
             qrViewModel.transactionResponse,
             loader,
             requireActivity().supportFragmentManager
         ) {
+            qrViewModel.transactionResponse.value?.data?.data?.rows?.let {
+                qrDetailsDataList = it
+            }
             qrSetUp()
         }
 
     }
 
     private fun qrSetUp() {
-        qrViewModel.transactionResponse.value?.data?.data?.rows?.let {
-            qrDetailsDataList = it
-        }
         if (qrDetailsDataList.isEmpty()) {
             binding.noTransaction.visibility = View.VISIBLE
             qrDetailRecyclerview.visibility = View.GONE
@@ -76,4 +87,11 @@ class QrDetailsFragment : Fragment() {
         }
         qrViewModel.transactionResponse.removeObservers(viewLifecycleOwner)
     }
+
+    override fun onDestroyView() {
+        qrViewModel.transactionResponse.removeObservers(viewLifecycleOwner)
+        qrViewModel.clear()
+        super.onDestroyView()
+    }
+
 }

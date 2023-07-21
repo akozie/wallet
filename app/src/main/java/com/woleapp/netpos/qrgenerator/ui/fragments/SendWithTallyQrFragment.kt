@@ -51,7 +51,7 @@ class SendWithTallyQrFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Singletons().getTallyWalletBalance()?.available_balance?.let {
+        Singletons().getTallyWalletBalance()?.info?.available_balance?.let {
             binding.availableBalance.text = it.formatCurrency()
         }
 

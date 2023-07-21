@@ -12,6 +12,7 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
 
     <style name="QRTheme" parent="Theme.SplashScreen">
@@ -23,6 +24,9 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowIsFloating">false</item>
+    </style>
+    <style name="CustomHintTextStyle">
+        <item name="android:textColorHint">@color/black</item> <!-- Change to the desired color -->
     </style>
 
 </resources>

@@ -10,3 +10,11 @@ data class GetSecurityQuestionResponseItem(
         return question
     }
 }
+data class NewGetSecurityQuestionResponseItem(
+    val id: Int,
+    val question: String,
+){
+    override fun toString(): String {
+        return question
+    }
+}

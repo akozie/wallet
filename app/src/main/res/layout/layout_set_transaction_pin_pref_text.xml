@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
@@ -10,6 +11,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="@dimen/padding_30dp">
+
+        <ImageView
+            android:id="@+id/cancel_dialog"
+            android:layout_width="@dimen/margin_60dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:padding="@dimen/margin_10"
+            android:src="@drawable/ic_close"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/reprint_password"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/reprint_password"
@@ -43,6 +57,7 @@
             android:hint="Select security questions"
             android:textColorHint="@color/black"
             app:boxStrokeWidth="@dimen/margin_0dp"
+            app:hintTextColor="@color/black"
             app:boxStrokeColor="@color/white"
             app:endIconDrawable="@drawable/ic_arrow_down_24"
             app:endIconTint="@color/black"
@@ -56,6 +71,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:inputType="none"
+                android:textColor="@color/black"
                 android:focusable="false"
                 app:backgroundTint="@color/white" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -66,10 +82,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter your answer"
+            app:hintTextColor="@color/black"
             app:layout_constraintTop_toBottomOf="@id/fragment_security_questions">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/security_answers"
+                android:singleLine="true"
+                android:maxLines="1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -79,7 +98,8 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Transaction PIN"
+            android:hint="Transaction PIN (****)"
+            app:hintTextColor="@color/black"
             app:passwordToggleEnabled="true"
             app:layout_constraintTop_toBottomOf="@id/security_answers_layout">
 
@@ -87,6 +107,10 @@
                 android:id="@+id/reprint_password_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:maxLength="4"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textColor="@color/black"
                 android:inputType="numberPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -96,6 +120,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Confirm Transaction PIN"
+            app:hintTextColor="@color/black"
             app:passwordToggleEnabled="true"
             app:layout_constraintTop_toBottomOf="@id/password_wrapper">
 
@@ -103,7 +128,26 @@
                 android:id="@+id/confirm_reprint_password_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:maxLength="4"
+                android:maxLines="1"
+                android:singleLine="true"
                 android:inputType="numberPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/checkbox_wrapper"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10"
+            app:layout_constraintTop_toBottomOf="@+id/confirm_password_wrapper"
+            tools:layout_editor_absoluteX="30dp">
+
+            <CheckBox
+                android:id="@+id/checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/i_understand_that_my_pin_protects_transactions_and_my_card_details_are_never_stored"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
@@ -113,19 +157,20 @@
             android:layout_marginTop="@dimen/margin_30dp"
             android:background="@color/orange"
             android:text="Save"
+            android:enabled="false"
             android:textColor="@color/white"
             app:cornerRadius="@dimen/margin_10dp"
             app:layout_constraintBottom_toTopOf="@+id/guideline4"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/confirm_password_wrapper" />
+            app:layout_constraintTop_toBottomOf="@id/checkbox_wrapper" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.8" />
+            app:layout_constraintGuide_percent="0.9" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

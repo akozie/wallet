@@ -5,6 +5,8 @@ import com.google.gson.Gson
 import com.woleapp.netpos.qrgenerator.BuildConfig
 import com.woleapp.netpos.qrgenerator.db.AppDatabase
 import com.woleapp.netpos.qrgenerator.db.QrDao
+import com.woleapp.netpos.qrgenerator.model.login.EmailDao
+import com.woleapp.netpos.qrgenerator.model.login.UserDao
 import com.woleapp.netpos.qrgenerator.network.*
 import com.woleapp.netpos.qrgenerator.utils.Singletons
 import com.woleapp.netpos.qrgenerator.utils.UtilityParam
@@ -237,6 +239,20 @@ object AppModule {
     fun providesQrDao(
         appDatabase: AppDatabase): QrDao {
         return appDatabase.getQrDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providesEmailDao(
+        appDatabase: AppDatabase): EmailDao {
+        return appDatabase.emailDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providesUserDao(
+        appDatabase: AppDatabase): UserDao {
+        return appDatabase.userDao()
     }
 
     @Provides

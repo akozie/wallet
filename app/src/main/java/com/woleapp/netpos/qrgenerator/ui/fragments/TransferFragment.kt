@@ -36,11 +36,9 @@ class TransferFragment : Fragment() {
         binding.requestPayment.setOnClickListener {
             //
         }
-        binding.providusBank.setOnClickListener {
-            //
-        }
-        binding.otherBanks.setOnClickListener {
-            //
+        binding.withdrawalBank.setOnClickListener {
+            val action = TransferFragmentDirections.actionTransferFragmentToWithdrawalFragment()
+            findNavController().navigate(action)
         }
     }
 }

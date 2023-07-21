@@ -14,4 +14,5 @@ class AppTypeConverter {
     fun toQrData(qrData:String):GenerateQRResponse{
         return Gson().fromJson(qrData, GenerateQRResponse::class.java)
     }
+
 }

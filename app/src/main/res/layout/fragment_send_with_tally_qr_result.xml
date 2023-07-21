@@ -98,130 +98,121 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <TextView
-                android:id="@+id/enter_amount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dimen_40dp"
-                android:text="Tally Number"
-                android:textColor="@color/black"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayout3" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_amount"
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout5"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_10"
-                android:hint="Wallet Number"
-                android:visibility="visible"
-                app:backgroundTint="@color/white"
-                app:boxStrokeColor="@color/white"
-                app:boxStrokeWidth="@dimen/margin_0dp"
-                app:endIconDrawable="@drawable/ic_arrow_down_24"
-                app:endIconTint="@color/black"
-                app:hintEnabled="true"
+                android:layout_margin="@dimen/margin_10"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/enter_amount">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/tally_qr_number"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:inputType="none"
-                    android:focusableInTouchMode="false"
-                    android:textColor="@android:color/background_dark"
-                    android:textCursorDrawable="@color/black"
-                    android:visibility="visible"
-                    app:backgroundTint="@color/background_color" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:id="@+id/card_number"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="PIN"
-                android:textColor="@color/black"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_amount" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_card_pin"
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:hint="Enter your transaction PIN"
-                android:visibility="visible"
-                app:backgroundTint="@color/white"
-                app:boxStrokeColor="@color/white"
-                app:boxStrokeWidth="@dimen/margin_0dp"
-                app:endIconDrawable="@drawable/ic_arrow_down_24"
-                app:endIconTint="@color/black"
-                app:hintEnabled="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/card_number">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/pin"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:inputType="numberPassword"
-                    android:textColor="@android:color/background_dark"
-                    android:textCursorDrawable="@color/black"
-                    android:visibility="visible"
-                    app:backgroundTint="@color/background_color" />
-            </com.google.android.material.textfield.TextInputLayout>
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout3">
 
 
-            <LinearLayout
-                android:id="@+id/linearLayout_1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/fragment_card_pin"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_card_pin">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/fragment_card_number"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margin_30dp"
-                    android:layout_weight="1">
+                    android:layout_marginTop="@dimen/margin_20dp"
+                    android:hint="Enter phone or Tally Number"
+                    android:visibility="visible"
+                    app:backgroundTint="@color/white"
+                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeWidth="@dimen/margin_0dp"
+                    app:endIconDrawable="@drawable/ic_arrow_down_24"
+                    app:endIconTint="@color/black"
+                    app:hintEnabled="true"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/btn_generate_qr"
-                        android:layout_width="wrap_content"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/enter_desc_account"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:backgroundTint="@color/orange"
-                        app:cardCornerRadius="@dimen/margin_10"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="55dp"
-                            android:layout_gravity="center"
-                            android:gravity="center"
-                            android:paddingHorizontal="60dp"
-                            android:text="PROCEED"
-                            android:textColor="@color/white"
-                            android:textStyle="bold" />
-
-                    </androidx.cardview.widget.CardView>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        android:gravity="center_vertical"
+                        android:inputType="number"
+                        android:maxLength="11"
+                        android:textColor="@android:color/background_dark"
+                        android:textCursorDrawable="@color/black"
+                        android:visibility="visible"
+                        app:backgroundTint="@color/background_color" />
+                </com.google.android.material.textfield.TextInputLayout>
 
 
-            </LinearLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/fragment_wallet_pin"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10"
+                    android:hint="Enter transaction pin"
+                    android:visibility="visible"
+                    app:backgroundTint="@color/white"
+                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeWidth="@dimen/margin_0dp"
+                    app:endIconDrawable="@drawable/ic_arrow_down_24"
+                    app:endIconTint="@color/black"
+                    app:hintEnabled="true"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_card_number">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/enter_transaction_pin"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:inputType="numberPassword"
+                        android:maxLength="4"
+                        android:textColor="@android:color/background_dark"
+                        android:textCursorDrawable="@color/black"
+                        android:visibility="visible"
+                        app:backgroundTint="@color/background_color" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_30dp"
+                android:layout_weight="1"
+                android:layout_marginBottom="?actionBarSize"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/constraintLayout5"
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout5">
+
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/btn_process_wallet_transfer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/orange"
+                    app:cardCornerRadius="@dimen/margin_10"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/btn_generate_qr_text_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="55dp"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:paddingHorizontal="60dp"
+                        android:text="PROCEED"
+                        android:textColor="@color/white"
+                        android:textStyle="bold" />
+
+                </androidx.cardview.widget.CardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 

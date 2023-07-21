@@ -6,9 +6,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.woleapp.netpos.qrgenerator.databinding.MerchantLayoutBinding
-import com.woleapp.netpos.qrgenerator.databinding.TransactionLayoutBinding
 import com.woleapp.netpos.qrgenerator.model.Merchant
-import com.woleapp.netpos.qrgenerator.model.Transaction
 
 class SearchMerchantPagingAdapter(private val merchantClickListener: OnMerchantClick) :
     PagingDataAdapter<Merchant, SearchMerchantPagingAdapter.SearchMerchantViewHolder>(
@@ -48,19 +46,19 @@ class SearchMerchantPagingAdapter(private val merchantClickListener: OnMerchantC
             with(holder) {
                 merchantName.text = current?.contact_name
                 merchantAddress.text = current?.address
-                }
             }
+        }
         holder.itemView.setOnClickListener {
             if (current != null) {
                 merchantClickListener.onEachMerchantClicked(current)
             }
+        }
+    }
 
-        }
-        }
     interface OnMerchantClick {
         fun onEachMerchantClicked(merchant: Merchant)
     }
-    }
+}
 
 
 

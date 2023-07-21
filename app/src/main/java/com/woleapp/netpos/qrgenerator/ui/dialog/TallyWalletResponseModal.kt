@@ -109,7 +109,7 @@ class TallyWalletResponseModal @Inject constructor() : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         initViews()
         goHome.visibility = View.VISIBLE
-        goHome.text = "GO HOME"
+        goHome.text = "DONE"
         dialog?.window?.apply {
             setBackgroundDrawableResource(R.drawable.curve_bg)
             isCancelable = false
@@ -138,7 +138,7 @@ class TallyWalletResponseModal @Inject constructor() : DialogFragment() {
         }
         goHome.setOnClickListener {
             dialog?.dismiss()
-            findNavController().popBackStack()
+          //  findNavController().popBackStack()
         }
     }
 
@@ -161,7 +161,7 @@ class TallyWalletResponseModal @Inject constructor() : DialogFragment() {
             requireActivity().supportFragmentManager
         ) {
             walletViewModel.creditWalletResponse.value?.data?.let {
-                showToast(it.message)
+                showLongToast(it.message)
                 walletViewModel.fetchWallet(token)
             }
         }

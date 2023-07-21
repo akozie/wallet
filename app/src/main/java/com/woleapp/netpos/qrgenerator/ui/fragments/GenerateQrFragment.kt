@@ -6,7 +6,6 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,9 +31,10 @@ import com.woleapp.netpos.qrgenerator.model.Row
 import com.woleapp.netpos.qrgenerator.model.RowX
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
-import com.woleapp.netpos.qrgenerator.ui.dialog.QrPasswordPinBlockDialog
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.isOnline
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseOnce
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.stringToBase64
@@ -66,6 +66,7 @@ class GenerateQrFragment : Fragment() {
     private lateinit var formattedDate: String
     private lateinit var receiptPdf: File
     private lateinit var pdfView: LayoutQrReceiptPdfBinding
+    private var transactionCheckbox: Boolean = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,26 +82,31 @@ class GenerateQrFragment : Fragment() {
                 qrViewModel.payVerveResponse.removeObservers(viewLifecycleOwner)
                 val checkOutModel = getCheckOutModel()
                 val qrModelRequest = getQrRequestModel()
-                qrViewModel.displayQrStatus = 0
-                qrViewModel.payQrChargesForVerve(checkOutModel, qrModelRequest, it)
-                val userDetails = Gson().toJson(getQrRequestModel())
-                val encodeUserDetails = stringToBase64(userDetails)
-                observeServerResponseOnce(
-                    qrViewModel.payVerveResponse,
-                    loader,
-                    requireActivity().supportFragmentManager
-                ) {
-                    if (qrViewModel.payVerveResponse.value?.data?.code == "90") {
-                     //   showToast(qrViewModel.payVerveResponse.value?.data?.result.toString())
-                    } else {
-                        Prefs.putString(PREF_GENERATE_QR, userDetails)
-                        if (findNavController().currentDestination?.id == R.id.generateQrFragment){
-                            val action = GenerateQrFragmentDirections.actionGenerateQrFragmentToEnterOtpFragment()
-                            findNavController().navigate(action)
-                        }else{
-                            findNavController().navigate(R.id.enterOtpFragment)
+                if (isOnline(requireContext())) {
+                    qrViewModel.displayQrStatus = 0
+                    qrViewModel.payQrChargesForVerve(checkOutModel, qrModelRequest, it)
+                    val userDetails = Gson().toJson(getQrRequestModel())
+                    val encodeUserDetails = stringToBase64(userDetails)
+                    observeServerResponseOnce(
+                        qrViewModel.payVerveResponse,
+                        loader,
+                        requireActivity().supportFragmentManager
+                    ) {
+                        if (qrViewModel.payVerveResponse.value?.data?.code == "90") {
+                            //   showToast(qrViewModel.payVerveResponse.value?.data?.result.toString())
+                        } else {
+                            Prefs.putString(PREF_GENERATE_QR, userDetails)
+                            if (findNavController().currentDestination?.id == R.id.generateQrFragment) {
+                                val action =
+                                    GenerateQrFragmentDirections.actionGenerateQrFragmentToEnterOtpFragment()
+                                findNavController().navigate(action)
+                            } else {
+                                findNavController().navigate(R.id.enterOtpFragment)
+                            }
                         }
                     }
+                }else{
+                    showToast("This device is not connected to the internet")
                 }
             }
         }
@@ -154,6 +160,20 @@ class GenerateQrFragment : Fragment() {
                 android.R.layout.simple_expandable_list_item_1
             )
             qrIssuingBank.setAdapter(bankCardAdapter)
+        }
+
+        val word = "You will be charged a fee of"
+        val amount = CHARGE_AMOUNT.formatCurrency()
+        val wordToDisplay = "$word $amount"
+        binding.checkbox.text = wordToDisplay
+
+        binding.checkbox.setOnCheckedChangeListener { _, isChecked ->
+            // Handle checkbox state changes here
+            if (isChecked) {
+                transactionCheckbox = true
+            } else {
+                transactionCheckbox
+            }
         }
 
         submitBtn.setOnClickListener {
@@ -224,9 +244,6 @@ class GenerateQrFragment : Fragment() {
             qrIssuingBank.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_issuing_bank))
             }
-            qrIssuingBank.text.toString().isEmpty() -> {
-                showToast(getString(R.string.all_please_enter_issuing_bank))
-            }
             qrCardScheme.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_issuing_card_scheme))
             }
@@ -238,6 +255,9 @@ class GenerateQrFragment : Fragment() {
             }
             cardExpiryCvv.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_card_cvv))
+            }
+            !transactionCheckbox -> {
+                showToast(getString(R.string.all_please_your_consent))
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
@@ -354,16 +374,19 @@ class GenerateQrFragment : Fragment() {
         val qrRequest = getQrRequestModel()
         if (qrRequest.card_scheme.contains("verve", true)) {
             qrViewModel.setIsVerveCard(true)
-            if (findNavController().currentDestination?.id == R.id.generateQrFragment){
-                val action = GenerateQrFragmentDirections.actionGenerateQrFragmentToQrPasswordPinBlockDialog()
+            if (findNavController().currentDestination?.id == R.id.generateQrFragment) {
+                val action =
+                    GenerateQrFragmentDirections.actionGenerateQrFragmentToQrPasswordPinBlockDialog()
                 findNavController().navigate(action)
-            }else{
+            } else {
                 findNavController().popBackStack()
             }
-        } else {
+        } else if (isOnline(requireContext())) {
             qrViewModel.setIsVerveCard(false)
             qrViewModel.displayQrStatus = 0
             qrViewModel.payQrCharges(checkOutModel, qrRequest)
+        }else{
+            showToast("This device is not connected to the internet")
         }
         observeServerResponse(
             qrViewModel.payResponse,
@@ -378,8 +401,7 @@ class GenerateQrFragment : Fragment() {
                     val action =
                         GenerateQrFragmentDirections.actionGenerateQrFragmentToWebViewFragment()
                     findNavController().navigate(action)
-                }
-                else {
+                } else {
                     findNavController().popBackStack()
                 }
             }

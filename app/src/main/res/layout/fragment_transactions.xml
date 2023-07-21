@@ -26,7 +26,7 @@
             android:layout_marginTop="@dimen/margin_20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabMode="fixed"
+            app:tabMode="auto"
             android:minHeight="?attr/actionBarSize"
             app:tabSelectedTextColor="@color/orange"
             android:background="@color/white"

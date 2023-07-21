@@ -8,14 +8,15 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import com.woleapp.netpos.qrgenerator.model.wallet.GetSecurityQuestionResponse
 import com.woleapp.netpos.qrgenerator.model.wallet.GetSecurityQuestionResponseItem
+import com.woleapp.netpos.qrgenerator.model.wallet.NewGetSecurityQuestionResponseItem
 
 
 class SecurityQuestionsAdapter(
-    categoryList: ArrayList<GetSecurityQuestionResponseItem>,
+    categoryList: ArrayList<NewGetSecurityQuestionResponseItem>,
     context: Context,
     layoutId: Int
 ) :
-    ArrayAdapter<GetSecurityQuestionResponseItem>(context, layoutId, categoryList) {
+    ArrayAdapter<NewGetSecurityQuestionResponseItem>(context, layoutId, categoryList) {
 
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {

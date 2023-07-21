@@ -6,5 +6,7 @@ data class WalletModelResponse(
     val message: String?,
     val phone_no: String?,
     val fullname: String?,
-    val email: String?
+    val verified: Int,
+    val email: String?,
+    val pin: Boolean
 )

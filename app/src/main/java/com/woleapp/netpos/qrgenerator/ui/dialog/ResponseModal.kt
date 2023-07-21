@@ -22,6 +22,7 @@ import com.woleapp.netpos.qrgenerator.databinding.TransactionStatusModalBinding
 import com.woleapp.netpos.qrgenerator.model.pay.ModalData
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
 import com.woleapp.netpos.qrgenerator.model.verve.VerveOTPResponse
+import com.woleapp.netpos.qrgenerator.model.wallet.request.QrTokenRequest
 import com.woleapp.netpos.qrgenerator.ui.activities.AuthenticationActivity
 import com.woleapp.netpos.qrgenerator.ui.activities.MainActivity
 import com.woleapp.netpos.qrgenerator.utils.*
@@ -29,6 +30,7 @@ import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import com.woleapp.netpos.qrgenerator.viewmodels.TransactionViewModel
+import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.OutputStream
 import javax.inject.Inject
@@ -47,6 +49,7 @@ class ResponseModal @Inject constructor() : DialogFragment() {
     private var responseFromWebView: Any? = null
     private val transactionViewModel by activityViewModels<TransactionViewModel>()
     private val qrViewModel by activityViewModels<QRViewModel>()
+    private val walletViewModel by activityViewModels<WalletViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -116,10 +119,12 @@ class ResponseModal @Inject constructor() : DialogFragment() {
         initViewsForPdfLayout(
             pdfView, responseFromWebView
         )
+
     }
 
     override fun onResume() {
         super.onResume()
+        viewQr()
         setData()
         cancelBtn.setOnClickListener {
             if (qrViewModel.displayQrStatus == 0){
@@ -146,11 +151,10 @@ class ResponseModal @Inject constructor() : DialogFragment() {
                     qrViewModel.showReceiptDialogForQrPayment()
                 }
             }
-
         }
         viewGeneratedQR.setOnClickListener {
             dialog?.dismiss()
-            viewQr()
+            storeQr()
         }
     }
 
@@ -169,6 +173,27 @@ class ResponseModal @Inject constructor() : DialogFragment() {
         observeServerResponse(
             qrViewModel.generateQrResponse, requireActivity().supportFragmentManager
         ) {
+            val qrTokenResponse = qrViewModel.generateQrResponse.value
+            val qrTokenId = qrTokenResponse?.data?.qr_code_id
+            val qrToken = qrTokenResponse?.data?.data
+            val getQrModel = Singletons().getSavedQrModelRequest()
+            val newQrToken = QrTokenRequest(
+                qr_code_id = qrTokenId!!,
+                qr_token = qrToken!!,
+                card_scheme = getQrModel?.card_scheme!!,
+                issuing_bank = getQrModel.issuing_bank
+            )
+            walletViewModel.storeQrToken(newQrToken)
+
+        }
+    }
+
+    private fun storeQr() {
+        observeServerResponse(
+            walletViewModel.storeQrResponse, requireActivity().supportFragmentManager
+        ) {
+            val storeQrMessage = walletViewModel.storeQrResponse.value?.data?.message!!
+           showToast(storeQrMessage)
             if (qrViewModel.displayQrStatus == 0) {
         //        Prefs.remove(PREF_GENERATE_QR)
                 findNavController().navigate(R.id.showQrFragment)

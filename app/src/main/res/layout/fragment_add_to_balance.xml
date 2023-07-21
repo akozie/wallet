@@ -80,17 +80,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Issuing Bank"
+            android:visibility="gone"
             android:layout_marginTop="10dp"
             android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/fragment_amount" />
+            app:layout_constraintTop_toBottomOf="@+id/fragment_card_number" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_issuing_bank"
             style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible"
+            android:visibility="gone"
             app:backgroundTint="@color/white"
             app:hintEnabled="true"
             android:layout_marginTop="10dp"
@@ -118,6 +119,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Card Scheme"
+            android:visibility="gone"
             android:layout_marginTop="10dp"
             android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="parent"
@@ -128,7 +130,7 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible"
+            android:visibility="gone"
             app:backgroundTint="@color/white"
             app:hintEnabled="true"
             android:layout_marginTop="10dp"
@@ -156,10 +158,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Card Number"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="@dimen/margin_10"
             android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/fragment_card_scheme" />
+            app:layout_constraintTop_toBottomOf="@+id/fragment_amount" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_card_number"
@@ -172,7 +174,6 @@
             app:backgroundTint="@color/white"
             app:boxStrokeColor="@color/white"
             app:boxStrokeWidth="@dimen/margin_0dp"
-            app:startIconDrawable="@drawable/card_number_icon"
             app:hintEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -189,6 +190,14 @@
                 android:visibility="visible"
                 app:backgroundTint="@color/background_color" />
         </com.google.android.material.textfield.TextInputLayout>
+        <ImageView
+            android:id="@+id/card_img"
+            android:layout_width="@dimen/dimen_50dp"
+            android:layout_height="0dp"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/fragment_card_number"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/fragment_card_number" />
 
 
 
@@ -200,7 +209,7 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/fragment_card_number"
-            app:layout_constraintTop_toBottomOf="@+id/fragment_card_number">
+            app:layout_constraintTop_toBottomOf="@+id/fragment_issuing_bank">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -303,7 +312,22 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+
         </LinearLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/checkbox_wrapper"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_10"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+            tools:layout_editor_absoluteX="30dp">
+
+            <CheckBox
+                android:id="@+id/checkbox"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
 
         <LinearLayout
@@ -312,9 +336,11 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="@dimen/margin_10"
+            android:layout_marginBottom="?actionBarSize"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/fragment_card_number"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+            app:layout_constraintStart_toStartOf="@+id/checkbox_wrapper"
+            app:layout_constraintTop_toBottomOf="@+id/checkbox_wrapper">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"

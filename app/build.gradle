@@ -14,8 +14,8 @@ android {
         applicationId "com.woleapp.netpos.qrgenerator"
         minSdk 21
         targetSdk 31
-        versionCode 1
-        versionName "1.0"
+        versionCode 5
+        versionName "1.0.5"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -125,6 +125,8 @@ dependencies {
     implementation "androidx.room:room-runtime:2.3.0"
     kapt "androidx.room:room-compiler:2.3.0"
     implementation "androidx.room:room-rxjava2:2.3.0"
+    implementation 'androidx.room:room-ktx:2.3.0'
+
 
     //easyprefs
     implementation 'com.pixplicity.easyprefs:EasyPrefs:1.10.0'
@@ -162,4 +164,8 @@ dependencies {
 
     // OTP VIEWS
     implementation "io.github.chaosleung:pinview:1.4.4"
+
+    //OTP AUTOMATIC VERIFICATION
+    implementation 'com.google.android.gms:play-services-auth:17.0.0'
+    implementation 'com.google.android.gms:play-services-auth-api-phone:17.4.0'
 }
