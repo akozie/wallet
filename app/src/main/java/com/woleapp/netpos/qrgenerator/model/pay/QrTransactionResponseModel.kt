@@ -21,3 +21,4 @@ data class QrTransactionResponseModel(
     val status: String,
     val transId: String
 ) : Parcelable
+

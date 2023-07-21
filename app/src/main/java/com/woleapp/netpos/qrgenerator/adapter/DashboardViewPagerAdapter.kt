@@ -10,19 +10,15 @@ import com.woleapp.netpos.qrgenerator.ui.fragments.MyTallyFragment
 import com.woleapp.netpos.qrgenerator.ui.fragments.QRFragment
 import com.woleapp.netpos.qrgenerator.ui.fragments.TransactionFragment
 
-class DashboardViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
+class DashboardViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle, private val NUM_PAGES: Int) :
     FragmentStateAdapter(fragmentManager, lifecycle) {
 
     override fun getItemCount(): Int {
-        return if (BuildConfig.FLAVOR.contains("tallywallet")) {
-            TALLY_NUM_PAGES
-        }else{
-            NUM_PAGES
-        }
+        return NUM_PAGES
     }
 
     override fun createFragment(position: Int): Fragment {
-        return if (BuildConfig.FLAVOR.contains("tallywallet")){
+        return if (NUM_PAGES == 4){
             when (position) {
                 1 -> QRFragment()
                 2 -> TransactionFragment()
@@ -38,8 +34,4 @@ class DashboardViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lif
         }
     }
 
-    companion object {
-        private const val NUM_PAGES = 3
-        private const val TALLY_NUM_PAGES = 4
-    }
 }

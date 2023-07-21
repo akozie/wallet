@@ -4,11 +4,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.woleapp.netpos.qrgenerator.databinding.TransactionLayoutBinding
+import com.woleapp.netpos.qrgenerator.model.Merchant
 import com.woleapp.netpos.qrgenerator.model.wallet.TallyWalletUserTransactionsResponseItem
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatDate
 
 
-class TallyWalletUserTransactionAdapter(private var transactionList: List<TallyWalletUserTransactionsResponseItem>): RecyclerView.Adapter<TallyWalletUserTransactionAdapter.MyViewHolder>() {
+class TallyWalletUserTransactionAdapter(private var transactionList: List<TallyWalletUserTransactionsResponseItem>, private val onUserTransactionsClick :OnUserTransactionsClick): RecyclerView.Adapter<TallyWalletUserTransactionAdapter.MyViewHolder>() {
 
     inner class MyViewHolder(private val binding: TransactionLayoutBinding): RecyclerView.ViewHolder(binding.root) {
         val transactionTitle = binding.transactionTitle
@@ -26,11 +28,29 @@ class TallyWalletUserTransactionAdapter(private var transactionList: List<TallyW
         holder.itemView.apply {
             with(holder){
                 with(transactionList[position]){
+                    val date = created_at.substring(0, 10)
+                    val time = created_at.substring(11, 16)
+                    if (time.substring(0, 2) < 12.toString()){
+                        transactionDate.text = "$date \n$time AM"
+                    } else {
+                        val newTime = time.substring(0,2).toInt()
+                        val calculatedTime = newTime - 12
+                        val remainingTime = time.substring(3,5)
+                        if (calculatedTime == 0){
+                            transactionDate.text = "$date \n12:$remainingTime PM"
+                        }else if (calculatedTime < 10){
+                            transactionDate.text = "$date \n0$calculatedTime:$remainingTime PM"
+                        } else{
+                            transactionDate.text = "$date \n$calculatedTime:$remainingTime PM"
+                        }
+                    }
                     transactionTitle.text = source_acct
-                    transactionDate.text = created_at
                     transactionPrice.text = transaction_amount.toInt().formatCurrency()
                 }
             }
+        }
+        holder.itemView.setOnClickListener {
+            onUserTransactionsClick.onEachTransactionsClicked(transactionList[position])
         }
     }
 
@@ -40,4 +60,7 @@ class TallyWalletUserTransactionAdapter(private var transactionList: List<TallyW
 
 }
 
+interface OnUserTransactionsClick {
+    fun onEachTransactionsClicked(data: TallyWalletUserTransactionsResponseItem)
+}
 

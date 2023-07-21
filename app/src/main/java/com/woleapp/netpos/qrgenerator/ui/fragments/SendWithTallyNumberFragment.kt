@@ -2,10 +2,14 @@ package com.woleapp.netpos.qrgenerator.ui.fragments
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.text.InputFilter
+import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -15,27 +19,23 @@ import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.adapter.FrequentBeneficiariesAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentSendWithTallyNumberBinding
-import com.woleapp.netpos.qrgenerator.databinding.LayoutEnterOtpBinding
+import com.woleapp.netpos.qrgenerator.databinding.LayoutCustomLoadingDialogBinding
 import com.woleapp.netpos.qrgenerator.databinding.SuccessLayoutBinding
 import com.woleapp.netpos.qrgenerator.model.FrequentBeneficiariesModel
-import com.woleapp.netpos.qrgenerator.model.pay.ModalData
 import com.woleapp.netpos.qrgenerator.model.wallet.request.SendWithTallyNumberRequest
+import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.isOnline
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
-import com.woleapp.netpos.qrgenerator.utils.SAVE_CUSTOMER_DETAILS
-import com.woleapp.netpos.qrgenerator.utils.Singletons
-import com.woleapp.netpos.qrgenerator.utils.WALLET_RESPONSE
-import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.Scheduler
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.internal.schedulers.IoScheduler
-import io.reactivex.schedulers.Schedulers
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
 class SendWithTallyNumberFragment : Fragment() {
@@ -45,13 +45,11 @@ class SendWithTallyNumberFragment : Fragment() {
     private lateinit var frequentBeneficiariesList: ArrayList<FrequentBeneficiariesModel>
     private val walletViewModel by activityViewModels<WalletViewModel>()
     private lateinit var loader: AlertDialog
-   // private lateinit var enterOTPDialog: AlertDialog
-  //  private lateinit var enterOTPBinding: LayoutEnterOtpBinding
     private lateinit var transactionStatusDialog: AlertDialog
     private lateinit var transactionStatusBinding: SuccessLayoutBinding
-    private lateinit var destinationAccount: String
-    private lateinit var transactionAmount: String
-    private lateinit var transactionPIN: String
+    private lateinit var customLayout: LayoutCustomLoadingDialogBinding
+    private var verified = false
+
 
     @Inject
     lateinit var compositeDisposable: CompositeDisposable
@@ -75,19 +73,7 @@ class SendWithTallyNumberFragment : Fragment() {
             container,
             false
         )
-
-//        enterOTPBinding = LayoutEnterOtpBinding.inflate(
-//            LayoutInflater.from(requireContext()),
-//            null,
-//            false
-//        ).apply {
-//            lifecycleOwner = this@SendWithTallyNumberFragment
-//            executePendingBindings()
-//        }
-//        enterOTPDialog = AlertDialog.Builder(requireContext())
-//            .setView(enterOTPBinding.root)
-//            .setCancelable(true)
-//            .create()
+        customLayout = LayoutCustomLoadingDialogBinding.inflate(layoutInflater)
 
         transactionStatusBinding = SuccessLayoutBinding.inflate(
             LayoutInflater.from(requireContext()),
@@ -107,35 +93,58 @@ class SendWithTallyNumberFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
+        loader = alertDialog(requireContext())
         beneficiariesList()
         qrSetUp()
-        //initViews()
-        binding.btnProcessWalletTransfer.setOnClickListener {
-            sendWithTallyNumber()
+        walletViewModel.fetchWalletMessage.observe(viewLifecycleOwner) {
+            it.getContentIfNotHandled()?.let { message ->
+                showToast(message)
+            }
         }
 
-        Singletons().getTallyWalletBalance()?.available_balance?.let {
+        Singletons().getTallyWalletBalance()?.info?.verified?.let {
+            verified = it
+        }
+        binding.btnProcessWalletTransfer.setOnClickListener {
+            if (binding.enterDescAccount.text?.trim().toString().isEmpty()) {
+                showToast("Please enter destination account")
+                return@setOnClickListener
+            }
+            if (binding.enterDescAccount.text?.trim().toString().length < 11) {
+                showToast("The destination account must not be less than 11")
+                return@setOnClickListener
+            }
+            if (binding.enterWalletAmount.text?.trim().toString().isEmpty()) {
+                showToast("Please enter wallet amount")
+                return@setOnClickListener
+            }
+            if (binding.enterTransactionPin.text?.trim().toString().isEmpty()) {
+                showToast("Please enter transaction PIN")
+                return@setOnClickListener
+            }
+            if (binding.enterTransactionPin.text?.trim().toString().length < 4) {
+                showToast("The transaction pin must not be less than 4")
+                return@setOnClickListener
+            }
+            if (!verified) {
+                showToast("Please you need to verify your number")
+                return@setOnClickListener
+            }
+                if (isOnline(requireContext())) {
+                    sendWithTallyNumber()
+                } else {
+                    showToast("This device is not connected to the internet")
+                }
+        }
+
+        Singletons().getTallyWalletBalance()?.info?.available_balance?.let {
             binding.availableBalance.text = it.formatCurrency()
         }
 
-//        binding.setTransactionPin.setOnClickListener {
-//            enterOTPDialog.show()
-//        }
-//        enterOTPBinding.proceed.setOnClickListener {
-//            val transactionPin = enterOTPBinding.otpEdittext.text?.trim().toString()
-//          //  setTransactionPin(transactionPin)
-//        }
         transactionStatusBinding.home.setOnClickListener {
             transactionStatusDialog.dismiss()
         }
     }
-
-//    private fun initViews() {
-//        enterOTPBinding.passwordWrapper.hint = "Enter PIN"
-//        enterOTPBinding.proceed.setText("SET PIN")
-//        enterOTPBinding.otpEdittext.filters = arrayOf(InputFilter.LengthFilter(4))
-//    }
 
     private fun qrSetUp() {
         frequentBeneficiariesAdapter = FrequentBeneficiariesAdapter(frequentBeneficiariesList)
@@ -164,7 +173,11 @@ class SendWithTallyNumberFragment : Fragment() {
             transaction_pin = binding.enterTransactionPin.text?.trim().toString()
         )
         observeServerResponse(
-            walletViewModel.sendWithTallyNumber("Bearer ${Singletons().getTallyUserToken()!!}",sendWithTallyNumberRequest),
+            walletViewModel.sendWithTallyNumber(
+                requireContext(),
+                "Bearer ${Singletons().getTallyUserToken()!!}",
+                sendWithTallyNumberRequest
+            ),
             loader,
             compositeDisposable,
             ioScheduler,
@@ -175,7 +188,4 @@ class SendWithTallyNumberFragment : Fragment() {
             findNavController().popBackStack()
         }
     }
-
-
-
 }

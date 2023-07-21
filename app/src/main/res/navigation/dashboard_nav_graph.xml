@@ -39,6 +39,12 @@
         <action
             android:id="@+id/action_transactionsFragment_to_transferFragment"
             app:destination="@id/transferFragment" />
+        <action
+            android:id="@+id/action_transactionsFragment_to_recentTransactionDetailsFragment"
+            app:destination="@id/recentTransactionDetailsFragment" />
+        <action
+            android:id="@+id/action_transactionsFragment_to_verificationFragment"
+            app:destination="@id/verificationFragment" />
     </fragment>
     <fragment
         android:id="@+id/transactionHistoryFragment"
@@ -61,7 +67,7 @@
         tools:layout="@layout/fragment_qr_details" >
         <argument
             android:name="DETAILSQR"
-            app:argType="com.woleapp.netpos.qrgenerator.model.QrModel" />
+            app:argType="com.woleapp.netpos.qrgenerator.model.wallet.FetchQrTokenResponseItem" />
     </fragment>
     <fragment
         android:id="@+id/QRFragment2"
@@ -79,7 +85,7 @@
         tools:layout="@layout/fragment_display_qr" >
         <argument
             android:name="DISPLAYQR"
-            app:argType="com.woleapp.netpos.qrgenerator.model.QrModel"
+            app:argType="com.woleapp.netpos.qrgenerator.model.wallet.FetchQrTokenResponseItem"
             app:nullable="true" />
         <action
             android:id="@+id/action_displayQrFragment2_to_transactionsFragment"
@@ -212,10 +218,42 @@
         <action
             android:id="@+id/action_transferFragment_to_sendWithTallyNumberFragment"
             app:destination="@id/sendWithTallyNumberFragment" />
+        <action
+            android:id="@+id/action_transferFragment_to_withdrawalFragment"
+            app:destination="@id/withdrawalFragment" />
     </fragment>
     <fragment
         android:id="@+id/walletEnterOtpFragment"
         android:name="com.woleapp.netpos.qrgenerator.ui.fragments.WalletEnterOtpFragment"
         android:label="fragment_wallet_enter_otp"
         tools:layout="@layout/fragment_wallet_enter_otp" />
+    <fragment
+        android:id="@+id/withdrawalFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.WithdrawalFragment"
+        android:label="fragment_withdrawal"
+        tools:layout="@layout/fragment_withdrawal" />
+    <fragment
+        android:id="@+id/recentTransactionDetailsFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.RecentTransactionDetailsFragment"
+        android:label="fragment_recent_transaction_details"
+        tools:layout="@layout/fragment_recent_transaction_details" >
+        <argument
+            android:name="USERTRANSACTION"
+            app:argType="com.woleapp.netpos.qrgenerator.model.wallet.TallyWalletUserTransactionsResponseItem" />
+    </fragment>
+    <fragment
+        android:id="@+id/transactionFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.TransactionFragment"
+        android:label="fragment_transaction"
+        tools:layout="@layout/fragment_transaction" />
+    <fragment
+        android:id="@+id/merchantsFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.MerchantsFragment"
+        android:label="fragment_merchants"
+        tools:layout="@layout/fragment_merchants" />
+    <fragment
+        android:id="@+id/verificationFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.VerificationFragment"
+        android:label="fragment_verification"
+        tools:layout="@layout/fragment_verification" />
 </navigation>

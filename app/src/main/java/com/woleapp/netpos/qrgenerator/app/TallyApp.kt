@@ -2,6 +2,7 @@ package com.woleapp.netpos.qrgenerator.app
 
 import android.app.Application
 import android.content.ContextWrapper
+import androidx.appcompat.app.AppCompatDelegate
 import com.pixplicity.easyprefs.library.Prefs
 import dagger.hilt.android.HiltAndroidApp
 
@@ -16,5 +17,8 @@ class TallyApp : Application(){
             .setPrefsName(packageName)
             .setUseDefaultSharedPreference(true)
             .build()
+
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
     }
 }

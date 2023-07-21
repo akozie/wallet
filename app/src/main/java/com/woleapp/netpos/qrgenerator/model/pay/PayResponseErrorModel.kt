@@ -6,6 +6,7 @@ data class PayResponseErrorModel(
     val message: String,
     val orderId: String,
     val result: String,
+    val review_status: String,
     val status: String,
     val transId: String
 )

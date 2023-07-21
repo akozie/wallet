@@ -20,25 +20,74 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/imageView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/home_icon"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
 
 
-            <ImageView
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/imageView3"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:src="@drawable/qr_card"
+                android:layout_marginTop="@dimen/margin_5dp"
+                android:background="@drawable/orange_button"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/margin_10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:id="@+id/imageView6"
+                        android:layout_width="@dimen/margin_80dp"
+                        android:layout_height="@dimen/margin_80dp"
+                        android:src="@drawable/qr_icon_white"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/textView8"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_5dp"
+                        android:text="Welcome"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/text_size_22sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/imageView6"
+                        app:layout_constraintTop_toBottomOf="@+id/imageView6" />
+
+                    <TextView
+                        android:id="@+id/user_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/margin_5dp"
+                        android:text="kk@gmail.com"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/text_size_22sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@+id/textView8"
+                        app:layout_constraintEnd_toEndOf="@+id/imageView7"
+                        app:layout_constraintStart_toEndOf="@+id/textView8"
+                        app:layout_constraintTop_toTopOf="@+id/textView8" />
+
+                    <ImageView
+                        android:id="@+id/imageView7"
+                        android:layout_width="@dimen/margin_80dp"
+                        android:layout_height="@dimen/margin_80dp"
+                        android:layout_marginEnd="20dp"
+                        android:src="@drawable/tally_user"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="@+id/textView8"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
                 android:id="@+id/textView4"
@@ -46,6 +95,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/enter_card_deatils"
                 android:textStyle="bold"
+                android:layout_marginTop="@dimen/margin_30dp"
                 android:textColor="@color/black"
                 android:textSize="@dimen/text_size_22sp"
                 app:layout_constraintEnd_toEndOf="@+id/imageView3"
@@ -71,10 +121,11 @@
                 android:layout_marginTop="30dp"
                 android:hint="Enter full name"
                 android:textColorHint="@color/black"
-                android:visibility="visible"
+                android:visibility="gone"
                 app:backgroundTint="@color/white"
                 app:boxStrokeColor="@color/white"
                 app:boxStrokeWidth="@dimen/margin_0dp"
+                app:hintTextColor="@color/black"
                 app:endIconDrawable="@drawable/ic_arrow_down_24"
                 app:endIconTint="@color/black"
                 app:hintEnabled="true"
@@ -101,8 +152,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:hint="Enter email"
+                app:hintTextColor="@color/black"
                 android:textColorHint="@color/black"
-                android:visibility="visible"
+                android:visibility="gone"
                 app:backgroundTint="@color/white"
                 app:boxStrokeColor="@color/white"
                 app:boxStrokeWidth="@dimen/margin_0dp"
@@ -133,7 +185,8 @@
                 android:layout_marginTop="20dp"
                 android:hint="Enter phone number"
                 android:textColorHint="@color/black"
-                android:visibility="visible"
+                android:visibility="gone"
+                app:hintTextColor="@color/black"
                 app:backgroundTint="@color/white"
                 app:boxStrokeColor="@color/white"
                 app:boxStrokeWidth="@dimen/margin_0dp"
@@ -164,8 +217,9 @@
                 android:visibility="visible"
                 app:backgroundTint="@color/white"
                 app:hintEnabled="true"
+                app:hintTextColor="@color/black"
                 android:layout_marginTop="20dp"
-                android:hint="Select issuing bank"
+                android:hint="Bank"
                 android:textColorHint="@color/black"
                 app:boxStrokeWidth="@dimen/margin_0dp"
                 app:boxStrokeColor="@color/white"
@@ -173,7 +227,7 @@
                 app:endIconTint="@color/black"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_mobile_number">
+                app:layout_constraintTop_toBottomOf="@+id/fragment_card_number">
 
                 <AutoCompleteTextView
                     android:id="@+id/issuing_bank"
@@ -193,7 +247,8 @@
                 android:layout_marginTop="20dp"
                 android:hint="Select Card Scheme"
                 android:textColorHint="@color/black"
-                android:visibility="visible"
+                android:visibility="gone"
+                app:hintTextColor="@color/black"
                 app:backgroundTint="@color/white"
                 app:boxStrokeColor="@color/white"
                 app:boxStrokeWidth="@dimen/margin_0dp"
@@ -222,19 +277,20 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
                 android:hint="Enter card number"
                 android:textColorHint="@color/black"
                 android:visibility="visible"
+                android:layout_marginTop="@dimen/margin_20dp"
                 app:backgroundTint="@color/white"
                 app:boxStrokeColor="@color/white"
                 app:boxStrokeWidth="@dimen/margin_0dp"
                 app:endIconDrawable="@drawable/ic_arrow_down_24"
                 app:endIconTint="@color/black"
                 app:hintEnabled="true"
+                app:hintTextColor="@color/black"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_select_card_scheme">
+                app:layout_constraintTop_toBottomOf="@+id/textView5">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/card_number"
@@ -246,7 +302,17 @@
                     android:textCursorDrawable="@color/black"
                     android:visibility="visible"
                     app:backgroundTint="@color/white" />
+
             </com.google.android.material.textfield.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/card_img"
+                android:layout_width="@dimen/dimen_50dp"
+                android:layout_height="@dimen/dimen_50dp"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="@+id/fragment_card_number"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/fragment_card_number" />
 
             <LinearLayout
                 android:id="@+id/linearLayout"
@@ -256,7 +322,7 @@
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="@+id/fragment_card_number"
                 app:layout_constraintStart_toStartOf="@+id/fragment_card_number"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_card_number">
+                app:layout_constraintTop_toBottomOf="@+id/fragment_select_bank">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -378,6 +444,21 @@
 
             </LinearLayout>
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/checkbox_wrapper"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+                tools:layout_editor_absoluteX="30dp">
+
+                <CheckBox
+                    android:id="@+id/checkbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <RelativeLayout
                 android:id="@+id/relativeLayout2"
@@ -385,8 +466,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/linearLayout"
-                app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+                app:layout_constraintEnd_toEndOf="@+id/checkbox_wrapper"
+                app:layout_constraintTop_toBottomOf="@+id/checkbox_wrapper">
 
                 <ProgressBar
                     android:id="@+id/generate_qr_progressBar"

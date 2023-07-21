@@ -3,7 +3,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="generate_qr_code">GENERATE QR CODE \n FOR YOUR DEBIT CARD</string>
-    <string name="pay_with_ease">Pay with ease</string>
+    <string name="pay_with_ease">Pay with Ease</string>
     <string name="qr_for_card">GENERATE QR FOR CARD</string>
     <string name="sign_in">SIGN IN</string>
     <string name="sign_up">SIGN UP</string>
@@ -27,8 +27,11 @@
     <string name="thirty_days">30 days</string>
     <string name="timeOut">Time Out</string>
 
+    <string name="all_please_account_number">Please enter destination account number</string>
+    <string name="all_please_account_name">Please enter destination account name</string>
     <string name="all_please_confirm_password">Please Confirm Your Password</string>
     <string name="all_password_mismatch">Password mismatch</string>
+    <string name="all_phone_number">Incorrect phone number</string>
     <string name="all_please_enter_password">Please Enter Your Password</string>
     <string name="all_please_enter_full_name">Please Enter Your Full Name</string>
     <string name="all_please_enter_email">Please Enter Your Email</string>
@@ -41,6 +44,7 @@
     <string name="all_please_enter_card_expiry_number">Please Enter Your Card Expiry Number</string>
     <string name="all_please_enter_card_date">Please Enter Your Card Date</string>
     <string name="all_please_enter_card_cvv">Please Enter Your Card CVV</string>
+    <string name="all_please_your_consent">"Please your consent is needed to proceed"</string>
     <string name="enter_pin">Enter Card Pin</string>
 
     <string name="btn_cal_0">0</string>
@@ -71,8 +75,11 @@
     <string name="date_time_place_holder">DATE/TIME: %1$s</string>
     <string name="amount_place_holder">Amount:   %1$S</string>
     <string name="order_id_place_holder">Order Id: %1$s</string>
+    <string name="source_account_place_holder">Source Account: %1$s</string>
     <string name="narration_place_holder">Narration: %1$s</string>
+    <string name="beneficiary_account_place_holder">Beneficiary Account: %1$s</string>
     <string name="card_owner_place_holder">Card Owner: %1$s</string>
+    <string name="beneficiary_place_holder">Beneficiary: %1$s</string>
     <string name="response_code_place_holder">Response Code:   %1$s</string>
     <string name="transaction_place_holder">Transaction Id: %1$s</string>
     <string name="app_version_place_holder"><![CDATA[App Version:   %1$s]]></string>
@@ -93,5 +100,7 @@
     <string name="resend_code">Didn\'t Receive Code? Resend it</string>
     <string name="otp_resent">A fresh OTP has been sent to you…</string>
     <string name="confirm_password">Confirm Password</string>
+    <string name="you_will_be_charged_a_fee_of_n100">You will be charged a fee of 100</string>
+    <string name="i_understand_that_my_pin_protects_transactions_and_my_card_details_are_never_stored">I understand that my pin protects transactions and my card details are never stored.</string>
 
 </resources>

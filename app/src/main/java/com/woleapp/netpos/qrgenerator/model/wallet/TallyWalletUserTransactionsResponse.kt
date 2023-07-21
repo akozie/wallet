@@ -1,3 +1,12 @@
 package com.woleapp.netpos.qrgenerator.model.wallet
 
-class TallyWalletUserTransactionsResponse : ArrayList<TallyWalletUserTransactionsResponseItem>()
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+class TallyWalletUserTransactionsResponse (
+    val status: String,
+    val message: String,
+    val total_records:Int,
+    val data: ArrayList<TallyWalletUserTransactionsResponseItem>
+) : Parcelable

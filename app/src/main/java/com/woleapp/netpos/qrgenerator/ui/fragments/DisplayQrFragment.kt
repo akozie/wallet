@@ -15,6 +15,8 @@ import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentDisplayQrBinding
 import com.woleapp.netpos.qrgenerator.model.GenerateQRResponse
 import com.woleapp.netpos.qrgenerator.model.QrModel
+import com.woleapp.netpos.qrgenerator.model.wallet.FetchQrTokenResponse
+import com.woleapp.netpos.qrgenerator.model.wallet.FetchQrTokenResponseItem
 import com.woleapp.netpos.qrgenerator.ui.activities.MainActivity
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 
@@ -32,23 +34,12 @@ class DisplayQrFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         _binding = FragmentDisplayQrBinding.inflate(inflater, container, false)
-        requireActivity()
-            .onBackPressedDispatcher
-            .addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    // Do custom work here
-                    startActivity(Intent(requireContext(), MainActivity::class.java))
-                    requireActivity().finish()
-                    // if you want onBackPressed() to be called as normal afterwards
-                }
-            }
-            )
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val qrCode = arguments?.getParcelable<QrModel>("DISPLAYQR")?.data
+        val qrCode = arguments?.getParcelable<FetchQrTokenResponseItem>("DISPLAYQR")?.qr_token
         if (qrCode.isNullOrEmpty()) {
             qrViewModel.generateQrResponse.value?.data?.data?.let {
                 Glide.with(requireContext()).load(it).into(binding.qrCode)

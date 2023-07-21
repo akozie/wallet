@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.fragments.WithdrawalFragment">
+
+    <data>
+
+    </data>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background_color"
+        android:fillViewport="true"
+        android:fitsSystemWindows="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/margin_20dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_select_bank"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Select issuing bank"
+                android:textColorHint="@color/black"
+                android:visibility="visible"
+                app:backgroundTint="@color/white"
+                app:boxStrokeColor="@color/white"
+                app:boxStrokeWidth="@dimen/margin_0dp"
+                app:endIconDrawable="@drawable/ic_arrow_down_24"
+                app:endIconTint="@color/black"
+                app:hintEnabled="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <AutoCompleteTextView
+                    android:id="@+id/issuing_bank"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:focusable="false"
+                    android:visibility="visible"
+                    android:gravity="center_vertical"
+                    android:inputType="none"
+                    app:backgroundTint="@color/white" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_number"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:hint="Enter Account Number"
+                android:textColorHint="@color/black"
+                android:visibility="visible"
+                app:backgroundTint="@color/white"
+                app:boxStrokeColor="@color/white"
+                app:boxStrokeWidth="@dimen/margin_0dp"
+                app:endIconDrawable="@drawable/ic_arrow_down_24"
+                app:endIconTint="@color/black"
+                app:hintEnabled="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_select_bank">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/account_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:inputType="number"
+                    android:maxLength="10"
+                    android:visibility="visible"
+                    android:textColor="@android:color/background_dark"
+                    android:textCursorDrawable="@color/black"
+                    app:backgroundTint="@color/white" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraint_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_number">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/fragment_account_name"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10"
+                    android:hint="Account Name"
+                    android:textColorHint="@color/black"
+                    app:backgroundTint="@color/white"
+                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeWidth="@dimen/margin_0dp"
+                    app:endIconDrawable="@drawable/ic_arrow_down_24"
+                    app:endIconTint="@color/black"
+                    app:hintEnabled="true"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/constraint_layout">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/account_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:inputType="none"
+                        android:textColor="@android:color/background_dark"
+                        android:textCursorDrawable="@color/black"
+                        app:backgroundTint="@color/white" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/fragment_transaction_amount"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_10"
+                    android:hint="Transaction Amount"
+                    android:textColorHint="@color/black"
+                    app:backgroundTint="@color/white"
+                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeWidth="@dimen/margin_0dp"
+                    app:endIconDrawable="@drawable/ic_arrow_down_24"
+                    app:endIconTint="@color/black"
+                    app:hintEnabled="true"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_account_name">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/transaction_amount"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:inputType="number"
+                        android:textColor="@android:color/background_dark"
+                        android:textCursorDrawable="@color/black"
+                        app:backgroundTint="@color/white" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/fragment_narration"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:hint="Narration"
+                    android:textColorHint="@color/black"
+                    app:backgroundTint="@color/white"
+                    app:boxStrokeColor="@color/white"
+                    app:boxStrokeWidth="@dimen/margin_0dp"
+                    app:endIconDrawable="@drawable/ic_arrow_down_24"
+                    app:endIconTint="@color/black"
+                    app:hintEnabled="true"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_transaction_amount">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/narration"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:inputType="text"
+                        android:textColor="@android:color/background_dark"
+                        android:textCursorDrawable="@color/black"
+                        app:backgroundTint="@color/white" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraint_layout">
+
+            <ProgressBar
+                android:id="@+id/generate_qr_progressBar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignTop="@+id/withdrawal_btn"
+                android:layout_alignEnd="@+id/withdrawal_btn"
+                android:layout_alignRight="@+id/withdrawal_btn"
+                android:layout_alignBottom="@+id/withdrawal_btn"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="10dp"
+                android:elevation="7dp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/withdrawal_btn"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/margin_55dp"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="@dimen/margin_30dp"
+                android:backgroundTint="@color/orange"
+                android:paddingHorizontal="@dimen/margin_60dp"
+                android:text="GET ACCOUNT"
+                android:textColor="@color/white" />
+
+        </RelativeLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</layout>

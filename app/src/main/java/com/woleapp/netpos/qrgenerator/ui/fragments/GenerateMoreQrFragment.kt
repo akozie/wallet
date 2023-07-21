@@ -2,10 +2,10 @@ package com.woleapp.netpos.qrgenerator.ui.fragments
 
 import android.Manifest
 import android.app.AlertDialog
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -33,6 +33,10 @@ import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.checkCardScheme
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.checkCardType
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.isOnline
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseOnce
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
@@ -61,6 +65,7 @@ class GenerateMoreQrFragment : Fragment() {
     private var userId: Int? = 0
     private lateinit var receiptPdf: File
     private lateinit var pdfView: LayoutQrReceiptPdfBinding
+    private var transactionCheckbox: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,29 +80,33 @@ class GenerateMoreQrFragment : Fragment() {
             data?.let {
                 val checkOutModel = getCheckOutModel()
                 val qrModelRequest = getQrRequestModel()
-                generateQrViewModel.displayQrStatus = 1
-                generateQrViewModel.payQrChargesForVerve(checkOutModel, qrModelRequest, it)
-                observeServerResponseOnce(
-                    generateQrViewModel.payVerveResponse,
-                    loader,
-                    requireActivity().supportFragmentManager
-                ) {
-                    if (generateQrViewModel.payVerveResponse.value?.data?.code == "90") {
-                  //      showToast(generateQrViewModel.payVerveResponse.value?.data?.result.toString())
-                    } else {
-                        Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
-                        if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment){
-                            val action =
-                                GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToEnterOtpFragment2()
-                            findNavController().navigate(action)
-                        }else{
-                            findNavController().navigate(R.id.enterOtpFragment2)
-                        }
+                if (isOnline(requireContext())) {
+                    generateQrViewModel.displayQrStatus = 1
+                    generateQrViewModel.payQrChargesForVerve(checkOutModel, qrModelRequest, it)
+                    observeServerResponseOnce(
+                        generateQrViewModel.payVerveResponse,
+                        loader,
+                        requireActivity().supportFragmentManager
+                    ) {
+                        if (generateQrViewModel.payVerveResponse.value?.data?.code == "90") {
+                            //      showToast(generateQrViewModel.payVerveResponse.value?.data?.result.toString())
+                        } else {
+                            Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
+                            if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment) {
+                                val action =
+                                    GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToEnterOtpFragment2()
+                                findNavController().navigate(action)
+                            } else {
+                                findNavController().navigate(R.id.enterOtpFragment2)
+                            }
 //                        parentFragmentManager.beginTransaction()
 //                            .replace(R.id.fragmentContainerView, EnterOtpFragment())
 //                            .addToBackStack(null)
 //                            .commit()
+                        }
                     }
+                } else {
+                    showToast("This device is not connected to the internet")
                 }
             }
         }
@@ -133,6 +142,13 @@ class GenerateMoreQrFragment : Fragment() {
             }
         }
         initViews()
+
+
+        val word = "You will be charged a fee of"
+        val amount = CHARGE_AMOUNT.formatCurrency()
+        val wordToDisplay = "$word $amount"
+        binding.checkbox.text = wordToDisplay
+        binding.checkbox.setTextColor(Color.BLACK)
         generateQrViewModel.cardSchemeResponse.observe(viewLifecycleOwner) {
             val cardSchemeAdapter = CardSchemeAdapter(
                 generateQrViewModel.cardSchemes, requireContext(),
@@ -151,22 +167,37 @@ class GenerateMoreQrFragment : Fragment() {
         binding.email.setText(userEmail)
         userName = Singletons().getCurrentlyLoggedInUser()?.fullname.toString()
         binding.fullName.setText(userName)
+        binding.userName.text = userName
         userPhoneNumber = Singletons().getCurrentlyLoggedInUser()?.mobile_phone.toString()
         binding.mobileNumber.setText(userPhoneNumber)
         userId = Singletons().getCurrentlyLoggedInUser()?.id
 
+        binding.checkbox.setOnCheckedChangeListener { _, isChecked ->
+            // Handle checkbox state changes here
+            transactionCheckbox = isChecked
+        }
 
-//        submitBtn.setOnClickListener {
-//            if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment){
-//                clearLiveData()
-//            generateQr()
-//            }else{
-//                findNavController().popBackStack()
-//            }
-//        }
+
         submitBtn.setOnClickListener {
             generateQr()
         }
+
+        cardExpiryNumber.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int, count: Int, after: Int
+            ) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                checkCardType(s.toString(), binding.cardImg)
+                val cardScheme = checkCardScheme(s.toString())
+                qrCardScheme.setText(cardScheme)
+            }
+        })
 
         cardExpiryDate.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(
@@ -230,12 +261,9 @@ class GenerateMoreQrFragment : Fragment() {
             qrIssuingBank.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_issuing_bank))
             }
-            qrIssuingBank.text.toString().isEmpty() -> {
-                showToast(getString(R.string.all_please_enter_issuing_bank))
-            }
-            qrCardScheme.text.toString().isEmpty() -> {
-                showToast(getString(R.string.all_please_enter_issuing_card_scheme))
-            }
+//            qrCardScheme.text.toString().isEmpty() -> {
+//                showToast(getString(R.string.all_please_enter_issuing_card_scheme))
+//            }
             cardExpiryNumber.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_card_expiry_number))
             }
@@ -244,6 +272,9 @@ class GenerateMoreQrFragment : Fragment() {
             }
             cardExpiryCvv.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_card_cvv))
+            }
+            !transactionCheckbox -> {
+                showToast(getString(R.string.all_please_your_consent))
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
@@ -304,18 +335,18 @@ class GenerateMoreQrFragment : Fragment() {
                 }
             }
         }
-        qrCardScheme.doOnTextChanged { _, _, _, _ ->
-            when {
-                qrCardScheme.text.toString().trim().isEmpty() -> {
-                    showToast(getString(R.string.all_please_enter_issuing_card_scheme))
-                    isValidated = false
-                }
-                else -> {
-                    binding.fragmentSelectCardScheme.error = null
-                    isValidated = true
-                }
-            }
-        }
+//        qrCardScheme.doOnTextChanged { _, _, _, _ ->
+//            when {
+//                qrCardScheme.text.toString().trim().isEmpty() -> {
+//                    showToast(getString(R.string.all_please_enter_issuing_card_scheme))
+//                    isValidated = false
+//                }
+//                else -> {
+//                    binding.fragmentSelectCardScheme.error = null
+//                    isValidated = true
+//                }
+//            }
+//        }
         cardExpiryNumber.doOnTextChanged { _, _, _, _ ->
             when {
                 cardExpiryNumber.text.toString().trim().isEmpty() -> {
@@ -361,37 +392,40 @@ class GenerateMoreQrFragment : Fragment() {
         if (qrRequest.card_scheme.contains("verve", true)) {
             generateQrViewModel.setIsVerveCard(true)
 
-            if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment){
-                val action = GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToQrPasswordPinBlockDialog2()
+            if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment) {
+                val action =
+                    GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToQrPasswordPinBlockDialog2()
                 findNavController().navigate(action)
-            }else{
+            } else {
                 findNavController().popBackStack()
             }
-        } else {
+        } else if (isOnline(requireContext())) {
             generateQrViewModel.setIsVerveCard(false)
             generateQrViewModel.displayQrStatus = 1
             generateQrViewModel.payQrCharges(checkOutModel, qrRequest)
+        } else {
+            showToast("This device is not connected to the internet")
         }
-            observeServerResponse(
-                generateQrViewModel.payResponse,
-                loader,
-                requireActivity().supportFragmentManager
-            ) {
-                if (generateQrViewModel.payResponse.value?.data?.code == "90") {
-                    //
+        observeServerResponse(
+            generateQrViewModel.payResponse,
+            loader,
+            requireActivity().supportFragmentManager
+        ) {
+            if (generateQrViewModel.payResponse.value?.data == null) {
+                //  Log.d("ANOTHERERROR", generateQrViewModel.payResponse.value?.data.toString())
+                // findNavController().navigate(R.id.generateMoreQrFragment)
+            } else {
+                Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
+                if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment) {
+                    val action =
+                        GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToWebViewFragment2()
+                    findNavController().navigate(action)
                 } else {
-                    Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
-                    if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment) {
-                        val action =
-                            GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToWebViewFragment2()
-                        findNavController().navigate(action)
-                    }
-                    else {
-                        findNavController().popBackStack()
-                    }
+                    findNavController().popBackStack()
                 }
             }
         }
+    }
 
     private fun getQrRequestModel(): QrModelRequest =
         QrModelRequest(

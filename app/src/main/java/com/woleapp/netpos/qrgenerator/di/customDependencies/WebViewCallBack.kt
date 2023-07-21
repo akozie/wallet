@@ -3,7 +3,6 @@ package com.woleapp.netpos.qrgenerator.di.customDependencies
 import android.util.Log
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Toast
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -11,7 +10,7 @@ import javax.inject.Singleton
 @Singleton
 class WebViewCallBack @Inject constructor() : WebViewClient() {
 
-    @Deprecated("Deprecated in Java", ReplaceWith("false"))
+    @Deprecated("Deprecated in Java", ReplaceWith("true"))
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean = true
 
     @Deprecated("Deprecated in Java", ReplaceWith(
@@ -28,6 +27,5 @@ class WebViewCallBack @Inject constructor() : WebViewClient() {
         super.onReceivedError(view, errorCode, description, failingUrl)
         Log.d("WEBVIEWERROR", errorCode.toString())
     }
-
 
 }

@@ -352,16 +352,17 @@ class QRViewModel @Inject constructor(
         }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
+                    val masterVisaResponse = gson.fromJson(it, PayResponse::class.java)
                     if (it.has("TermUrl")) {
-                        val masterVisaResponse = gson.fromJson(it, PayResponse::class.java)
                         _payResponse.postValue(Resource.success(masterVisaResponse))
+                    }
                         val failedResponse = gson.fromJson(it, PayResponseErrorModel::class.java)
                         if (failedResponse.code == "90"){
                             _payMessage.value = Event(
                                 Resource.success(failedResponse).data!!.result
                             )
+                           _payResponse.postValue(Resource.success(null))
                         }
-                    }
                 }
                 error?.let {
                         _payResponse.postValue(Resource.error(null))
@@ -500,6 +501,9 @@ class QRViewModel @Inject constructor(
         _isVerveCard.postValue(data)
     }
 
+    fun clear(){
+        _transactionResponse.postValue(Resource.error(null))
+    }
     override fun onCleared() {
         disposable.clear()
         super.onCleared()

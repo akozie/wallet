@@ -8,74 +8,78 @@
 </head>
 <body>
 <!--<div id="redirect" style="height: 100vh; width:100% !important;"></div>-->
-        <form id="authData" method="POST" target="threeDS">
-            <div style="display:none;">
-                <input name="TermUrl" id="TermUrl">
-                <input name="MD" id="MD">
-                <input name="cReq" id="cReq">
-            </div>
-        </form>
-        <iframe id="threeDS" name="threeDS" frameborder="0" style="height: 100vh; width: 100vw;"></iframe>
+<!--<form id="authData" method="POST" target="threeDS">-->
+<!--    <div style="display:none;">-->
+<!--        <input name="TermUrl" id="TermUrl">-->
+<!--        <input name="MD" id="MD">-->
+<!--        <input name="cReq" id="cReq">-->
+<!--    </div>-->
+<!--</form>-->
+<!--<iframe id="redirect" name="" frameborder="0"-->
+<!--        style="height: 100vh; width: 100vw; display:none;"></iframe>-->
+<div id="redirect" style="height: 100vh; width:100vw !important; display: none; border-width: 0; border-color: white; border-style: none;"></div>
 <script type="text/javascript">
 
-<!--            const dataFromAndroid = Android.sendValueToWebView().split("<======>");-->
-<!--            const transIdVal = dataFromAndroid[4];-->
-<!--            const reQueryUrl = "https://api.netpluspay.com/transactions/requery/MID635ff140365c5/";-->
-<!--            const redirectHtml = dataFromAndroid[6];-->
 
-<!--        document.getElementById('redirect').innerHTML = redirectHtml;-->
-<!--                       setTimeout(() => {-->
-<!--                            const threeDF = document.getElementById('threedsChallengeRedirectForm') ?? document.getElementById('threedsFrictionLessRedirectForm');-->
-<!--                            threeDF.submit();-->
-<!--                       }, 1000);-->
-
-<!--            const myheaders = {"Content-Type": "application/json", "Accept": "application/json"};-->
-
-<!--                       window.onmessage = (event) => {-->
-<!--                       console.log(reQueryUrl)-->
-<!--                                       fetch(reQueryUrl+transIdVal,{headers: myheaders, method: "GET"})-->
-<!--                .then(async(response) => {-->
-<!--                    const data = await response.text();-->
-<!--                    Android.webViewCallback(data);-->
-<!--                })-->
-<!--                .catch(err => {-->
-<!--                    Android.webViewCallback(JSON.stringify(err));-->
-<!--                });-->
-<!--                        }-->
-
-
-            function replace(termUrlValue, mdValue, cReqValue, acsUrl) {
-                document.getElementById("TermUrl").value = termUrlValue;
-                document.getElementById("MD").value = mdValue;
-                document.getElementById("cReq").value = cReqValue;
-                document.getElementById("authData").setAttribute("action", acsUrl);
-            }
+            let fired=0;
             const dataFromAndroid = Android.sendValueToWebView().split("<======>");
             const termUrlVal = dataFromAndroid[0];
             const mdVal = dataFromAndroid[1];
             const cReqVal = dataFromAndroid[2];
             const acsUrlVal = dataFromAndroid[3];
             const transIdVal = dataFromAndroid[4];
-            const reQueryUrl = "https://api.netpluspay.com/transactions/requery/MID63dbdc67badab/"; //dataFromAndroid[5];
+            const reQueryUrl = "https://webpay.netpluspay.com/transactions/requery/MID63dbdc67badab/"; //dataFromAndroid[5];
             const redirectHtml = dataFromAndroid[6];
 
-            <!-- automatically set value to the above form -->
-            replace(termUrlVal, mdVal, cReqVal, acsUrlVal);
-            document.getElementById("authData").submit();
+            console.log("CHECKREDIRECTHTML", redirectHtml)
+             const dis = document.getElementById('redirect');
+                        dis.style.display = 'block';
+                        dis.innerHTML = redirectHtml;
+
+            setTimeout(() => {
+                const threeDF = document.getElementById('threedsChallengeRedirectForm') ?? document.getElementById('threedsFrictionLessRedirectForm');
+                threeDF.submit();
+            }, 1000);
 
             const myheaders = {"Content-Type": "application/json", "Accept": "application/json"};
 
+
             window.onmessage = (event) => {
+         //   fired+=1;
+           // if(fired>1){
             console.log("Window event fired")
                 fetch(reQueryUrl+transIdVal,{headers: myheaders, method: "GET"})
                 .then(async(response) => {
                     const data = await response.text();
+                    console.log("RESPONSEFROMWEB", data)
                     Android.webViewCallback(data);
                 })
                 .catch(err => {
                     Android.webViewCallback(JSON.stringify(err));
                 });
+             //   }
             }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 </script>

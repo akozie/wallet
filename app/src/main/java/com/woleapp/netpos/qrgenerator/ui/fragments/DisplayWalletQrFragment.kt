@@ -34,7 +34,7 @@ class DisplayWalletQrFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Singletons().getTallyWalletBalance()?.phone_no?.let {
+        Singletons().getTallyWalletBalance()?.info?.phone_no?.let {
             data = it
         }
         userName = binding.userName

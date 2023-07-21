@@ -1,31 +1,47 @@
 package com.woleapp.netpos.qrgenerator.ui.fragments
 
+import android.content.IntentFilter
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.AutoCompleteTextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withResumed
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.auth.api.phone.SmsRetriever
+import com.google.android.material.tabs.TabLayoutMediator
 import com.woleapp.netpos.qrgenerator.R
-import com.woleapp.netpos.qrgenerator.adapter.TallyWalletUserTransactionAdapter
-import com.woleapp.netpos.qrgenerator.adapter.TransactionAdapter
-import com.woleapp.netpos.qrgenerator.databinding.FragmentMyTallyBinding
-import com.woleapp.netpos.qrgenerator.databinding.LayoutEnterOtpBinding
+import com.woleapp.netpos.qrgenerator.adapter.*
+import com.woleapp.netpos.qrgenerator.broadcastreceiver.MySMSBroadcastReceiver
+import com.woleapp.netpos.qrgenerator.broadcastreceiver.MySMSBroadcastReceiver.OTPReceiveListener
+import com.woleapp.netpos.qrgenerator.databinding.*
 import com.woleapp.netpos.qrgenerator.model.TransactionModel
+import com.woleapp.netpos.qrgenerator.model.login.UserViewModel
+import com.woleapp.netpos.qrgenerator.model.wallet.NewGetSecurityQuestionResponseItem
 import com.woleapp.netpos.qrgenerator.model.wallet.TallyWalletUserTransactionsResponseItem
+import com.woleapp.netpos.qrgenerator.utils.NetworkConnectivityHelper
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.displaySecurityQuestion
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.isDarkModeEnabled
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.Singletons
 import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
+import kotlinx.coroutines.launch
 
-class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
+
+class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUserTransactionsClick {
 
     private lateinit var binding: FragmentMyTallyBinding
     private lateinit var qrAdapter: TallyWalletUserTransactionAdapter
@@ -33,12 +49,24 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
     private lateinit var qrDataList: ArrayList<TallyWalletUserTransactionsResponseItem>
     private lateinit var qrDataLists: ArrayList<TransactionModel>
     private val walletViewModel by activityViewModels<WalletViewModel>()
+    private val userViewModel by activityViewModels<UserViewModel>()
     private lateinit var loader: android.app.AlertDialog
     private var tallyWalletBalance: Int = 0
+    private lateinit var noInternetDialog: AlertDialog
+    private lateinit var noInternetBinding: LayoutNoInternetBinding
+    private lateinit var token: String
+    private lateinit var networkConnectivityHelper: NetworkConnectivityHelper
+    private lateinit var mySMSBroadcastReceiver: MySMSBroadcastReceiver
+    private lateinit var email:String
+    private lateinit var passwordSetDialog: AlertDialog
+    private lateinit var passwordSetBinding: LayoutSetTransactionPinPrefTextBinding
+    private lateinit var listOfQuestions: NewGetSecurityQuestionResponseItem
+    private lateinit var getSecurityQuestion: AutoCompleteTextView
+    private lateinit var securityQuestionAnswer: String
+    private var transactionCheckbox = false
     private lateinit var enterOTPDialog: AlertDialog
     private lateinit var enterOTPBinding: LayoutEnterOtpBinding
     private lateinit var otp: String
-    private lateinit var token: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,19 +81,72 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
                     activity?.finishAffinity()
                 }
             })
+        networkConnectivityHelper = NetworkConnectivityHelper(requireActivity())
         loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
         val header = Singletons().getTallyUserToken()!!
          token = "Bearer $header"
+
+
+        enterOTPBinding = LayoutEnterOtpBinding.inflate(
+            LayoutInflater.from(requireContext()),
+            null,
+            false
+        ).apply {
+            lifecycleOwner = this@MyTallyFragment
+            executePendingBindings()
+        }
+        enterOTPDialog = AlertDialog.Builder(requireContext())
+            .setView(enterOTPBinding.root)
+            .setCancelable(false)
+            .create()
+
+
+        passwordSetBinding = LayoutSetTransactionPinPrefTextBinding.inflate(
+            LayoutInflater.from(requireContext()),
+            null,
+            false
+        ).apply {
+            lifecycleOwner = this@MyTallyFragment
+            executePendingBindings()
+        }
+
+        passwordSetDialog =
+            AlertDialog.Builder(requireContext())
+                .setView(passwordSetBinding.root)
+                .setCancelable(false)
+                .create()
+
+        getSecurityQuestion = passwordSetBinding.securityQuestions
+
+
+        val securityQuestionAdapter = SecurityQuestionsAdapter(
+            displaySecurityQuestion(), requireContext(),
+            android.R.layout.simple_expandable_list_item_1
+        )
+        getSecurityQuestion.setAdapter(securityQuestionAdapter)
+
+        getSecurityQuestion.onItemClickListener = object : AdapterView.OnItemClickListener {
+            override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                listOfQuestions =
+                    adapterView?.getItemAtPosition(p2) as NewGetSecurityQuestionResponseItem
+                securityQuestionAnswer = listOfQuestions.question
+                passwordSetBinding.save.isEnabled = true
+            }
+        }
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-       // dummyList()
-        getUserTransactions(5)
-        // loader = binding.myTallyProgressbar
-        Singletons().getTallyWalletBalance()?.available_balance?.let {
+        walletViewModel.getUserTransactionResponse.removeObservers(viewLifecycleOwner)
+        Singletons().getTallyWalletBalance()?.info?.available_balance?.let {
             tallyWalletBalance = it
+        }
+
+        passwordSetBinding.checkbox.setOnCheckedChangeListener { _, isChecked ->
+            // Handle checkbox state changes here
+            transactionCheckbox = isChecked
         }
 
         binding.addToBalance.setOnClickListener {
@@ -88,7 +169,8 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
             findNavController().navigate(action)
         }
 
-        enterOTPBinding = LayoutEnterOtpBinding.inflate(
+
+        noInternetBinding = LayoutNoInternetBinding.inflate(
             LayoutInflater.from(requireContext()),
             null,
             false
@@ -96,15 +178,89 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
             lifecycleOwner = this@MyTallyFragment
             executePendingBindings()
         }
-        enterOTPDialog = AlertDialog.Builder(requireContext())
-            .setView(enterOTPBinding.root)
+        noInternetDialog = AlertDialog.Builder(requireContext())
+            .setView(noInternetBinding.root)
             .setCancelable(false)
             .create()
-        fetchWallet()
+        networkConnectivityHelper.observeNetworkStatus()
+            .subscribe {
+            if (it) {
+                requireActivity().runOnUiThread(Runnable {
+                    // Stuff that updates the UI
+                    noInternetDialog.dismiss()
+                })
+                launchWhenResumed {
+                        // Do something
+                        getWalletStatus()
+                }
+            } else {
+                requireActivity().runOnUiThread(Runnable {
+                    // Stuff that updates the UI
+                    noInternetDialog.show()
+                })
+            }
+        }
+            .isDisposed
+
+        getUserTransactions(5)
+
+
+        passwordSetBinding.save.setOnClickListener {
+            //  val savedPin = Singletons().getPin()!!
+            val transactionPIN = passwordSetBinding.reprintPasswordEdittext.text.toString()
+            val securityQuestion = passwordSetBinding.securityQuestions.text.toString()
+            val securityAnswer = passwordSetBinding.securityAnswers.text.toString()
+            val questionID = listOfQuestions.id
+            if (transactionPIN.isEmpty()) {
+                showToast("PIN cannot be empty")
+                return@setOnClickListener
+            }
+            if (transactionPIN.length < 4) {
+                showToast("PIN cannot be less than 4 digits")
+                return@setOnClickListener
+            }
+            if (securityAnswer.isEmpty()) {
+                showToast("Please answer your security question")
+                return@setOnClickListener
+            }
+            if (questionID.toString().isNullOrEmpty()) {
+                showToast("Please answer your security question")
+                return@setOnClickListener
+            }
+            if (transactionPIN != passwordSetBinding.confirmReprintPasswordEdittext.text.toString()) {
+                showToast("Passwords do not match")
+                return@setOnClickListener
+            }
+            if (!transactionCheckbox) {
+                showToast("Please your consent is needed to set your transaction PIN")
+                return@setOnClickListener
+            }
+            setTransactionPin(transactionPIN, questionID.toString(), securityQuestion, securityAnswer)
+        }
+
+        enterOTPBinding.resendOtp.setOnClickListener {
+            verifyWalletAccount()
+        }
+        enterOTPBinding.closeDialog.setOnClickListener {
+            enterOTPDialog.dismiss()
+            verifyWalletOTP(token, "")
+        }
+        passwordSetBinding.cancelDialog.setOnClickListener {
+            passwordSetDialog.dismiss()
+        }
+
+        binding.verifyPhoneNumber.setOnClickListener {
+            verifyWalletAccount()
+        }
+
+
+        binding.setPin.setOnClickListener {
+            passwordSetDialog.show()
+        }
 
         enterOTPBinding.proceed.setOnClickListener {
             otp = enterOTPBinding.otpEdittext.text?.trim().toString()
-            if (otp.isEmpty()){
+            if (otp.isEmpty()) {
                 showToast("Please enter OTP")
                 return@setOnClickListener
             }
@@ -112,8 +268,9 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
         }
     }
 
+
     private fun tallySetUp() {
-        qrAdapter = TallyWalletUserTransactionAdapter(qrDataList)
+        qrAdapter = TallyWalletUserTransactionAdapter(qrDataList, this)
         binding.tallyRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.tallyRecycler.adapter = qrAdapter
@@ -125,11 +282,6 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
     }
 
     private fun fetchWallet() {
-
-       //     "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTcsImVtYWlsIjoiZXpla2llbEBnbWFpbC5jb20iLCJmdWxsbmFtZSI6IlRlc3QiLCJtb2JpbGVfcGhvbmUiOiIwNzAzMzQ3NDE5OCIsImlhdCI6MTY4MjQxMTUxMiwiZXhwIjoxNzEzOTQ3NTEyfQ.LLEUvp_NplojFDsWXJ02vj_QwyU8HjgY9x32QWucQwM"
-        //       val header = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTcsImVtYWlsIjoiZXpla2llbEBnbWFpbC5jb20iLCJmdWxsbmFtZSI6IlRlc3QiLCJtb2JpbGVfcGhvbmUiOiIwNzA0MzQ3NDE1OCIsImlhdCI6MTY4MjQxMTUxMiwiZXhwIjoxNzEzOTQ3NTEyfQ.J_SrpzpbarRVMyeiOpIlFLoLAbf2efW0LhMlU5YEyr8"
-        val apiKey = "27403342c95d1d83a40c0a8523803ec1518e2e5d6edd64b6296a81e8f94b1091"
-
         walletViewModel.fetchWallet(token)
         observeServerResponse(
             walletViewModel.fetchWalletResponse,
@@ -138,10 +290,159 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
         ) {
             walletViewModel.fetchWalletResponse.value?.let {
                 if (it.data?.available_balance == null) {
-                    enterOTPDialog.show()
+                 //   enterOTPDialog.show()
                 } else if (it.data.available_balance >= 0) {
                     binding.walletBalance.text = it.data.available_balance.formatCurrency()
                     binding.walletNumber.text = it.data.phone_no
+                }
+            }
+        }
+    }
+//    private fun getWalletStatus() {
+//    //    walletViewModel.getWalletStatus()
+//        observeServerResponse(
+//            walletViewModel.getWalletUserResponse,
+//            null,
+//            requireActivity().supportFragmentManager
+//        ) {
+//            Log.d("TABRESP", "JUSTCHECKING")
+//            walletViewModel.getWalletUserResponse.value?.let {
+//                if (it.data?.info?.available_balance == null) {
+//                    //   enterOTPDialog.show()
+//                } else if (it.data.info.available_balance >= 0) {
+//                    binding.walletBalance.text = it.data.info.available_balance.formatCurrency()
+//                    binding.walletNumber.text = it.data.info.phone_no
+//                }
+//                Log.d("TABRESP", it.toString())
+//            }
+//        }
+//    }
+
+
+    private fun getUserTransactions(recordsNumber: Int) {
+        walletViewModel.getUserTransactions(recordsNumber)
+        observeServerResponse(
+            walletViewModel.getUserTransactionResponse,
+            null,
+            requireActivity().supportFragmentManager
+        ) {
+            walletViewModel.getUserTransactionResponse.value?.let {result ->
+                if (result.data?.data.isNullOrEmpty()){
+                    binding.noTransactionYet.visibility = View.VISIBLE
+               //     binding.myTallyProgressbar.visibility = View.GONE
+                    return@observeServerResponse
+                }
+                result.data?.data.let { resp ->
+                    qrDataList = arrayListOf()
+                    resp?.forEach {
+                        qrDataList.add(it)
+                    }
+                    tallySetUp()
+                }
+            }
+        }
+    }
+
+    override fun onEachTransactionsClicked(data: TallyWalletUserTransactionsResponseItem) {
+        val action = TransactionsFragmentDirections.actionTransactionsFragmentToRecentTransactionDetailsFragment(data)
+        findNavController().navigate(action)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+       // lifecycle.remov
+    }
+
+    fun Fragment.launchWhenResumed(callback: () -> Unit) {
+        lifecycleScope.launch {
+            lifecycle.withResumed(callback)
+        }
+    }
+
+    private fun getWalletStatus() {
+        walletViewModel.getWalletStatus()
+        observeServerResponse(
+            walletViewModel.getWalletStatusResponse,
+            null,
+            requireActivity().supportFragmentManager
+        ) {
+            walletViewModel.getWalletStatusResponse.value?.let {
+                binding.myTallyConstraint.visibility = View.GONE
+                binding.notAUserConstraint.visibility = View.VISIBLE
+            }
+        }
+        observeServerResponse(
+            walletViewModel.getWalletUserResponse,
+            null,
+            requireActivity().supportFragmentManager
+        ) {
+            Log.d("TABRESP", "JUSTCHECKING")
+            walletViewModel.getWalletUserResponse.value?.let {
+                val verified = it.data?.info?.verified
+                if (!verified!!){
+                    binding.myTallyConstraint.visibility = View.GONE
+                    binding.notAUserConstraint.visibility = View.VISIBLE
+                }else{
+                    binding.myTallyConstraint.visibility = View.VISIBLE
+                    binding.notAUserConstraint.visibility = View.GONE
+                }
+                if (it.data?.info?.available_balance == null) {
+                    //   enterOTPDialog.show()
+                } else if (it.data.info.available_balance >= 0) {
+                    binding.walletBalance.text = it.data.info.available_balance.formatCurrency()
+                    binding.walletNumber.text = it.data.info.phone_no
+                }
+                Log.d("TABRESP", it.toString())
+            }
+        }
+    }
+
+    private fun setTransactionPin(
+        transactionPin: String,
+        securityQuestionId: String,
+        securityQuestion: String,
+        securityAnswer: String
+    ) {
+        walletViewModel.setTransactionPin(
+            transactionPin,
+            securityQuestionId,
+            securityQuestion,
+            securityAnswer
+        )
+        observeServerResponse(
+            walletViewModel.setPINResponse,
+            loader,
+            requireActivity().supportFragmentManager
+        ) {
+            walletViewModel.setPINResponse.value?.let {
+                if (it.data?.status == "success") {
+                    getWalletStatus()
+                    //  Toast.makeText(this, it.data.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            //sharedPrefsData()
+            passwordSetBinding.confirmReprintPasswordEdittext.setText("")
+            passwordSetBinding.reprintPasswordEdittext.setText("")
+            passwordSetDialog.cancel()
+            // walletViewModel.fetchWallet(token)
+            walletViewModel.getWalletStatus()
+        }
+    }
+
+    private fun verifyWalletAccount() {
+        walletViewModel.verifyWalletNumber(token, true)
+        observeServerResponse(
+            walletViewModel.verifyWalletResponse,
+            loader,
+            requireActivity().supportFragmentManager
+        ) {
+            walletViewModel.verifyWalletResponse.value?.let {
+                if (it.data?.verified == 0) {
+                    enterOTPDialog.show()
+                } else {
+                    enterOTPDialog.dismiss()
+                    walletViewModel.verifyWalletResponse.removeObservers(viewLifecycleOwner)
                 }
             }
         }
@@ -159,36 +460,17 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick {
                     showToast("Wrong OTP")
                 } else {
                     enterOTPDialog.dismiss()
-                    showToast("Your Phone number has been verified")
-                    binding.walletBalance.text = it.data?.balance
-                    binding.walletNumber.text = it.data?.tally_no
+                    showToast(it.data!!.message)
                 }
             }
         }
     }
 
-    private fun getUserTransactions(recordsNumber: Int) {
 
-        walletViewModel.getUserTransactions(recordsNumber)
-        observeServerResponse(
-            walletViewModel.getUserTransactionResponse,
-            loader,
-            requireActivity().supportFragmentManager
-        ) {
-            walletViewModel.getUserTransactionResponse.value?.let {result ->
-                if (result.data.isNullOrEmpty()){
-                    binding.noTransactionYet.visibility = View.VISIBLE
-               //     binding.myTallyProgressbar.visibility = View.GONE
-                    return@observeServerResponse
-                }
-                result.data.let { resp ->
-                    qrDataList = arrayListOf()
-                    resp.forEach {
-                        qrDataList.add(it)
-                    }
-                    tallySetUp()
-                }
-            }
-        }
-    }
+//    @Override
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        if (mySMSBroadcastReceiver != null)
+//            activity.unregisterReceiver(mySMSBroadcastReceiver);
+//    }
 }

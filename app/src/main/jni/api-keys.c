@@ -21,7 +21,7 @@ Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getMerchantBaseUrl(JNIEnv
 JNIEXPORT jstring JNICALL
 Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getCheckoutBaseUrl(JNIEnv *env,
                                                                           jobject thiz) {
-    return (*env)->NewStringUTF(env, "https://api.netpluspay.com/");
+    return (*env)->NewStringUTF(env, "https://webpay.netpluspay.com/");
 }
 
 JNIEXPORT jstring JNICALL
@@ -49,7 +49,7 @@ Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getWebViewBaseUrl(JNIEnv 
 JNIEXPORT jstring JNICALL
 Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getTallyWalletBaseUrl(JNIEnv *env,
                                                                              jobject thiz) {
-    return (*env)->NewStringUTF(env, "https://tally.netpluspay.com/api/");
+    return (*env)->NewStringUTF(env, "https://tally.netpluspay.com/api/transactions/");
 }
 
 JNIEXPORT jstring JNICALL

@@ -24,9 +24,9 @@
             app:layout_constraintGuide_percent="0.1" />
         <ImageView
             android:id="@+id/imageView5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/sign_in_header"
+            android:layout_width="200dp"
+            android:layout_height="80dp"
+            android:src="@drawable/tally_logo_white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/guideline2" />
@@ -38,6 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_60dp"
             android:hint="@string/enter_full_name"
+            app:hintTextColor="@android:color/black"
             app:backgroundTint="@color/white"
             app:boxStrokeColor="@color/white"
             app:boxStrokeWidth="@dimen/margin_0dp"
@@ -53,6 +54,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:maxLines="1"
+                style="@style/CustomHintTextStyle"
                 android:textColor="@android:color/background_dark"
                 android:textCursorDrawable="@color/black"
                 android:visibility="visible"
@@ -67,6 +69,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_5dp"
             android:hint="@string/enter_email"
+            app:hintTextColor="@android:color/black"
             app:backgroundTint="@color/white"
             app:boxStrokeColor="@color/white"
             app:boxStrokeWidth="@dimen/margin_0dp"
@@ -82,42 +85,73 @@
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:maxLines="1"
+                style="@style/CustomHintTextStyle"
+                android:inputType="textEmailAddress"
                 android:textColor="@android:color/background_dark"
                 android:textCursorDrawable="@color/black"
                 android:visibility="visible"
                 app:backgroundTint="@color/white" />
         </com.google.android.material.textfield.TextInputLayout>
 
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/fragment_enter_mobile_number"
-            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+        <LinearLayout
+            android:id="@+id/fragment_enter_mobile_number_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="horizontal"
             android:layout_marginTop="@dimen/margin_5dp"
-            android:hint="@string/enter_mobile_number"
-            app:backgroundTint="@color/white"
-            app:boxStrokeColor="@color/white"
-            app:boxStrokeWidth="@dimen/margin_0dp"
-            app:errorTextColor="@color/white"
-            app:hintEnabled="true"
             app:layout_constraintEnd_toEndOf="@+id/fragment_enter_full_name"
             app:layout_constraintStart_toStartOf="@+id/fragment_enter_full_name"
             app:layout_constraintTop_toBottomOf="@+id/fragment_enter_email">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/sign_up_mobile_number"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:inputType="number"
-                android:maxLines="1"
-                android:textColor="@android:color/background_dark"
-                android:textCursorDrawable="@color/black"
-                android:visibility="visible"
-                app:backgroundTint="@color/white" />
-        </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_enter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:inputType="number"
+                    android:text="+234"
+                    android:enabled="false"
+                    android:textColor="@android:color/background_dark"
+                    android:textCursorDrawable="@color/black"
+                    android:visibility="visible"
+                    app:backgroundTint="@color/white" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_enter_mobile_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Phone number"
+                android:layout_marginStart="@dimen/margin_10dp"
+                app:backgroundTint="@color/white"
+                app:boxStrokeColor="@color/white"
+                app:boxStrokeWidth="@dimen/margin_0dp"
+                app:hintTextColor="@color/white"
+                app:errorTextColor="@color/white"
+                app:hintEnabled="true">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/sign_up_mobile_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:inputType="number"
+                    android:maxLines="1"
+                    android:maxLength="10"
+                    android:textColor="@android:color/background_dark"
+                    android:textCursorDrawable="@color/black"
+                    android:visibility="visible"
+                    app:backgroundTint="@color/white" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+        </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_enter_password"
@@ -131,9 +165,10 @@
             app:boxStrokeWidth="@dimen/margin_0dp"
             app:errorTextColor="@color/white"
             app:hintEnabled="true"
-            app:layout_constraintEnd_toEndOf="@+id/fragment_enter_mobile_number"
-            app:layout_constraintStart_toStartOf="@+id/fragment_enter_mobile_number"
-            app:layout_constraintTop_toBottomOf="@+id/fragment_enter_mobile_number"
+            app:hintTextColor="@color/white"
+            app:layout_constraintEnd_toEndOf="@+id/fragment_enter_mobile_number_layout"
+            app:layout_constraintStart_toStartOf="@+id/fragment_enter_mobile_number_layout"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_enter_mobile_number_layout"
             app:passwordToggleEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -158,6 +193,7 @@
             app:backgroundTint="@color/white"
             app:boxStrokeColor="@color/white"
             app:boxStrokeWidth="@dimen/margin_0dp"
+            app:hintTextColor="@color/white"
             app:errorTextColor="@color/white"
             app:hintEnabled="true"
             app:layout_constraintEnd_toEndOf="@+id/fragment_enter_password"
@@ -204,6 +240,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
+                android:textStyle="bold"
                 android:background="@drawable/second_button"
                 android:text="@string/sign_up"
                 android:textColor="@color/white" />

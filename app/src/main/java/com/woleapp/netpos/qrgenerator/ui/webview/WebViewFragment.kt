@@ -67,10 +67,10 @@ class WebViewFragment : Fragment() {
             response.data?.let {
                 javaScriptInterface = JavaScriptInterface(
                     parentFragmentManager,
-                    it.TermUrl,
-                    it.MD,
-                    it.PaReq,
-                    it.ACSUrl,
+                    null,
+                    null,
+                    null,
+                    null,
                     it.transId,
                     it.redirectHtml
                 )

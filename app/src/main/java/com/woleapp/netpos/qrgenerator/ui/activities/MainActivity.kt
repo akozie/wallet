@@ -1,30 +1,42 @@
 package com.woleapp.netpos.qrgenerator.ui.activities
 
+import android.content.DialogInterface
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.AdapterView
-import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.navigation.NavigationView
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
-import com.woleapp.netpos.qrgenerator.adapter.SecurityQuestionsAdapter
-import com.woleapp.netpos.qrgenerator.databinding.ActivityMainBinding
-import com.woleapp.netpos.qrgenerator.databinding.LayoutEnterPasswordBinding
-import com.woleapp.netpos.qrgenerator.databinding.LayoutReprintPasswordPrefTextBinding
-import com.woleapp.netpos.qrgenerator.databinding.LayoutUpdatePinPrefTextBinding
-import com.woleapp.netpos.qrgenerator.model.wallet.GetSecurityQuestionResponseItem
-import com.woleapp.netpos.qrgenerator.utils.PIN_PASSWORD
+import com.woleapp.netpos.qrgenerator.databinding.*
+import com.woleapp.netpos.qrgenerator.model.login.UserEntity
+import com.woleapp.netpos.qrgenerator.model.login.UserViewModel
+import com.woleapp.netpos.qrgenerator.model.wallet.request.ConfirmTransactionPin
+import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseActivity
-import com.woleapp.netpos.qrgenerator.utils.Singletons
 import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import io.reactivex.Scheduler
+import io.reactivex.disposables.CompositeDisposable
+import java.util.*
+import javax.inject.Inject
+import javax.inject.Named
 
 
 @AndroidEntryPoint
@@ -34,43 +46,225 @@ class MainActivity : AppCompatActivity() {
     private val qrViewModel by viewModels<WalletViewModel>()
     private lateinit var inputPasswordDialog: AlertDialog
     private lateinit var passwordDialogBinding: LayoutEnterPasswordBinding
-    private lateinit var passwordSetDialog: AlertDialog
-    private lateinit var passwordSetBinding: LayoutReprintPasswordPrefTextBinding
-    private lateinit var updatePinDialog: AlertDialog
-    private lateinit var updatePinBinding: LayoutUpdatePinPrefTextBinding
-    private lateinit var getSecurityQuestion: AutoCompleteTextView
-    private lateinit var securityQuestionAnswer: String
+    private lateinit var enterOTPDialog: AlertDialog
+    private lateinit var enterOTPBinding: LayoutEnterOtpBinding
     private lateinit var loader: android.app.AlertDialog
-    private var securityQuestion: Int? = 0
-    private lateinit var listOfQuestions: GetSecurityQuestionResponseItem
+    private lateinit var token: String
+    private var count: Int = 0
+    private lateinit var navigationView: NavigationView
+    private lateinit var navController: NavController
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var setYourPasswordDialog: AlertDialog
+    private lateinit var setYourPasswordBinding: LayoutSetPasswordPrefBinding
+    private lateinit var email: String
+    private val userViewModel by viewModels<UserViewModel>()
+    //  private lateinit var result: UserEntity
+    private lateinit var loginPassword: String
+    private var newSignIn = 0
 
+    @Inject
+    lateinit var compositeDisposable: CompositeDisposable
+
+    @Inject
+    @Named("io-scheduler")
+    lateinit var ioScheduler: Scheduler
+
+    @Inject
+    @Named("main-scheduler")
+    lateinit var mainThreadScheduler: Scheduler
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_QRGenerator)
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        loader = alertDialog(this, R.layout.layout_loading_dialog)
-        qrViewModel.getSecurityQuestions()
 
+        setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+
+
+        navController = findNavController(R.id.mainActivityfragmentContainerView)
+        drawerLayout = binding.drawerLayout
+        navigationView = binding.navView
+
+        appBarConfiguration = AppBarConfiguration(
+            navController.graph, drawerLayout
+        )
+
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        navigationView.setupWithNavController(navController)
+
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.transferFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.sendWithTallyNumberFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.addToBalanceFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.generateMoreQrFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.displayQrFragment2 -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.displayWalletQrFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.merchantDetailsFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.sendWithTallyNumberFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.sendWithTallyQrFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.sendWithTallyQrResultFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.withdrawalFragment -> {
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                }
+                R.id.recentTransactionDetailsFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.transactionDetailsFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.transactionDetailsFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.qrDetailsFragment2 -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                R.id.verificationFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                }
+                else -> {
+                    binding.appBarDashboard.dashboardActivityToolbar.setNavigationOnClickListener(
+                        null
+                    )
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.VISIBLE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        loader = alertDialog(this, R.layout.layout_loading_dialog)
         qrViewModel.fetchWalletMessage.observe(this) {
             it.getContentIfNotHandled()?.let { message ->
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
             }
         }
+        binding.appBarDashboard.contentDashboard.signOut.setOnClickListener {
+            android.app.AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?") // Specifying a listener allows you to take an action before dismissing the dialog.
+                // The dialog is automatically dismissed when a dialog button is clicked.
+                .setPositiveButton(
+                    android.R.string.yes,
+                    DialogInterface.OnClickListener { _, _ ->
+                        // Continue with delete operation
+                        newSignIn = 0
+                        Prefs.remove(PREF_USER)
+                        startActivity(
+                            Intent(this, AuthenticationActivity::class.java).apply {
+                                flags =
+                                    Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            }
+                        )
+                    }) // A null listener allows the button to dismiss the dialog and take no further action.
+                .setNegativeButton(android.R.string.no, null)
+                .show()
+        }
 
+        val header = Singletons().getTallyUserToken()!!
+        token = "Bearer $header"
 
+        Singletons().getCurrentlyLoggedInUser()?.email?.let {
+            email = it
+            Log.d("EMAIL", email)
+        }
+
+        binding.appBarDashboard.contentDashboard.setUpAccount.setOnClickListener {
+            navController.navigate(R.id.verificationFragment)
+        }
         passwordDialogBinding =
             LayoutEnterPasswordBinding.inflate(LayoutInflater.from(this), null, false)
                 .apply {
                     lifecycleOwner = this@MainActivity
                     executePendingBindings()
                 }
-        updatePinBinding =
-            LayoutUpdatePinPrefTextBinding.inflate(LayoutInflater.from(this), null, false)
-                .apply {
-                    lifecycleOwner = this@MainActivity
-                    executePendingBindings()
-                }
-        passwordSetBinding = LayoutReprintPasswordPrefTextBinding.inflate(
+
+
+
+
+//        passwordDialogBinding.proceed.setOnClickListener {
+//            loader.show()
+//            val transactionPin = passwordDialogBinding.passwordEdittext.text.toString()
+//            val newTransactionPin = ConfirmTransactionPin(
+//                transaction_pin = transactionPin
+//            )
+//            observeServerResponseActivity(
+//                this,
+//                qrViewModel.confirmTransactionPin(
+//                    "Bearer ${Singletons().getTallyUserToken()!!}",
+//                    newTransactionPin
+//                ),
+//                loader,
+//                compositeDisposable,
+//                ioScheduler,
+//                mainThreadScheduler,
+//                supportFragmentManager
+//            ) {
+//                val confirmTransactionPinResponse = Prefs.getString(CONFIRM_PIN_RESPONSE, "")
+//                if (confirmTransactionPinResponse == "true") {
+//                    inputPasswordDialog.dismiss()
+//                    passwordDialogBinding.passwordEdittext.setText("")
+//                    return@observeServerResponseActivity
+//                }
+//                Toast.makeText(this, "Wrong PIN", Toast.LENGTH_SHORT).show()
+//
+//            }
+//
+//        }
+
+        enterOTPBinding = LayoutEnterOtpBinding.inflate(
             LayoutInflater.from(this),
             null,
             false
@@ -78,135 +272,133 @@ class MainActivity : AppCompatActivity() {
             lifecycleOwner = this@MainActivity
             executePendingBindings()
         }
+        enterOTPDialog = AlertDialog.Builder(this)
+            .setView(enterOTPBinding.root)
+            .setCancelable(false)
+            .create()
 
-        updatePinBinding.pinUpdateButton.setOnClickListener {
-            val selectedSecurityQuestion = securityQuestion
-            val securityAnswer = updatePinBinding.securityAnswers.text.toString()
-            val otp = updatePinBinding.transactionOtp.text.toString()
-            val newPin = updatePinBinding.transactionPinEdittext.text.toString()
-            val confirmNewPin = updatePinBinding.confirmPinEdittext.text.toString()
 
-            if (securityAnswer.isEmpty()) {
-                Toast.makeText(this, "Please answer your security question", Toast.LENGTH_SHORT)
-                    .show()
-                return@setOnClickListener
-            }
-            if (otp.isEmpty()) {
-                Toast.makeText(this, "OTP cannot be empty", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (newPin.isEmpty()) {
-                Toast.makeText(this, "Please enter your new PIN", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (confirmNewPin.isEmpty()) {
-                Toast.makeText(this, "Please confirm your new PIN", Toast.LENGTH_SHORT).show()
-            }
-
-            if (newPin != confirmNewPin) {
-                Toast.makeText(this, "PIN do not match", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (selectedSecurityQuestion != null) {
-                updateTransactionPin(newPin, otp, securityAnswer, selectedSecurityQuestion)
-            }
-        }
-
-        passwordSetBinding.save.setOnClickListener {
-            val transactionPIN = passwordSetBinding.reprintPasswordEdittext.text.toString()
-            val securityQuestion = passwordSetBinding.securityQuestions.text.toString()
-            val securityAnswer = passwordSetBinding.securityAnswers.text.toString()
-            val questionID = listOfQuestions.id
-            if (transactionPIN.isEmpty()) {
-                Toast.makeText(this, "PIN cannot be empty", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (securityAnswer.isEmpty()) {
-                Toast.makeText(this, "Please answer your security question", Toast.LENGTH_SHORT)
-                    .show()
-                return@setOnClickListener
-            }
-            if (transactionPIN != passwordSetBinding.confirmReprintPasswordEdittext.text.toString()) {
-                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT)
-                    .show()
-                return@setOnClickListener
-            }
-            setTransactionPin(transactionPIN, questionID.toString(), securityQuestion, securityAnswer)
-        }
-
-        getSecurityQuestion = passwordSetBinding.securityQuestions
-        qrViewModel.getSecurityQuestionsResponse.observe(this) {
-            val securityQuestionAdapter = SecurityQuestionsAdapter(
-                qrViewModel.listOfSecurityQuestions, this,
-                android.R.layout.simple_expandable_list_item_1
-            )
-            getSecurityQuestion.setAdapter(securityQuestionAdapter)
-        }
-
-        getSecurityQuestion.onItemClickListener = object : AdapterView.OnItemClickListener {
-            override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                 listOfQuestions =
-                    adapterView?.getItemAtPosition(p2) as GetSecurityQuestionResponseItem
-                securityQuestionAnswer = listOfQuestions.question
-            }
-        }
-
-        passwordDialogBinding.proceed.setOnClickListener {
-            if (passwordDialogBinding.passwordEdittext.text.toString() == Prefs.getString(
-                    PIN_PASSWORD,
-                    ""
-                )
-            ) {
-                inputPasswordDialog.dismiss()
-            } else {
-                Toast.makeText(this, "Incorrect pin", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        passwordDialogBinding.update.setOnClickListener {
-            getOtpVerificationToUpdatePin()
-            getSelectedQuestion()
-            updatePinDialog.show()
-            inputPasswordDialog.dismiss()
-        }
-        passwordSetDialog =
-            AlertDialog.Builder(this, android.R.style.Theme_Material_Light_NoActionBar_Fullscreen)
-                .setView(passwordSetBinding.root)
-                .setCancelable(false)
-                .create()
-        updatePinDialog =
-            AlertDialog.Builder(this, android.R.style.Theme_Material_Light_NoActionBar_Fullscreen)
-                .setView(updatePinBinding.root)
-                .setCancelable(false)
-                .create()
         inputPasswordDialog = AlertDialog.Builder(this)
             .setView(passwordDialogBinding.root)
             .setCancelable(false)
             .create()
 
-        if (restorePrefData()) {
-            inputPasswordDialog.dismiss()
-            inputPasswordDialog.show()
-        } else {
-            passwordSetDialog.show()
+        setYourPasswordBinding = LayoutSetPasswordPrefBinding.inflate(
+            LayoutInflater.from(this),
+            null,
+            false
+        ).apply {
+            lifecycleOwner = this@MainActivity
+            executePendingBindings()
+        }
+        setYourPasswordDialog = AlertDialog.Builder(this)
+            .setView(setYourPasswordBinding.root)
+            .setCancelable(false)
+            .create()
+
+        //fetchWallet()
+
+//        enterOTPBinding.proceed.setOnClickListener {
+//            otp = enterOTPBinding.otpEdittext.text?.trim().toString()
+//            if (otp.isEmpty()){
+//                showToast("Please enter OTP")
+//                return@setOnClickListener
+//            }
+//            verifyWalletOTP(token, otp)
+//        }
+//        enterOTPBinding.resendOtp.setOnClickListener {
+//            verifyWalletAccount()
+//        }
+//        enterOTPBinding.closeDialog.setOnClickListener {
+//            enterOTPDialog.dismiss()
+//            verifyWalletOTP(token, "")
+//        }
+
+//        if (restorePrefData()) {
+//            inputPasswordDialog.dismiss()
+//            inputPasswordDialog.show()
+//        } else {
+//             passwordSetDialog.show()
+//        }
+
+
+        drawerLayout.closeDrawers()
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+
+
+  //      findUserEmailInDB()
+
+         loginPassword = Singletons().getLoginPassword()
+
+        passwordDialogBinding.proceed.setOnClickListener {
+            val enterPin = passwordDialogBinding.passwordEdittext.text.toString().trim()
+            if (enterPin == loginPassword) {
+                inputPasswordDialog.dismiss()
+                passwordDialogBinding.passwordEdittext.setText("")
+            } else {
+                Toast.makeText(this, "Incorrect PIN", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
+    private fun findUserEmailInDB() {
+        userViewModel.getUserEmail(email)
+        userViewModel.getUserEmailResponse.observe(this) {
+            if (it.data == null) {
+                setYourPasswordDialog.show()
+                setYourPasswordBinding.save.setOnClickListener {
+                    val password =
+                        setYourPasswordBinding.reprintPasswordEdittext.text.toString().trim()
+                    val resetPassword =
+                        setYourPasswordBinding.confirmReprintPasswordEdittext.text.toString().trim()
+                    if (password != resetPassword) {
+                        Toast.makeText(this, "PIN mismatch, please contact admin if you forgot PIN", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(this, "Transaction PIN saved", Toast.LENGTH_SHORT).show()
+                        userViewModel.insertUser(UserEntity(email, password))
+                        setYourPasswordDialog.dismiss()
+                    }
+                }
+            } else {
+                val pin = it.data.pin
+                inputPasswordDialog.show()
+                passwordDialogBinding.proceed.setOnClickListener {
+                    val enterPin = passwordDialogBinding.passwordEdittext.text.toString().trim()
+                    if (enterPin == pin) {
+                        Prefs.putString(
+                            PIN_PASSWORD,
+                            pin
+                        )
+                        inputPasswordDialog.dismiss()
+                    } else {
+                        Toast.makeText(this, "Incorrect PIN", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
     }
 
-//    private fun navigateToDestination(fragment: Fragment) {
-//        val fragmentManager: FragmentManager = supportFragmentManager
-//
-//        val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-//        fragmentTransaction.replace(
-//            R.id.mainActivityfragmentContainerView,
-//            fragment
-//        )
-//        fragmentTransaction.addToBackStack(null)
-//        fragmentTransaction.commit()
-//    }
+    override fun onResume() {
+        if (newSignIn == 0){
+            inputPasswordDialog.dismiss()
+            newSignIn = 1
+        }else{
+            inputPasswordDialog.show()
+        }
+        super.onResume()
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    override fun onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
+    }
 
     private fun restorePrefData(): Boolean {
         val pref: SharedPreferences? = application?.getSharedPreferences(
@@ -228,99 +420,5 @@ class MainActivity : AppCompatActivity() {
         editor?.apply()
     }
 
-    private fun setTransactionPin(
-        transactionPin: String,
-        securityQuestionId: String,
-        securityQuestion: String,
-        securityAnswer: String
-    ) {
-        qrViewModel.setTransactionPin(transactionPin, securityQuestionId, securityQuestion, securityAnswer)
-        observeServerResponseActivity(
-            this,
-            this,
-            qrViewModel.setPINResponse,
-            loader,
-            supportFragmentManager
-        ) {
-            qrViewModel.setPINResponse.value?.let {
-                if (it.data?.status == "success") {
-                  //  Toast.makeText(this, it.data.message, Toast.LENGTH_SHORT).show()
-                }
-            }
-            Prefs.putString(
-                PIN_PASSWORD,
-                transactionPin
-            )
-            sharedPrefsData()
-            passwordSetBinding.confirmReprintPasswordEdittext.setText("")
-            passwordSetBinding.reprintPasswordEdittext.setText("")
-            passwordSetDialog.cancel()
-            val header = Singletons().getTallyUserToken()!!
-            val token = "Bearer $header"
-            qrViewModel.fetchWallet(token)
-        }
-    }
 
-    private fun getOtpVerificationToUpdatePin() {
-        qrViewModel.getOtpVerificationToUpdatePin()
-        observeServerResponseActivity(
-            this,
-            this,
-            qrViewModel.getOtpToUpdatePinResponse,
-            loader,
-            supportFragmentManager
-        ) {
-            val otpResponse = qrViewModel.getOtpToUpdatePinResponse.value
-            otpResponse?.let {
-                Toast.makeText(this, otpResponse.message, Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun updateTransactionPin(
-        newPin: String,
-        otp: String,
-        securityAnswer: String,
-        securityQuestion: Int
-    ) {
-        qrViewModel.updateTransactionPin(newPin, otp, securityAnswer, securityQuestion)
-        observeServerResponseActivity(
-            this,
-            this,
-            qrViewModel.updatePinResponse,
-            loader,
-            supportFragmentManager
-        ) {
-            val otpResponse = qrViewModel.updatePinResponse.value
-            otpResponse?.let {
-             //   Toast.makeText(this, otpResponse.message, Toast.LENGTH_SHORT).show()
-            }
-            Prefs.putString(
-                PIN_PASSWORD,
-                newPin
-            )
-            sharedPrefsData()
-            updatePinBinding.confirmPinEdittext.setText("")
-            updatePinBinding.transactionPinEdittext.setText("")
-            updatePinDialog.cancel()
-        }
-    }
-
-    private fun getSelectedQuestion(
-    ) {
-        qrViewModel.getSelectedQuestion()
-        observeServerResponseActivity(
-            this,
-            this,
-            qrViewModel.getSelectedQuestionResponse,
-            loader,
-            supportFragmentManager
-        ) {
-            val selectedQuestion = qrViewModel.getSelectedQuestionResponse.value?.data
-            selectedQuestion?.let {
-                updatePinBinding.securityQuestions.setText(it.question)
-                securityQuestion = it.question_id
-            }
-        }
-    }
 }

@@ -13,11 +13,15 @@ import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.textfield.TextInputEditText
+import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentSignInBinding
 import com.woleapp.netpos.qrgenerator.model.LoginRequest
 import com.woleapp.netpos.qrgenerator.model.User
+import com.woleapp.netpos.qrgenerator.model.login.EmailEntity
+import com.woleapp.netpos.qrgenerator.model.login.UserViewModel
 import com.woleapp.netpos.qrgenerator.ui.activities.MainActivity
+import com.woleapp.netpos.qrgenerator.utils.LOGIN_PASSWORD
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
@@ -32,13 +36,14 @@ class SignInFragment : Fragment() {
     private lateinit var passwordView: TextInputEditText
     private lateinit var loginButton: Button
     private val qrViewModel by viewModels<QRViewModel>()
+    private val userViewModel by viewModels<UserViewModel>()
     private lateinit var loader: ProgressBar
     private lateinit var user: User
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         _binding = FragmentSignInBinding.inflate(inflater, container, false)
         return binding.root
@@ -141,6 +146,7 @@ class SignInFragment : Fragment() {
             loader,
             requireActivity().supportFragmentManager
         ) {
+            Prefs.putString(LOGIN_PASSWORD, passwordView.text.toString().trim())
             loader.visibility = View.GONE
             startActivity(
                 Intent(requireContext(), MainActivity::class.java).apply {

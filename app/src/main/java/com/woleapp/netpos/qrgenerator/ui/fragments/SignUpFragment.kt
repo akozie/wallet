@@ -16,6 +16,7 @@ import com.woleapp.netpos.qrgenerator.databinding.FragmentSignUpBinding
 import com.woleapp.netpos.qrgenerator.model.RegisterRequest
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.validatePasswordMismatch
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.validatePhoneNumbers
 import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -86,6 +87,13 @@ class SignUpFragment : Fragment() {
                 binding.fragmentEnterMobileNumber.error =
                     getString(R.string.all_please_enter_mobile_no)
                 binding.fragmentEnterMobileNumber.errorIconDrawable = null
+            }
+            !validatePhoneNumbers(phoneNumber.text.toString()) -> {
+                binding.fragmentEnterMobileNumber.error =
+                    getString(R.string.all_phone_number)
+                showToast(getString(R.string.all_phone_number))
+                binding.fragmentEnterMobileNumber.errorIconDrawable =
+                    null
             }
             passwordView.text.toString().isEmpty() -> {
                 binding.fragmentEnterPassword.error =
@@ -160,6 +168,15 @@ class SignUpFragment : Fragment() {
                     binding.fragmentEnterMobileNumber.error = ""
                     isValidated = true
                 }
+                !validatePhoneNumbers(
+                    binding.signUpMobileNumber.text.toString().trim()
+                ) -> {
+                    binding.fragmentEnterMobileNumber.error =
+                        getString(R.string.all_phone_number)
+                    binding.fragmentEnterMobileNumber.errorIconDrawable =
+                        null
+                    isValidated = false
+                }
                 else -> {
                     binding.fragmentEnterMobileNumber.error = null
                     isValidated = true
@@ -215,7 +232,7 @@ class SignUpFragment : Fragment() {
         val registerRequest = RegisterRequest(
             fullname = fullName.text.toString().trim(),
             email = emailAddress.text.toString().trim(),
-            mobile_phone = phoneNumber.text.toString().trim(),
+            mobile_phone = "0"+phoneNumber.text.toString().trim(),
             password = passwordView.text.toString().trim()
         )
         qrViewModel.register(

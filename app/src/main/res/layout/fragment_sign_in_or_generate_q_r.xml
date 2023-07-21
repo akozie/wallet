@@ -16,37 +16,24 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
-            android:gravity="center"
-            android:text="@string/generate_qr_code"
-            android:textColor="@color/black"
-            android:textSize="@dimen/text_size_25sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/margin_10"
             android:gravity="center"
-            android:textStyle="italic"
             android:text="@string/pay_with_ease"
+            android:textColor="@color/black"
             android:textSize="@dimen/text_size_23sp"
-            android:textColor="@color/orange"
-            app:layout_constraintEnd_toEndOf="@+id/textView"
-            app:layout_constraintStart_toStartOf="@+id/textView"
-            app:layout_constraintTop_toBottomOf="@+id/textView" />
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="@+id/imageView"
+            app:layout_constraintStart_toStartOf="@+id/imageView"
+            app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
         <ImageView
             android:id="@+id/image"
             android:layout_width="wrap_content"
             android:layout_height="200dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="@dimen/margin_50dp"
             android:src="@drawable/qr_code"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -56,11 +43,11 @@
             android:id="@+id/imageView"
             android:layout_width="wrap_content"
             android:layout_height="70dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="@dimen/dimen_50dp"
             android:src="@drawable/tally_logo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/image" />
+            app:layout_constraintTop_toTopOf="parent" />
 
 
         <RelativeLayout
@@ -69,6 +56,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_marginStart="50dp"
+            android:visibility="gone"
             android:layout_marginEnd="50dp"
             app:layout_constraintEnd_toEndOf="@+id/imageView"
             app:layout_constraintStart_toStartOf="@+id/imageView"
@@ -101,18 +89,20 @@
         <RelativeLayout
             android:id="@+id/relativeLayout2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/dimen_50dp"
             android:layout_marginStart="50dp"
             android:layout_marginEnd="50dp"
             app:layout_constraintEnd_toEndOf="@+id/relativeLayout"
             app:layout_constraintStart_toStartOf="@+id/relativeLayout"
-            app:layout_constraintTop_toBottomOf="@+id/relativeLayout">
+            app:layout_constraintTop_toBottomOf="@+id/image">
+
             <Button
                 android:id="@+id/sign_in_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
+                android:textStyle="bold"
                 android:background="@drawable/second_button"
                 android:text="@string/sign_in"
                 android:textColor="@color/white" />
@@ -148,8 +138,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:background="@drawable/second_button"
-                android:text="@string/sign_up"
+                android:textStyle="bold"
+                android:background="@drawable/orange_button"
+                android:text="GET TALLY"
                 android:textColor="@color/white" />
 
         </RelativeLayout>
@@ -170,8 +161,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:padding="@dimen/padding_10dp"
                 android:gravity="center"
+                android:padding="@dimen/padding_10dp"
+                android:visibility="gone"
                 android:text="Need a Payment Card? "
                 android:textColor="@color/black" />
 

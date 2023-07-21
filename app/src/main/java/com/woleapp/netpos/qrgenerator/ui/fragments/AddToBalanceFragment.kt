@@ -2,41 +2,44 @@ package com.woleapp.netpos.qrgenerator.ui.fragments
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
+import android.content.Context.CONNECTIVITY_SERVICE
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.AutoCompleteTextView
-import android.widget.Button
+import androidx.annotation.RequiresApi
 import androidx.cardview.widget.CardView
 import androidx.core.widget.doOnTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
 import com.google.gson.Gson
-import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.adapter.BankCardAdapter
 import com.woleapp.netpos.qrgenerator.adapter.CardSchemeAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentAddToBalanceBinding
-import com.woleapp.netpos.qrgenerator.databinding.FragmentGenerateMoreQrBinding
-import com.woleapp.netpos.qrgenerator.databinding.FragmentMyTallyBinding
 import com.woleapp.netpos.qrgenerator.databinding.LayoutQrReceiptPdfBinding
-import com.woleapp.netpos.qrgenerator.model.CardScheme
 import com.woleapp.netpos.qrgenerator.model.QrModelRequest
 import com.woleapp.netpos.qrgenerator.model.Row
 import com.woleapp.netpos.qrgenerator.model.RowX
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
-import com.woleapp.netpos.qrgenerator.ui.dialog.QrPasswordPinBlockDialog
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.isOnline
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseOnce
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
@@ -63,10 +66,13 @@ class AddToBalanceFragment : Fragment() {
     private var userId: Int? = 0
     private lateinit var receiptPdf: File
     private lateinit var pdfView: LayoutQrReceiptPdfBinding
+    private var transactionCheckbox: Boolean = false
+    private lateinit var connectivity: Connectivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
+        //loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
+        loader = alertDialog(requireContext())
         generateQrViewModel.getCardSchemes()
         generateQrViewModel.getCardBanks()
         requireActivity().supportFragmentManager.setFragmentResultListener(
@@ -78,24 +84,29 @@ class AddToBalanceFragment : Fragment() {
                 generateQrViewModel.payVerveResponse.removeObservers(viewLifecycleOwner)
                 val checkOutModel = getCheckOutModel()
                 val qrModelRequest = getQrRequestModel()
-                generateQrViewModel.displayQrStatus = 1
-                generateQrViewModel.payQrChargesForVerve(checkOutModel, qrModelRequest, it)
-                val userDetails = Gson().toJson(getQrRequestModel())
-                observeServerResponseOnce(
-                    generateQrViewModel.payVerveResponse,
-                    loader,
-                    requireActivity().supportFragmentManager
-                ) {
-                    if (generateQrViewModel.payVerveResponse.value?.data?.code == "90") {
-                        //   showToast(qrViewModel.payVerveResponse.value?.data?.result.toString())
-                    } else {
-                        if (findNavController().currentDestination?.id == R.id.addToBalanceFragment){
-                            val action = AddToBalanceFragmentDirections.actionAddToBalanceFragmentToWalletEnterOtpFragment()
-                            findNavController().navigate(action)
-                        }else{
-                            findNavController().navigate(R.id.walletEnterOtpFragment)
+                if (isOnline(requireContext())){
+                    generateQrViewModel.displayQrStatus = 1
+                    generateQrViewModel.payQrChargesForVerve(checkOutModel, qrModelRequest, it)
+                    val userDetails = Gson().toJson(getQrRequestModel())
+                    observeServerResponseOnce(
+                        generateQrViewModel.payVerveResponse,
+                        loader,
+                        requireActivity().supportFragmentManager
+                    ) {
+                        if (generateQrViewModel.payVerveResponse.value?.data?.code == "90") {
+                            //   showToast(qrViewModel.payVerveResponse.value?.data?.result.toString())
+                        } else {
+                            if (findNavController().currentDestination?.id == R.id.addToBalanceFragment) {
+                                val action =
+                                    AddToBalanceFragmentDirections.actionAddToBalanceFragmentToWalletEnterOtpFragment()
+                                findNavController().navigate(action)
+                            } else {
+                                findNavController().navigate(R.id.walletEnterOtpFragment)
+                            }
                         }
                     }
+                }else{
+                    showToast("This device is not connected to the internet")
                 }
             }
         }
@@ -108,12 +119,14 @@ class AddToBalanceFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         pdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_add_to_balance, container, false)
+        binding =
+            DataBindingUtil.inflate(inflater, R.layout.fragment_add_to_balance, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        connectivity = Connectivity(requireContext())
         generateQrViewModel.showQrPrintDialog.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 val qrTransaction = Gson().fromJson(it, QrTransactionResponseModel::class.java)
@@ -131,6 +144,10 @@ class AddToBalanceFragment : Fragment() {
             }
         }
         initViews()
+        val word = "You will be charged a fee of"
+        val amount = CHARGE_AMOUNT.formatCurrency()
+        val wordToDisplay = "$word $amount"
+        binding.checkbox.text = wordToDisplay
         generateQrViewModel.cardSchemeResponse.observe(viewLifecycleOwner) {
             val cardSchemeAdapter = CardSchemeAdapter(
                 generateQrViewModel.cardSchemes, requireContext(),
@@ -147,12 +164,33 @@ class AddToBalanceFragment : Fragment() {
         }
 
 
-
+        binding.checkbox.setOnCheckedChangeListener { _, isChecked ->
+            // Handle checkbox state changes here
+            transactionCheckbox = isChecked
+        }
 
 
         submitBtn.setOnClickListener {
             generateQr()
         }
+
+
+        cardExpiryNumber.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int, count: Int, after: Int
+            ) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                RandomUtils.checkCardType(s.toString(), binding.cardImg)
+                val cardScheme = RandomUtils.checkCardScheme(s.toString())
+                qrCardScheme.setText(cardScheme)
+            }
+        })
 
         cardExpiryDate.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(
@@ -195,7 +233,7 @@ class AddToBalanceFragment : Fragment() {
             cardExpiryNumber = cardNumber
             cardExpiryDate = expiryDate
             cardExpiryCvv = cardCvv
-            submitBtn =  btnGenerateQr
+            submitBtn = btnGenerateQr
             creditAmount = amount
         }
     }
@@ -205,15 +243,12 @@ class AddToBalanceFragment : Fragment() {
             creditAmount.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_amount))
             }
-            qrIssuingBank.text.toString().isEmpty() -> {
-                showToast(getString(R.string.all_please_enter_issuing_bank))
-            }
-            qrIssuingBank.text.toString().isEmpty() -> {
-                showToast(getString(R.string.all_please_enter_issuing_bank))
-            }
-            qrCardScheme.text.toString().isEmpty() -> {
-                showToast(getString(R.string.all_please_enter_issuing_card_scheme))
-            }
+//            qrIssuingBank.text.toString().isEmpty() -> {
+//                showToast(getString(R.string.all_please_enter_issuing_bank))
+//            }
+//            qrCardScheme.text.toString().isEmpty() -> {
+//                showToast(getString(R.string.all_please_enter_issuing_card_scheme))
+//            }
             cardExpiryNumber.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_card_expiry_number))
             }
@@ -222,6 +257,9 @@ class AddToBalanceFragment : Fragment() {
             }
             cardExpiryCvv.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_card_cvv))
+            }
+            !transactionCheckbox -> {
+                showToast(getString(R.string.all_please_your_consent))
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
@@ -234,30 +272,30 @@ class AddToBalanceFragment : Fragment() {
     private fun validateSignUpFieldsOnTextChange(): Boolean {
         var isValidated = true
 
-        qrIssuingBank.doOnTextChanged { _, _, _, _ ->
-            when {
-                qrIssuingBank.text.toString().trim().isEmpty() -> {
-                    showToast(getString(R.string.all_please_enter_issuing_bank))
-                    isValidated = false
-                }
-                else -> {
-                    binding.fragmentIssuingBank.error = null
-                    isValidated = true
-                }
-            }
-        }
-        qrCardScheme.doOnTextChanged { _, _, _, _ ->
-            when {
-                qrCardScheme.text.toString().trim().isEmpty() -> {
-                    showToast(getString(R.string.all_please_enter_issuing_card_scheme))
-                    isValidated = false
-                }
-                else -> {
-                    binding.fragmentCardScheme.error = null
-                    isValidated = true
-                }
-            }
-        }
+//        qrIssuingBank.doOnTextChanged { _, _, _, _ ->
+//            when {
+//                qrIssuingBank.text.toString().trim().isEmpty() -> {
+//                    showToast(getString(R.string.all_please_enter_issuing_bank))
+//                    isValidated = false
+//                }
+//                else -> {
+//                    binding.fragmentIssuingBank.error = null
+//                    isValidated = true
+//                }
+//            }
+//        }
+//        qrCardScheme.doOnTextChanged { _, _, _, _ ->
+//            when {
+//                qrCardScheme.text.toString().trim().isEmpty() -> {
+//                    showToast(getString(R.string.all_please_enter_issuing_card_scheme))
+//                    isValidated = false
+//                }
+//                else -> {
+//                    binding.fragmentCardScheme.error = null
+//                    isValidated = true
+//                }
+//            }
+//        }
         cardExpiryNumber.doOnTextChanged { _, _, _, _ ->
             when {
                 cardExpiryNumber.text.toString().trim().isEmpty() -> {
@@ -302,31 +340,33 @@ class AddToBalanceFragment : Fragment() {
         val qrRequest = getQrRequestModel()
         if (qrRequest.card_scheme.contains("verve", true)) {
             generateQrViewModel.setIsVerveCard(true)
-            if (findNavController().currentDestination?.id == R.id.addToBalanceFragment){
-                val action = AddToBalanceFragmentDirections.actionAddToBalanceFragmentToQrPasswordPinBlockDialog2()
+            if (findNavController().currentDestination?.id == R.id.addToBalanceFragment) {
+                val action =
+                    AddToBalanceFragmentDirections.actionAddToBalanceFragmentToQrPasswordPinBlockDialog2()
                 findNavController().navigate(action)
-            }else{
+            } else {
                 findNavController().popBackStack()
             }
-        } else {
+        } else if (isOnline(requireContext())) {
             generateQrViewModel.setIsVerveCard(false)
             generateQrViewModel.displayQrStatus = 1
             generateQrViewModel.payQrCharges(checkOutModel, qrRequest)
+        }else{
+            showToast("This device is not connected to the internet")
         }
         observeServerResponse(
             generateQrViewModel.payResponse,
             loader,
             requireActivity().supportFragmentManager
         ) {
-            if (generateQrViewModel.payResponse.value?.data?.code == "90") {
-                //
+            if (generateQrViewModel.payResponse.value?.data == null) {
+                //   findNavController().navigate(R.id.addToBalanceFragment)
             } else {
                 if (findNavController().currentDestination?.id == R.id.addToBalanceFragment) {
                     val action =
                         AddToBalanceFragmentDirections.actionAddToBalanceFragmentToTallyWalletWebViewFragment()
                     findNavController().navigate(action)
-                }
-                else {
+                } else {
                     findNavController().popBackStack()
                 }
             }
@@ -341,19 +381,23 @@ class AddToBalanceFragment : Fragment() {
             card_expiry = cardExpiryDate.text.toString().trim(),
             card_number = cardExpiryNumber.text.toString().trim(),
             card_scheme = qrCardScheme.text.toString().trim(),
-            issuing_bank = bankCard,
+            issuing_bank = BANK_NAME,
             mobile_phone = Singletons().getCurrentlyLoggedInUser()?.mobile_phone.toString(),
             user_id = userId
         )
 
-    private fun getCheckOutModel(): CheckOutModel =
-        CheckOutModel(
+    private fun getCheckOutModel(): CheckOutModel {
+        val totalAmount = creditAmount.text.toString().trim().toDouble() + CHARGE_AMOUNT
+
+        return CheckOutModel(
             merchantId = UtilityParam.STRING_CHECKOUT_MERCHANT_ID,
             name = Singletons().getCurrentlyLoggedInUser()?.fullname.toString(),
             email = Singletons().getCurrentlyLoggedInUser()?.email.toString(),
-            amount = creditAmount.text.toString().trim().toDouble(),
+            amount = totalAmount,
             currency = "NGN"
         )
+    }
+
 
     private fun printQrTransactionUtil(qrTransaction: QrTransactionResponseModel) {
         receiptPdf = createPdf(binding, this)

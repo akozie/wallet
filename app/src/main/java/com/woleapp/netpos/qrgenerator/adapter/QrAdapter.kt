@@ -6,9 +6,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.woleapp.netpos.qrgenerator.databinding.QrLayoutBinding
 import com.woleapp.netpos.qrgenerator.model.QrModel
+import com.woleapp.netpos.qrgenerator.model.wallet.FetchQrTokenResponseItem
+import com.woleapp.netpos.qrgenerator.model.wallet.QRTokenResponse
+import com.woleapp.netpos.qrgenerator.model.wallet.QRTokenResponseItem
 
 
-class QrAdapter(private var qrList: List<QrModel>, private val qrClick: OnQrClick): RecyclerView.Adapter<QrAdapter.MyViewHolder>() {
+class QrAdapter(private var qrList: List<FetchQrTokenResponseItem>, private val qrClick: OnQrClick): RecyclerView.Adapter<QrAdapter.MyViewHolder>() {
 
     inner class MyViewHolder(private val binding: QrLayoutBinding): RecyclerView.ViewHolder(binding.root) {
         val qrTitle = binding.qrTitle
@@ -28,10 +31,10 @@ class QrAdapter(private var qrList: List<QrModel>, private val qrClick: OnQrClic
         holder.itemView.apply {
             with(holder){
                 with(qrList[position]){
-                    Glide.with(context).load(data).into(qrCode)
+                    Glide.with(context).load(qr_token).into(qrCode)
                     qrTitle.text = issuing_bank + " " +card_scheme
-                    val newdate = date.substring(0,10)
-                    val time = date.substring(11,16)
+                    val newdate = date?.substring(0,10)
+                    val time = date?.substring(11,16)
                     if (time?.substring(0,2)!! < 12.toString()){
                         qrDate.text = "${newdate} $time AM"
                     } else {
@@ -64,8 +67,8 @@ class QrAdapter(private var qrList: List<QrModel>, private val qrClick: OnQrClic
         return qrList.size
     }
     interface OnQrClick {
-        fun viewTransaction(qrModel: QrModel)
-        fun onViewQr(qrModel: QrModel)
+        fun viewTransaction(qrModel: FetchQrTokenResponseItem)
+        fun onViewQr(qrModel: FetchQrTokenResponseItem)
     }
 }
 

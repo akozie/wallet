@@ -30,6 +30,9 @@ import java.util.*
 fun Fragment.showToast(message: String) {
     Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
 }
+fun Fragment.showLongToast(message: String) {
+    Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+}
 
 //convert image to bitmap
 fun getBitMap(view: View): Bitmap {
