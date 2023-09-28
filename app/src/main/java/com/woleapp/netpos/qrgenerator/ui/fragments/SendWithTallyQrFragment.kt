@@ -51,7 +51,7 @@ class SendWithTallyQrFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Singletons().getTallyWalletBalance()?.info?.available_balance?.let {
+        Singletons().getTallyWalletBalance(requireContext())?.info?.available_balance?.let {
             binding.availableBalance.text = it.formatCurrency()
         }
 
@@ -131,7 +131,7 @@ class SendWithTallyQrFragment : Fragment() {
                              "0",
                             scannedValue
                         )
-                        Prefs.putString(AMOUNT_AND_TALLY_NUMBER, Gson().toJson(result))
+                        EncryptedPrefsUtils.putString(requireContext(), AMOUNT_AND_TALLY_NUMBER, Gson().toJson(result))
 //                        val amount = creditAmount.text.trim()
 //                        if (amount.isNullOrEmpty()){
 //                            showToast("Amount can't be empty")

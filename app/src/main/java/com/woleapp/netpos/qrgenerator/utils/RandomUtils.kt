@@ -28,8 +28,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.gms.tasks.Task
@@ -40,7 +39,13 @@ import com.woleapp.netpos.qrgenerator.model.Status
 import com.woleapp.netpos.qrgenerator.model.wallet.*
 import io.reactivex.Scheduler
 import io.reactivex.Single
+import io.reactivex.SingleTransformer
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -51,25 +56,25 @@ object RandomUtils {
         context: Context,
         lifecycle: LifecycleOwner,
         serverResponse: LiveData<Resource<T>>,
-        loadingDialog: AlertDialog,
+        loadingDialog: AlertDialog?,
         fragmentManager: FragmentManager,
         successAction: () -> Unit,
     ) {
         serverResponse.observe(lifecycle) {
             when (it.status) {
                 Status.SUCCESS -> {
-                    loadingDialog.dismiss()
+                    loadingDialog?.dismiss()
                     successAction()
                 }
                 Status.LOADING -> {
-                    loadingDialog.show()
+                    loadingDialog?.show()
                 }
                 Status.ERROR -> {
-                    loadingDialog.dismiss()
+                    loadingDialog?.dismiss()
                     //   Toast.makeText(context, R.string.an_error_occurred, Toast.LENGTH_SHORT).show()
                 }
                 Status.TIMEOUT -> {
-                    loadingDialog.dismiss()
+                    loadingDialog?.dismiss()
                     Toast.makeText(context, R.string.timeOut, Toast.LENGTH_SHORT).show()
                 }
             }
@@ -163,6 +168,8 @@ object RandomUtils {
                                     showToast("User cannot send money to self")
                                 } else if (it.data is String && it.data.contains("Insufficient")) {
                                     showToast("Insufficient Balance")
+                                } else if (it.data is String && it.data.contains("transaction")) {
+                                    showToast("The transaction amount must be at least 100.")
                                 } else {
                                     showToast("Wrong Pin")
                                 }
@@ -192,6 +199,34 @@ object RandomUtils {
                 Status.SUCCESS -> {
                     loadingDialog.dismiss()
                     successAction()
+                }
+                Status.LOADING -> {
+                  //  Log.d("LOADING", "LOADINGRESULT")
+                    loadingDialog.show()
+                }
+                Status.ERROR -> {
+                    loadingDialog.cancel()
+                    loadingDialog.dismiss()
+                }
+                Status.TIMEOUT -> {
+                    loadingDialog.cancel()
+                    loadingDialog.dismiss()
+                }
+            }
+        }
+    }
+
+    fun <T> Fragment.observeServerResponseForQrFragment(
+        serverResponse: LiveData<Resource<T>>,
+        loadingDialog: AlertDialog,
+        fragmentManager: FragmentManager,
+        successAction: (qrData:T) -> Unit
+    ) {
+        serverResponse.observe(this.viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    loadingDialog.dismiss()
+                    successAction(it.data!!)
                 }
                 Status.LOADING -> {
                   //  Log.d("LOADING", "LOADINGRESULT")
@@ -244,7 +279,7 @@ object RandomUtils {
         fragmentManager: FragmentManager,
         successAction: () -> Unit
     ) {
-        serverResponse.observe(this.viewLifecycleOwner) {
+        serverResponse.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     loadingDialog?.visibility = View.GONE
@@ -286,16 +321,16 @@ object RandomUtils {
     }
 
 
-    fun alertDialog(
-        context: Context, layout: Int
-    ): AlertDialog {
-        val dialogView: View = LayoutInflater.from(context).inflate(layout, null)
-        val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
-        dialogBuilder.setCancelable(false)
-        dialogBuilder.setView(dialogView)
-
-        return dialogBuilder.create()
-    }
+//    fun alertDialog(
+//        context: Context, layout: Int
+//    ): AlertDialog {
+//        val dialogView: View = LayoutInflater.from(context).inflate(layout, null)
+//        val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
+//        dialogBuilder.setCancelable(false)
+//        dialogBuilder.setView(dialogView)
+//
+//        return dialogBuilder.create()
+//    }
 
     fun alertDialog(
         context: Context
@@ -400,7 +435,6 @@ object RandomUtils {
     }
 
     fun randomGeneratedTexts(textView: TextView) {
-        Log.d("<=RANDOMGENERAEDTEXTS=>", "HERE")
         val countDownTimer = object : CountDownTimer(3000, 300) {
             override fun onTick(millisUntilFinished: Long) {
                 // Not used in this example, but called every second during the countdown
@@ -409,6 +443,7 @@ object RandomUtils {
             override fun onFinish() {
                 val random = Random()
                 val randomTexts = arrayOf(
+                    "Did you know that you can earn money by inviting users to tally?",
                     "Nigeria is one of the nine African countries that prints her own money",
                     "Largest Economy in Africa: Nigeria has the largest economy in Africa in terms of GDP (Gross Domestic Product)",
                     "To remain financially happy avoid comparing your earnings to that of others or try to spend the way they do",
@@ -423,7 +458,6 @@ object RandomUtils {
                 ) // Add more text options as needed
                 val index = random.nextInt(randomTexts.size)
                 val randomText = randomTexts[index]
-                Log.d("<=GENERAEDTEXTS=>", "HEREEEEE")
 
                 textView.text = randomText
             }
@@ -451,24 +485,24 @@ object RandomUtils {
         return false
     }
 
-    fun isOnline(c: Context): Boolean {
-
-        val connectivityMgr =
-            c.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        val allNetworks: Array<Network> = connectivityMgr.allNetworks // added in API 21 (Lollipop)
-
-        for (network in allNetworks) {
-            val networkCapabilities = connectivityMgr!!.getNetworkCapabilities(network)
-            return (networkCapabilities!!.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                    networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) &&
-                    (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                            || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                            || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)))
-        }
-
-        return false
-    }
+//    fun isOnline(c: Context): Boolean {
+//
+//        val connectivityMgr =
+//            c.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+//
+//        val allNetworks: Array<Network> = connectivityMgr.allNetworks // added in API 21 (Lollipop)
+//
+//        for (network in allNetworks) {
+//            val networkCapabilities = connectivityMgr!!.getNetworkCapabilities(network)
+//            return (networkCapabilities!!.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+//                    networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) &&
+//                    (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+//                            || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+//                            || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)))
+//        }
+//
+//        return false
+//    }
 
     fun checkCardType(cardNumber: String, img: ImageView): Any {
         val visaPattern = "^4[0-9]{12}(?:[0-9]{3})?\$"
@@ -478,15 +512,6 @@ object RandomUtils {
         val vervePattern = "^((506(0|1|2|3|4|5))|(650(0|1|2|3|4|5)))\\d{12}$"
         val anotherVervePattern = "^((506(0|1|2|3|4|5))|(650(0|1|2|3|4|5)))\\d{15}$"
 
-//        return when {
-//            cardNumber.matches(Regex(visaPattern)) -> "Visa"
-//            cardNumber.matches(Regex(mastercardPattern)) -> "Mastercard"
-//            cardNumber.matches(Regex(amexPattern)) -> "American Express"
-//            cardNumber.matches(Regex(discoverPattern)) -> "Discover"
-//            cardNumber.matches(Regex(vervePattern)) -> "Verve"
-//            cardNumber.matches(Regex(anotherVervePattern)) -> "Verve"
-//            else -> "Unknown"
-//        }
         return when {
             cardNumber.matches(Regex(visaPattern)) -> img.setImageResource(R.drawable.visa)
             cardNumber.matches(Regex(mastercardPattern)) -> img.setImageResource(R.drawable.mastercard_logo)
@@ -549,28 +574,6 @@ object RandomUtils {
         return bitMap
     }
 
-    //    fun initPartnerId(): String {
-//        var partnerID = ""
-//        val bankList = mapOf(
-//            "12" to "What was the name of your first pet?",
-//            "13" to "What is your mother's maiden name?",
-//            "14" to "What is the name of your favorite teacher?",
-//            "15" to "What was the first concert you attended?",
-//            "16" to "What is your favorite book?",
-//            "17" to "What is the name of the street you grew up on?",
-//            "18" to "What is your favorite movie?",
-//            "19" to "What was the make and model of your first car?",
-//            "20" to "What is your favorite color?",
-//            "21" to "What is the name of the city where you were born?",
-//        )
-//
-//        for (element in bankList) {
-//            if (element.key == BuildConfig.FLAVOR) {
-//                partnerID = element.value
-//            }
-//        }
-//        return partnerID
-//    }
     fun displaySecurityQuestion(): ArrayList<NewGetSecurityQuestionResponseItem> {
         return arrayListOf(
             NewGetSecurityQuestionResponseItem(12, "What was the name of your first pet?"),
@@ -595,4 +598,22 @@ object RandomUtils {
         )
     }
 
+    fun Fragment.launchWhenResumed(callback: () -> Unit) {
+        lifecycleScope.launch {
+            lifecycle.withResumed(callback)
+        }
+    }
+
+    fun Disposable.disposeWith(compositeDisposable: CompositeDisposable) {
+        compositeDisposable.add(this)
+    }
+
+    fun <T> getSingleTransformer(errorTag: String): SingleTransformer<T, T> =
+        SingleTransformer {
+            it.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError { throwable ->
+                    Timber.d(errorTag, throwable.localizedMessage)
+                }
+        }
 }

@@ -3,6 +3,8 @@ package com.woleapp.netpos.qrgenerator.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.TransactionLayoutBinding
 import com.woleapp.netpos.qrgenerator.model.Merchant
 import com.woleapp.netpos.qrgenerator.model.wallet.TallyWalletUserTransactionsResponseItem
@@ -16,6 +18,7 @@ class TallyWalletUserTransactionAdapter(private var transactionList: List<TallyW
         val transactionTitle = binding.transactionTitle
         val transactionDate = binding.transactionDate
         val transactionPrice = binding.transactionPrice
+        val transImage = binding.transactionType
 
     }
 
@@ -46,6 +49,11 @@ class TallyWalletUserTransactionAdapter(private var transactionList: List<TallyW
                     }
                     transactionTitle.text = source_acct
                     transactionPrice.text = transaction_amount.toInt().formatCurrency()
+                    if (transaction_type == "credit"){
+                        transImage.setImageResource(R.drawable.credit)
+                    }else{
+                        transImage.setImageResource(R.drawable.debit)
+                    }
                 }
             }
         }

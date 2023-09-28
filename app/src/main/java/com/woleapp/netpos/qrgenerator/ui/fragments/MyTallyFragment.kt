@@ -55,8 +55,6 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
     private lateinit var noInternetDialog: AlertDialog
     private lateinit var noInternetBinding: LayoutNoInternetBinding
     private lateinit var token: String
-    private lateinit var networkConnectivityHelper: NetworkConnectivityHelper
-    private lateinit var mySMSBroadcastReceiver: MySMSBroadcastReceiver
     private lateinit var email:String
     private lateinit var passwordSetDialog: AlertDialog
     private lateinit var passwordSetBinding: LayoutSetTransactionPinPrefTextBinding
@@ -81,9 +79,8 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
                     activity?.finishAffinity()
                 }
             })
-        networkConnectivityHelper = NetworkConnectivityHelper(requireActivity())
-        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
-        val header = Singletons().getTallyUserToken()!!
+        loader = alertDialog(requireContext())
+        val header = Singletons().getTallyUserToken(requireContext())!!
          token = "Bearer $header"
 
 
@@ -140,7 +137,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         walletViewModel.getUserTransactionResponse.removeObservers(viewLifecycleOwner)
-        Singletons().getTallyWalletBalance()?.info?.available_balance?.let {
+        Singletons().getTallyWalletBalance(requireContext())?.info?.available_balance?.let {
             tallyWalletBalance = it
         }
 
@@ -169,41 +166,40 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
             findNavController().navigate(action)
         }
 
+//
+//        noInternetBinding = LayoutNoInternetBinding.inflate(
+//            LayoutInflater.from(requireContext()),
+//            null,
+//            false
+//        ).apply {
+//            lifecycleOwner = this@MyTallyFragment
+//            executePendingBindings()
+//        }
+//        noInternetDialog = AlertDialog.Builder(requireContext())
+//            .setView(noInternetBinding.root)
+//            .setCancelable(false)
+//            .create()
+//        networkConnectivityHelper.observeNetworkStatus()
+//            .subscribe {
+//            if (it) {
+//                requireActivity().runOnUiThread(Runnable {
+//                    // Stuff that updates the UI
+//                    noInternetDialog.dismiss()
+//                })
+//                launchWhenResumed {
+//                        // Do something
+//                        getWalletStatus()
+//                }
+//            } else {
+//                requireActivity().runOnUiThread(Runnable {
+//                    // Stuff that updates the UI
+//                    noInternetDialog.show()
+//                })
+//            }
+//        }
+//            .isDisposed
 
-        noInternetBinding = LayoutNoInternetBinding.inflate(
-            LayoutInflater.from(requireContext()),
-            null,
-            false
-        ).apply {
-            lifecycleOwner = this@MyTallyFragment
-            executePendingBindings()
-        }
-        noInternetDialog = AlertDialog.Builder(requireContext())
-            .setView(noInternetBinding.root)
-            .setCancelable(false)
-            .create()
-        networkConnectivityHelper.observeNetworkStatus()
-            .subscribe {
-            if (it) {
-                requireActivity().runOnUiThread(Runnable {
-                    // Stuff that updates the UI
-                    noInternetDialog.dismiss()
-                })
-                launchWhenResumed {
-                        // Do something
-                        getWalletStatus()
-                }
-            } else {
-                requireActivity().runOnUiThread(Runnable {
-                    // Stuff that updates the UI
-                    noInternetDialog.show()
-                })
-            }
-        }
-            .isDisposed
-
-        getUserTransactions(5)
-
+        getWalletStatus()
 
         passwordSetBinding.save.setOnClickListener {
             //  val savedPin = Singletons().getPin()!!
@@ -320,7 +316,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
 
 
     private fun getUserTransactions(recordsNumber: Int) {
-        walletViewModel.getUserTransactions(recordsNumber)
+        walletViewModel.getUserTransactions(requireContext(), recordsNumber)
         observeServerResponse(
             walletViewModel.getUserTransactionResponse,
             null,
@@ -360,7 +356,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
     }
 
     private fun getWalletStatus() {
-        walletViewModel.getWalletStatus()
+        walletViewModel.getWalletStatus(requireContext())
         observeServerResponse(
             walletViewModel.getWalletStatusResponse,
             null,
@@ -369,6 +365,12 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
             walletViewModel.getWalletStatusResponse.value?.let {
                 binding.myTallyConstraint.visibility = View.GONE
                 binding.notAUserConstraint.visibility = View.VISIBLE
+                binding.step1.visibility = View.VISIBLE
+                binding.verifyPhoneNumber.visibility = View.VISIBLE
+                binding.verifyAccountText.visibility = View.VISIBLE
+                binding.step2.visibility = View.GONE
+                binding.setPin.visibility = View.GONE
+                binding.setPinText.visibility = View.GONE
             }
         }
         observeServerResponse(
@@ -376,21 +378,88 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
             null,
             requireActivity().supportFragmentManager
         ) {
-            Log.d("TABRESP", "JUSTCHECKING")
             walletViewModel.getWalletUserResponse.value?.let {
+                val pinSet = it.data?.info?.pin
                 val verified = it.data?.info?.verified
-                if (!verified!!){
+                if (verified!!){
                     binding.myTallyConstraint.visibility = View.GONE
                     binding.notAUserConstraint.visibility = View.VISIBLE
+                    binding.step1.visibility = View.GONE
+                    binding.verifyPhoneNumber.visibility = View.GONE
+                    binding.verifyAccountText.visibility = View.GONE
                 }else{
-                    binding.myTallyConstraint.visibility = View.VISIBLE
-                    binding.notAUserConstraint.visibility = View.GONE
+                    binding.myTallyConstraint.visibility = View.GONE
+                    binding.notAUserConstraint.visibility = View.VISIBLE
+                    binding.step1.visibility = View.VISIBLE
+                    binding.verifyPhoneNumber.visibility = View.VISIBLE
+                    binding.verifyAccountText.visibility = View.VISIBLE
                 }
-                if (it.data?.info?.available_balance == null) {
-                    //   enterOTPDialog.show()
-                } else if (it.data.info.available_balance >= 0) {
+                if (pinSet!! && verified){
+                    binding.myTallyConstraint.visibility = View.VISIBLE
                     binding.walletBalance.text = it.data.info.available_balance.formatCurrency()
                     binding.walletNumber.text = it.data.info.phone_no
+                    binding.notAUserConstraint.visibility = View.GONE
+                    binding.step1.visibility = View.GONE
+                    binding.verifyPhoneNumber.visibility = View.GONE
+                    binding.verifyAccountText.visibility = View.GONE
+                    binding.step2.visibility = View.GONE
+                    binding.setPin.visibility = View.GONE
+                    binding.setPinText.visibility = View.GONE
+                    getUserTransactions(5)
+                    return@observeServerResponse
+                }
+
+                if (pinSet && !it.data.info.verified){
+                    binding.myTallyConstraint.visibility = View.GONE
+                    binding.notAUserConstraint.visibility = View.VISIBLE
+                    binding.step1.visibility = View.VISIBLE
+                    binding.verifyPhoneNumber.visibility = View.VISIBLE
+                    binding.verifyAccountText.visibility = View.VISIBLE
+                    binding.step2.visibility = View.GONE
+                    binding.setPin.visibility = View.GONE
+                    binding.setPinText.visibility = View.GONE
+                    return@observeServerResponse
+                }
+
+                if (!pinSet && it.data.info.verified){
+                    binding.myTallyConstraint.visibility = View.GONE
+                    binding.notAUserConstraint.visibility = View.VISIBLE
+                    binding.step1.visibility = View.GONE
+                    binding.verifyPhoneNumber.visibility = View.GONE
+                    binding.verifyAccountText.visibility = View.GONE
+                    binding.step2.visibility = View.VISIBLE
+                    binding.setPin.visibility = View.VISIBLE
+                    binding.setPinText.visibility = View.VISIBLE
+                    return@observeServerResponse
+                }
+
+                if (!verified){
+                    binding.myTallyConstraint.visibility = View.GONE
+                    binding.notAUserConstraint.visibility = View.VISIBLE
+                    binding.step1.visibility = View.VISIBLE
+                    binding.verifyPhoneNumber.visibility = View.VISIBLE
+                    binding.verifyAccountText.visibility = View.VISIBLE
+                    binding.step2.visibility = View.GONE
+                    binding.setPin.visibility = View.GONE
+                    binding.setPinText.visibility = View.GONE
+                    return@observeServerResponse
+                }
+                if (!it.data.info.pin){
+                    binding.myTallyConstraint.visibility = View.GONE
+                    binding.notAUserConstraint.visibility = View.VISIBLE
+                    binding.step1.visibility = View.VISIBLE
+                    binding.verifyPhoneNumber.visibility = View.VISIBLE
+                    binding.verifyAccountText.visibility = View.VISIBLE
+                    binding.step2.visibility = View.GONE
+                    binding.setPin.visibility = View.GONE
+                    binding.setPinText.visibility = View.GONE
+                    return@observeServerResponse
+                }
+                if (it.data.info.available_balance >= 0) {
+                    binding.myTallyConstraint.visibility = View.VISIBLE
+                    binding.walletBalance.text = it.data.info.available_balance.formatCurrency()
+                    binding.walletNumber.text = it.data.info.phone_no
+                    return@observeServerResponse
                 }
                 Log.d("TABRESP", it.toString())
             }
@@ -403,7 +472,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
         securityQuestion: String,
         securityAnswer: String
     ) {
-        walletViewModel.setTransactionPin(
+        walletViewModel.setTransactionPin(requireContext(),
             transactionPin,
             securityQuestionId,
             securityQuestion,
@@ -417,6 +486,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
             walletViewModel.setPINResponse.value?.let {
                 if (it.data?.status == "success") {
                     getWalletStatus()
+                    getUserTransactions(5)
                     //  Toast.makeText(this, it.data.message, Toast.LENGTH_SHORT).show()
                 }
             }
@@ -426,12 +496,12 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
             passwordSetBinding.reprintPasswordEdittext.setText("")
             passwordSetDialog.cancel()
             // walletViewModel.fetchWallet(token)
-            walletViewModel.getWalletStatus()
+            walletViewModel.getWalletStatus(requireContext())
         }
     }
 
     private fun verifyWalletAccount() {
-        walletViewModel.verifyWalletNumber(token, true)
+        walletViewModel.verifyWalletNumber(requireContext(), token, true)
         observeServerResponse(
             walletViewModel.verifyWalletResponse,
             loader,
@@ -460,6 +530,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
                     showToast("Wrong OTP")
                 } else {
                     enterOTPDialog.dismiss()
+                    getWalletStatus()
                     showToast(it.data!!.message)
                 }
             }

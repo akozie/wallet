@@ -30,6 +30,10 @@ const val SMS_CONSENT_REQUEST = 2
 const val BANK_NAME = "FCMB"
 const val CONFIRM_PIN_RESPONSE = "CONFIRM_PIN_RESPONSE"
 const val LOGIN_PASSWORD = "LOGIN_PASSWORD"
+const val LOGIN_PASSWORD_VALUE = "LOGIN_PASSWORD_VALUE"
+const val REFRESH_TOKEN = "refresh_token"
+const val REFRESH_TOKEN_ERROR = "refresh_token_error"
+
 
 
 

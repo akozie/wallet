@@ -21,7 +21,7 @@ Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getMerchantBaseUrl(JNIEnv
 JNIEXPORT jstring JNICALL
 Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getCheckoutBaseUrl(JNIEnv *env,
                                                                           jobject thiz) {
-    return (*env)->NewStringUTF(env, "https://webpay.netpluspay.com/");
+    return (*env)->NewStringUTF(env, "https://paytally.netpluspay.com/");
 }
 
 JNIEXPORT jstring JNICALL
@@ -61,4 +61,15 @@ Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getWalletXAPIToken(JNIEnv
 JNIEXPORT jstring JNICALL
 Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getBearerToken(JNIEnv *env, jobject thiz) {
     return (*env) ->NewStringUTF(env, "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTcsImVtYWlsIjoiZXpla2llbEBnbWFpbC5jb20iLCJmdWxsbmFtZSI6IlRlc3QiLCJtb2JpbGVfcGhvbmUiOiIwNzAzMzQ3NDE5OCIsImlhdCI6MTY4MjQxMTUxMiwiZXhwIjoxNzEzOTQ3NTEyfQ.LLEUvp_NplojFDsWXJ02vj_QwyU8HjgY9x32QWucQwM");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getTallyConstant(JNIEnv *env, jobject thiz) {
+    return (*env) ->NewStringUTF(env, "Tally");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getMerchantHeaderToken(JNIEnv *env,
+                                                                              jobject thiz) {
+    return (*env) ->NewStringUTF(env, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdG9ybUlkIjoiYzIzMDY1MTctNmE5Mi0xMWVhLTk1N2MtZjIzYzkyOWIwMDU3IiwidGVybWluYWxJZCI6IjIxMDFKQTI2IiwiYnVzaW5lc3NOYW1lIjoib2xhbWlkZUB3ZWJtYWxsLm5nIiwibWlkIjoiMCIsInBhcnRuZXJJZCI6bnVsbCwiZG9tYWlucyI6WyJuZXRwb3MiXSwicm9sZXMiOlsiYWRtaW4iXSwiaXNzIjoic3Rvcm06YWNjb3VudHMiLCJzdWIiOiJ1c2VyIiwiaWF0IjoxNjY3MjU3NDI3LCJleHAiOjE2OTg3OTM0Mjd9.5pI7PDOYGB6FdfbZNs7R6ewlMWFlw95eSZM6H6Gpl0g");
 }

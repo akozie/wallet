@@ -1,7 +1,13 @@
 package com.woleapp.netpos.qrgenerator.ui.fragments
 
-import android.content.Context
+import android.Manifest
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -9,54 +15,57 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.BuildConfig
-import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.adapter.QrAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentQRBinding
 import com.woleapp.netpos.qrgenerator.databinding.LayoutEnterOtpBinding
-import com.woleapp.netpos.qrgenerator.databinding.NoQrCodeLayoutBinding
-import com.woleapp.netpos.qrgenerator.db.AppDatabase
-import com.woleapp.netpos.qrgenerator.model.QrModel
-import com.woleapp.netpos.qrgenerator.model.wallet.FetchQrTokenResponseItem
-import com.woleapp.netpos.qrgenerator.model.wallet.QRTokenResponseItem
-import com.woleapp.netpos.qrgenerator.model.wallet.request.SendWithTallyNumberRequest
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils
+import com.woleapp.netpos.qrgenerator.databinding.LayoutNoInternetBinding
+import com.woleapp.netpos.qrgenerator.model.GenerateQRResponse
+import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils.isDarkModeEnabled
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.launchWhenResumed
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
-import com.woleapp.netpos.qrgenerator.utils.Singletons
-import com.woleapp.netpos.qrgenerator.utils.WALLET_RESPONSE
-import com.woleapp.netpos.qrgenerator.utils.showToast
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseForQrFragment
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
+import com.woleapp.netpos.qrgenerator.viewmodels.TransactionViewModel
 import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.properties.Delegates
+
 
 @AndroidEntryPoint
 class QRFragment : Fragment(), QrAdapter.OnQrClick {
-    private lateinit var _binding: FragmentQRBinding
-    private val binding get() = _binding
+    private var _binding: FragmentQRBinding? = null
+    private val binding get() = _binding!!
     private lateinit var qrAdapter: QrAdapter
-    private lateinit var qrDataList: ArrayList<FetchQrTokenResponseItem>
+
+    // private lateinit var qrDataList: ArrayList<FetchQrTokenResponseItem>
+    private lateinit var qrDataList: ArrayList<GenerateQRResponse>
     private val qrViewModel by activityViewModels<QRViewModel>()
     private val walletViewModel by activityViewModels<WalletViewModel>()
+    private val transactionViewModel by activityViewModels<TransactionViewModel>()
     private lateinit var token: String
     private lateinit var loader: android.app.AlertDialog
     private var tallyWalletBalance: Int = 0
     private lateinit var enterOTPDialog: AlertDialog
     private lateinit var enterOTPBinding: LayoutEnterOtpBinding
     private lateinit var otp: String
- //   lateinit var dataPasser: VerificationInterface
+    private var userId by Delegates.notNull<Int>()
 
+    //   lateinit var dataPasser: VerificationInterface
+    private lateinit var noInternetDialog: AlertDialog
+    private lateinit var noInternetBinding: LayoutNoInternetBinding
+    private lateinit var networkConnectivityHelper: NetworkConnectivityHelper
 
     @Inject
     lateinit var compositeDisposable: CompositeDisposable
@@ -83,55 +92,36 @@ class QRFragment : Fragment(), QrAdapter.OnQrClick {
                         activity?.finishAffinity()
                     }
                 })
-        }else{
+        } else {
             binding.verifyAccount.visibility = View.GONE
         }
-        val header = Singletons().getTallyUserToken()!!
+        networkConnectivityHelper = NetworkConnectivityHelper(requireActivity())
+        val header = Singletons().getTallyUserToken(requireContext())!!
         token = "Bearer $header"
-        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
-
+        loader = alertDialog(requireContext())
+        userId = Singletons().getCurrentlyLoggedInUser(requireContext())?.id!!
         enterOTPBinding = LayoutEnterOtpBinding.inflate(
             LayoutInflater.from(requireContext()),
             null,
             false
         ).apply {
-            lifecycleOwner = this@QRFragment
+            lifecycleOwner = viewLifecycleOwner
             executePendingBindings()
         }
         enterOTPDialog = AlertDialog.Builder(requireContext())
             .setView(enterOTPBinding.root)
             .setCancelable(false)
             .create()
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        qrDataList = arrayListOf()
         binding.verifyAccount.setOnClickListener {
             verifyWalletAccount()
         }
-        walletViewModel.fetchWalletMessage.observe(viewLifecycleOwner) {
-            it.getContentIfNotHandled()?.let { message ->
-                showToast(message)
-            }
-        }
-//        observeServerResponse(
-//            walletViewModel.verifyWalletResponse,
-//            loader,
-//            requireActivity().supportFragmentManager
-//        ) {
-//            walletViewModel.verifyWalletResponse.value?.let {
-//                if (it.data!!.verified == 0){
-//                    enterOTPDialog.show()
-//                }else{
-//                    enterOTPDialog.dismiss()
-//                }
-//            }
-//        }
-        qrDataList = walletViewModel.listOfQrTokens
-        getQrCodes()
+
 
         binding.button.setOnClickListener {
             val action =
@@ -140,12 +130,13 @@ class QRFragment : Fragment(), QrAdapter.OnQrClick {
         }
 
 
+
         enterOTPBinding = LayoutEnterOtpBinding.inflate(
             LayoutInflater.from(requireContext()),
             null,
             false
         ).apply {
-            lifecycleOwner = this@QRFragment
+            lifecycleOwner = viewLifecycleOwner
             executePendingBindings()
         }
         enterOTPDialog = AlertDialog.Builder(requireContext())
@@ -177,33 +168,116 @@ class QRFragment : Fragment(), QrAdapter.OnQrClick {
             findNavController().navigate(action)
         }
 
+
+
+        noInternetBinding = LayoutNoInternetBinding.inflate(
+            LayoutInflater.from(requireContext()),
+            null,
+            false
+        ).apply {
+            lifecycleOwner = this@QRFragment
+            executePendingBindings()
+        }
+        noInternetDialog = AlertDialog.Builder(requireContext())
+            .setView(noInternetBinding.root)
+            .setCancelable(false)
+            .create()
+        networkConnectivityHelper.observeNetworkStatus()
+            .subscribe {
+                if (it) {
+                    requireActivity().runOnUiThread(Runnable {
+                        // Stuff that updates the UI
+                        noInternetDialog.dismiss()
+                    })
+                    launchWhenResumed {
+                        // Do something
+                        //    qrViewModel.fetchQrToken(requireContext())
+                    }
+                } else {
+                    requireActivity().runOnUiThread(Runnable {
+                        // Stuff that updates the UI
+                        noInternetDialog.show()
+                    })
+                }
+            }
+            .isDisposed
+
+        transactionViewModel.getQRFromDb(userId.toString())
+
     }
+
+
+    override fun onResume() {
+        super.onResume()
+        getQrCodes()
+    }
+
+
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//
+//        if (requestCode == PICK_CONTACT_REQUEST && resultCode == Activity.RESULT_OK) {
+//            if (data != null) {
+//                val contacts = mutableListOf<String>()
+//
+//                if (data.data != null) {
+//                    // Single contact selected
+//                    val contactUri: Uri = data.data!!
+//                    val cursor: Cursor? = requireActivity().contentResolver.query(
+//                        contactUri, null, null, null, null
+//                    )
+//                    cursor?.use {
+//                        if (it.moveToFirst()) {
+//                            val contactName: String =
+//                                it.getString(it.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
+//                            contacts.add(contactName)
+//                            Log.d("CONTACTNAME", contactName)
+//                        }
+//                    }
+//                } else {
+//                    // Multiple contacts selected
+//                    val cursor: Cursor? = requireActivity().contentResolver.query(
+//                        data.data!!, null, null, null, null
+//                    )
+//                    cursor?.use {
+//                        while (it.moveToNext()) {
+//                            val contactName: String =
+//                                it.getString(it.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
+//                            contacts.add(contactName)
+//                            Log.d("MULTIPLECONTACTNAME", contactName)
+//                        }
+//                    }
+//                }
+//
+//                // Do something with the selected contacts (e.g., display or process them)
+//            }
+//        }
+//    }
 
     private fun qrSetUp() {
         qrAdapter = QrAdapter(qrDataList, this)
         binding.qrRecycler.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-            binding.qrRecycler.adapter = qrAdapter
+        binding.qrRecycler.adapter = qrAdapter
+        qrAdapter.notifyDataChanged(qrDataList)
     }
 
     private fun getQrCodes() {
-        loader.show()
-        observeServerResponse(
-            walletViewModel.fetchQrToken(token),
+        observeServerResponseForQrFragment(
+            transactionViewModel.getQRFromDbResponse,
             loader,
-            compositeDisposable,
-            ioScheduler,
-            mainThreadScheduler,
+            requireActivity().supportFragmentManager,
         ) {
-
-            if (qrDataList.isNullOrEmpty()){
+            qrDataList = it as ArrayList<GenerateQRResponse>
+            //  showToast(qrDataList.size.toString())
+            if (qrDataList.isEmpty()) {
                 binding.noQrCodesLayout.visibility = View.VISIBLE
-            }else{
+            } else {
                 binding.noQrCodesLayout.visibility = View.GONE
                 qrSetUp()
             }
         }
-}
+    }
 
 
     private fun verifyWalletOTP(token: String, otp: String) {
@@ -220,9 +294,9 @@ class QRFragment : Fragment(), QrAdapter.OnQrClick {
                     enterOTPDialog.dismiss()
                     showToast("Your Phone number has been verified")
                     val verified = it.data?.verified!!
-                    if (verified == 0){
+                    if (verified == 0) {
                         binding.verifyAccount.visibility = View.VISIBLE
-                    }else{
+                    } else {
                         binding.verifyAccount.visibility = View.GONE
                     }
                     walletViewModel.fetchWalletResponse.removeObservers(viewLifecycleOwner)
@@ -230,17 +304,18 @@ class QRFragment : Fragment(), QrAdapter.OnQrClick {
             }
         }
     }
+
     private fun verifyWalletAccount() {
-        walletViewModel.verifyWalletNumber(token, true)
+        walletViewModel.verifyWalletNumber(requireContext(), token, true)
         observeServerResponse(
             walletViewModel.verifyWalletResponse,
             loader,
             requireActivity().supportFragmentManager
         ) {
             walletViewModel.verifyWalletResponse.value?.let {
-                if (it.data?.verified == 0){
+                if (it.data?.verified == 0) {
                     enterOTPDialog.show()
-                }else{
+                } else {
                     enterOTPDialog.dismiss()
                     walletViewModel.verifyWalletResponse.removeObservers(viewLifecycleOwner)
                 }
@@ -249,22 +324,17 @@ class QRFragment : Fragment(), QrAdapter.OnQrClick {
     }
 
 
-    override fun viewTransaction(qrModel: FetchQrTokenResponseItem) {
+    override fun viewTransaction(qrModel: GenerateQRResponse) {
         qrViewModel.transactionResponse.removeObservers(viewLifecycleOwner)
         val action =
             TransactionsFragmentDirections.actionTransactionsFragmentToQrDetailsFragment2(qrModel)
         findNavController().navigate(action)
     }
 
-    override fun onViewQr(qrModel: FetchQrTokenResponseItem) {
+    override fun onViewQr(qrModel: GenerateQRResponse) {
         val action =
             TransactionsFragmentDirections.actionTransactionsFragmentToDisplayQrFragment23(qrModel)
         findNavController().navigate(action)
     }
 
-    override fun onDestroyView() {
-        walletViewModel.listOfQrTokens.removeAll(qrDataList)
-      //  qrViewModel.transactionResponse.removeObservers(viewLifecycleOwner)
-        super.onDestroyView()
-    }
 }

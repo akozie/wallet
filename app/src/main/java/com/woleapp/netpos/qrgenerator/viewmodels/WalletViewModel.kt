@@ -9,8 +9,11 @@ import androidx.lifecycle.ViewModel
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
+import com.woleapp.netpos.qrgenerator.db.AppDatabase
+import com.woleapp.netpos.qrgenerator.model.DomainQREntity
 import com.woleapp.netpos.qrgenerator.model.ErrorModel
 import com.woleapp.netpos.qrgenerator.model.GeneralResponse
+import com.woleapp.netpos.qrgenerator.model.GenerateQRResponse
 import com.woleapp.netpos.qrgenerator.model.pay.PayResponse
 import com.woleapp.netpos.qrgenerator.model.wallet.*
 import com.woleapp.netpos.qrgenerator.model.wallet.request.*
@@ -24,6 +27,8 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import org.json.JSONObject
 import retrofit2.HttpException
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 import kotlin.coroutines.coroutineContext
 
@@ -138,6 +143,8 @@ class WalletViewModel @Inject constructor(
     val listOfQrTokens = arrayListOf<FetchQrTokenResponseItem>()
     lateinit var errorMsg: String
 
+    private lateinit var formattedDate: String
+
     fun fetchWallet(token : String) {
         _fetchWalletResponse.postValue(Resource.loading(null))
         disposable.add(walletRepository.fetchWallet(token)
@@ -166,13 +173,13 @@ class WalletViewModel @Inject constructor(
             })
     }
 
-    fun verifyWalletNumber(token : String, verifyWallet: Boolean) {
+    fun verifyWalletNumber(context: Context, token : String, verifyWallet: Boolean) {
         _verifyWalletResponse.postValue(Resource.loading(null))
         disposable.add(walletRepository.verifyWalletNumber(token, verifyWallet)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
-                    Prefs.putString(PREF_TALLY_WALLET, Gson().toJson(it))
+                    EncryptedPrefsUtils.putString(context, PREF_TALLY_WALLET, Gson().toJson(it))
                     _verifyWalletResponse.postValue(Resource.success(it))
                     _fetchWalletMessage.value = Event(Resource.success(it).data?.message.toString())
                 }
@@ -212,7 +219,7 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }
@@ -242,13 +249,13 @@ class WalletViewModel @Inject constructor(
         walletRepository.sendWithTallyNumber(token, sendWithTallyNumberRequest)
             .flatMap {
                 if (it.isSuccessful) {
-                    Prefs.putString(WALLET_RESPONSE, it.body()?.message)
+                    EncryptedPrefsUtils.putString(context, WALLET_RESPONSE, it.body()?.message.toString())
                     Single.just(Resource.success(it.body()))
                 } else {
                     try {
                         val gson = Gson()
                         errorMsg = gson.fromJson(it.errorBody()?.charStream(), ErrorModel::class.java).message
-                        Prefs.putString(WALLET_RESPONSE, errorMsg)
+                        EncryptedPrefsUtils.putString(context, WALLET_RESPONSE, errorMsg)
                         val anotherTest = Event(errorMsg)
                         val justForTest = Event("YEEEEEEEP")
                       //  Log.d("CHECKRESULT", errorMsg)
@@ -282,9 +289,9 @@ class WalletViewModel @Inject constructor(
 //                }
 //            }
 
-    fun setTransactionPin(transactionPin: String, securityQuestionId: String, securityQuestion: String, securityAnswer: String) {
+    fun setTransactionPin(context: Context, transactionPin: String, securityQuestionId: String, securityQuestion: String, securityAnswer: String) {
         _setPINResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.setTransactionPin("Bearer ${Singletons().getTallyUserToken()!!}",transactionPin, securityQuestionId, securityQuestion, securityAnswer)
+        disposable.add(walletRepository.setTransactionPin("Bearer ${Singletons().getTallyUserToken(context)!!}",transactionPin, securityQuestionId, securityQuestion, securityAnswer)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
@@ -300,7 +307,7 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }
@@ -308,9 +315,9 @@ class WalletViewModel @Inject constructor(
             })
     }
 
-    fun getUserTransactions(recordsNumber: Int) {
+    fun getUserTransactions(context: Context, recordsNumber: Int) {
         _getUserTransactionResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.getUserTransactions("Bearer ${Singletons().getTallyUserToken()!!}", recordsNumber)
+        disposable.add(walletRepository.getUserTransactions("Bearer ${Singletons().getTallyUserToken(context)!!}", recordsNumber)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
@@ -325,7 +332,7 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }
@@ -333,9 +340,9 @@ class WalletViewModel @Inject constructor(
             })
     }
 
-    fun creditWallet(transactionID: String) {
+    fun creditWallet(context: Context, transactionID: String) {
         _creditWalletResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.creditWallet("Bearer ${Singletons().getTallyUserToken()!!}", transactionID)
+        disposable.add(walletRepository.creditWallet("Bearer ${Singletons().getTallyUserToken(context)!!}", transactionID)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
@@ -351,16 +358,16 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }
                 }
             })
     }
-    fun getOtpVerificationToUpdatePin() {
+    fun getOtpVerificationToUpdatePin(context: Context) {
         _getOtpToUpdatePinResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.getOtpVerificationToUpdatePin("Bearer ${Singletons().getTallyUserToken()!!}")
+        disposable.add(walletRepository.getOtpVerificationToUpdatePin("Bearer ${Singletons().getTallyUserToken(context)!!}")
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
@@ -376,7 +383,7 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }
@@ -385,15 +392,32 @@ class WalletViewModel @Inject constructor(
     }
 
 
-//    fun fetchQrToken() {
+//    fun fetchQrToken(context: Context) {
 //        _fetchQrResponse.postValue(Resource.loading(null))
-//        disposable.add(walletRepository.fetchQrToken("Bearer ${Singletons().getTallyUserToken()!!}")
+//        disposable.add(walletRepository.fetchQrToken("Bearer ${Singletons().getTallyUserToken(context)!!}")
 //            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
 //            .subscribe { data, error ->
 //                data?.let {
 //                    _fetchQrResponse.postValue(Resource.success(it.data))
-//                    for (i in 0 until it.data.size) {
-//                        listOfQrTokens.add(it.data[i])
+//                    val listOfQrTokens = it.data
+//                    for (i in listOfQrTokens.indices){
+//                        val c = Calendar.getInstance().time
+//                        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+//                        formattedDate = formatter.format(c)
+//                        val userId = Singletons().getCurrentlyLoggedInUser(context)?.id.toString()
+//                        val generalResponse = GenerateQRResponse(
+//                            qr_code_id = listOfQrTokens[i].qr_code_id,
+//                            data = listOfQrTokens[i].qr_token,
+//                            success = true,
+//                            card_scheme = listOfQrTokens[i].card_scheme,
+//                            issuing_bank = listOfQrTokens[i].issuing_bank,
+//                            date = formattedDate
+//                        )
+//                        if (userId.isNotEmpty()) {
+//                            val dataQREntity = DomainQREntity(listOfQrTokens[i].qr_code_id!!, userId, generalResponse)
+//                            AppDatabase.getDatabaseInstance(context).getQrDao()
+//                                .insertQrCode(dataQREntity)
+//                        }
 //                    }
 //                }
 //                error?.let {
@@ -405,7 +429,7 @@ class WalletViewModel @Inject constructor(
 //                            try {
 //                                Gson().fromJson(errorMessage, ErrorModel::class.java).message
 //                            } catch (e: Exception) {
-//                                "Gateway Time-out"
+//                                "Error"
 //                            }
 //                        )
 //                    }
@@ -413,32 +437,32 @@ class WalletViewModel @Inject constructor(
 //            })
 //    }
 
-    fun fetchQrToken(token: String) =
-        walletRepository.fetchQrToken(token)
-            .flatMap {
-                if (it.isSuccessful) {
-                //    Prefs.putString(WALLET_RESPONSE, it.body()?.status)
-                    it.body()?.data?.let {result ->
-                        for (i in result.indices) {
-                            listOfQrTokens.add(result[i])
-                        }
-                    }
-                    Single.just(Resource.success(it.body()))
-                } else {
-                    try {
-                        val gson = Gson()
-                        errorMsg = gson.fromJson(it.errorBody()?.charStream(), ErrorModel::class.java).message
-                        Prefs.putString(WALLET_RESPONSE, errorMsg)
-                    } catch (e: java.lang.Exception) {
-                        //
-                    }
-                    Single.just(Resource.error(errorMsg))
-                }
-            }
+//    fun fetchQrToken() =
+//        walletRepository.fetchQrToken("Bearer ${Singletons().getTallyUserToken()!!}")
+//            .flatMap {
+//                if (it.isSuccessful) {
+//                //    Prefs.putString(WALLET_RESPONSE, it.body()?.status)
+//                    it.body()?.data?.let {result ->
+//                        for (i in result.indices) {
+//                            listOfQrTokens.add(result[i])
+//                        }
+//                    }
+//                    Single.just(Resource.success(it.body()))
+//                } else {
+//                    try {
+//                        val gson = Gson()
+//                        errorMsg = gson.fromJson(it.errorBody()?.charStream(), ErrorModel::class.java).message
+//                        Prefs.putString(WALLET_RESPONSE, errorMsg)
+//                    } catch (e: java.lang.Exception) {
+//                        //
+//                    }
+//                    Single.just(Resource.error(errorMsg))
+//                }
+//            }
 
-    fun storeQrToken(qrTokenRequest: QrTokenRequest) {
+    fun storeQrToken(context: Context, qrTokenRequest: QrTokenRequest) {
         _storeQrResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.storeQrToken("Bearer ${Singletons().getTallyUserToken()!!}", qrTokenRequest)
+        disposable.add(walletRepository.storeQrToken("Bearer ${Singletons().getTallyUserToken(context)!!}", qrTokenRequest)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
@@ -453,7 +477,7 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }
@@ -462,38 +486,38 @@ class WalletViewModel @Inject constructor(
     }
 
 
-    fun getSecurityQuestions() {
-        _getSecurityQuestionsResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.getSecurityQuestions("Bearer ${Singletons().getTallyUserToken()!!}")
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread()).subscribe { data, error ->
-                data?.let {
-                    Log.d("SECURITYQUESTIONSRESULT", it.toString())
-                    _getSecurityQuestionsResponse.postValue(Resource.success(it))
-                    for (i in 0 until it.size) {
-                        listOfSecurityQuestions.add(it[i])
-                    }
-                }
-                error?.let {
-                    _getSecurityQuestionsResponse.postValue(Resource.error(null))
-                    (it as? HttpException).let { httpException ->
-                        val errorMessage = httpException?.response()?.errorBody()?.string()
-                            ?: "{\"message\":\"Unexpected error\"}"
-                        _fetchWalletMessage.value = Event(
-                            try {
-                                Gson().fromJson(errorMessage, ErrorModel::class.java).message
-                            } catch (e: Exception) {
-                                "Gateway Time-out"
-                            }
-                        )
-                    }
-                }
-            })
-    }
+//    fun getSecurityQuestions() {
+//        _getSecurityQuestionsResponse.postValue(Resource.loading(null))
+//        disposable.add(walletRepository.getSecurityQuestions("Bearer ${Singletons().getTallyUserToken()!!}")
+//            .subscribeOn(Schedulers.io())
+//            .observeOn(AndroidSchedulers.mainThread()).subscribe { data, error ->
+//                data?.let {
+//                    Log.d("SECURITYQUESTIONSRESULT", it.toString())
+//                    _getSecurityQuestionsResponse.postValue(Resource.success(it))
+//                    for (i in 0 until it.size) {
+//                        listOfSecurityQuestions.add(it[i])
+//                    }
+//                }
+//                error?.let {
+//                    _getSecurityQuestionsResponse.postValue(Resource.error(null))
+//                    (it as? HttpException).let { httpException ->
+//                        val errorMessage = httpException?.response()?.errorBody()?.string()
+//                            ?: "{\"message\":\"Unexpected error\"}"
+//                        _fetchWalletMessage.value = Event(
+//                            try {
+//                                Gson().fromJson(errorMessage, ErrorModel::class.java).message
+//                            } catch (e: Exception) {
+//                                "Error"
+//                            }
+//                        )
+//                    }
+//                }
+//            })
+//    }
 
-    fun updateTransactionPin(newPin: String, otp: String, securityAnswer: String, securityQuestion: String) {
+    fun updateTransactionPin(context: Context, newPin: String, otp: String, securityAnswer: String, securityQuestion: String) {
         _updatePinResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.updateTransactionPin("Bearer ${Singletons().getTallyUserToken()!!}", newPin, otp, securityAnswer, securityQuestion)
+        disposable.add(walletRepository.updateTransactionPin("Bearer ${Singletons().getTallyUserToken(context)!!}", newPin, otp, securityAnswer, securityQuestion)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
@@ -509,7 +533,7 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }
@@ -517,35 +541,9 @@ class WalletViewModel @Inject constructor(
             })
     }
 
-    fun getTransactionReceipt(transactionReceiptResponse: TransactionReceiptRequest) {
-        _getTransactionReceiptResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.getTransactionReceipt("Bearer ${Singletons().getTallyUserToken()!!}", transactionReceiptResponse)
-            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-            .subscribe { data, error ->
-                data?.let {
-                    _getTransactionReceiptResponse.postValue(Resource.success(it))
-                //    _fetchWalletMessage.value = Event(Resource.success(it).data!!.)
-                }
-                error?.let {
-                    _getTransactionReceiptResponse.postValue(Resource.error(null))
-                    (it as? HttpException).let { httpException ->
-                        val errorMessage = httpException?.response()?.errorBody()?.string()
-                            ?: "{\"message\":\"Unexpected error\"}"
-                        _fetchWalletMessage.value = Event(
-                            try {
-                                Gson().fromJson(errorMessage, ErrorModel::class.java).message
-                            } catch (e: Exception) {
-                                "Gateway Time-out"
-                            }
-                        )
-                    }
-                }
-            })
-    }
-
-    fun sendEmailReceipt(transactionReceiptResponse: TransactionReceiptRequest) {
+    fun sendEmailReceipt(context: Context, transactionReceiptResponse: TransactionReceiptRequest) {
         _sendEmailReceiptResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.sendEmailReceipt("Bearer ${Singletons().getTallyUserToken()!!}", transactionReceiptResponse)
+        disposable.add(walletRepository.sendEmailReceipt("Bearer ${Singletons().getTallyUserToken(context)!!}", transactionReceiptResponse)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
@@ -561,7 +559,7 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }
@@ -569,9 +567,9 @@ class WalletViewModel @Inject constructor(
             })
     }
 
-    fun getSelectedQuestion() {
+    fun getSelectedQuestion(context: Context) {
         _getSelectedQuestionResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.getSelectedQuestion("Bearer ${Singletons().getTallyUserToken()!!}")
+        disposable.add(walletRepository.getSelectedQuestion("Bearer ${Singletons().getTallyUserToken(context)!!}")
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
@@ -586,7 +584,7 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }
@@ -594,9 +592,9 @@ class WalletViewModel @Inject constructor(
             })
     }
 
-    fun fetchOtherAccount(accountNumber: FindAccountNumberRequest) {
+    fun fetchOtherAccount(context: Context, accountNumber: FindAccountNumberRequest) {
         _fetchOtherAccountResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.fetchOtherAccount("Bearer ${Singletons().getTallyUserToken()!!}", accountNumber)
+        disposable.add(walletRepository.fetchOtherAccount("Bearer ${Singletons().getTallyUserToken(context)!!}", accountNumber)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
@@ -612,7 +610,7 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }
@@ -620,9 +618,9 @@ class WalletViewModel @Inject constructor(
             })
     }
 
-    fun fetchProvidusAccount(accountNumber: FindAccountNumberRequest) {
+    fun fetchProvidusAccount(context: Context, accountNumber: FindAccountNumberRequest) {
         _fetchProvidusAccountResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.fetchProvidusAccount("Bearer ${Singletons().getTallyUserToken()!!}", accountNumber)
+        disposable.add(walletRepository.fetchProvidusAccount("Bearer ${Singletons().getTallyUserToken(context)!!}", accountNumber)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
@@ -638,7 +636,7 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }
@@ -646,9 +644,9 @@ class WalletViewModel @Inject constructor(
             })
     }
 
-    fun providusToProvidus(providusRequest: ProvidusRequest) {
+    fun providusToProvidus(context: Context, providusRequest: ProvidusRequest) {
         _providusToProvidusResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.providusToProvidus("Bearer ${Singletons().getTallyUserToken()!!}", providusRequest)
+        disposable.add(walletRepository.providusToProvidus("Bearer ${Singletons().getTallyUserToken(context)!!}", providusRequest)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
@@ -664,7 +662,7 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }
@@ -672,9 +670,9 @@ class WalletViewModel @Inject constructor(
             })
     }
 
-    fun providusToOtherBanks(otherBanksRequest: OtherBanksRequest) {
+    fun providusToOtherBanks(context: Context, otherBanksRequest: OtherBanksRequest) {
         _providusToOtherBanksResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.providusToOtherBanks("Bearer ${Singletons().getTallyUserToken()!!}", otherBanksRequest)
+        disposable.add(walletRepository.providusToOtherBanks("Bearer ${Singletons().getTallyUserToken(context)!!}", otherBanksRequest)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
@@ -690,7 +688,7 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }
@@ -698,9 +696,9 @@ class WalletViewModel @Inject constructor(
             })
     }
 
-    fun getWalletStatus() {
+    fun getWalletStatus(context: Context) {
         _getWalletStatusResponse.postValue(Resource.loading(null))
-        disposable.add(walletRepository.getWalletStatus("Bearer ${Singletons().getTallyUserToken()!!}")
+        disposable.add(walletRepository.getWalletStatus("Bearer ${Singletons().getTallyUserToken(context)!!}")
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { data, error ->
                 data?.let {
@@ -711,7 +709,7 @@ class WalletViewModel @Inject constructor(
                     } else {
                         val noUserExists = gson.fromJson(it, WalletUserResponse::class.java)
                         _getWalletUserResponse.postValue(Resource.success(noUserExists))
-                        Prefs.putString(PREF_TALLY_WALLET, Gson().toJson(it))
+                        EncryptedPrefsUtils.putString(context, PREF_TALLY_WALLET, Gson().toJson(it))
                     }
                 }
                 error?.let {
@@ -723,7 +721,7 @@ class WalletViewModel @Inject constructor(
                             try {
                                 Gson().fromJson(errorMessage, ErrorModel::class.java).message
                             } catch (e: Exception) {
-                                "Gateway Time-out"
+                                "Error"
                             }
                         )
                     }

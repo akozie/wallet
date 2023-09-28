@@ -19,8 +19,10 @@ import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import okhttp3.ConnectionPool
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -156,7 +158,7 @@ object AppModule {
     @Singleton
     @Named("defaultMerchantRetrofit")
     fun providesMerchantRetrofit(
-        @Named("defaultOkHttp") okhttp: OkHttpClient,
+        @Named("checkOutOkHttp") okhttp: OkHttpClient,
         @Named("merchantBaseUrl") baseUrl: String
     ): Retrofit =
         Retrofit.Builder()

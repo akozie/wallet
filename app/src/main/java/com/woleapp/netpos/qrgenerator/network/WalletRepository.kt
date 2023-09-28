@@ -52,8 +52,8 @@ class WalletRepository @Inject constructor(
     fun getOtpVerificationToUpdatePin(token: String) =
         walletService.getOtpVerificationToUpdatePin(token)
 
-    fun fetchQrToken(token: String) =
-        walletService.fetchQrToken(token)
+//    fun fetchQrToken(token: String) =
+//        walletService.fetchQrToken(token)
 
     fun storeQrToken(token: String, qrTokenRequest: QrTokenRequest) =
         walletService.storeQrToken(token, qrTokenRequest)
@@ -71,14 +71,6 @@ class WalletRepository @Inject constructor(
         walletService.updateTransactionPin(
             token,
             UpdateTransactionPinRequest(newPin, otp, securityAnswer, securityQuestion)
-        )
-    fun getTransactionReceipt(
-        token: String,
-        transactionReceiptRequest: TransactionReceiptRequest
-    ) =
-        walletService.getTransactionReceipt(
-            token,
-            transactionReceiptRequest
         )
 
    fun sendEmailReceipt(

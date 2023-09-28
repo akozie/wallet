@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,14 +14,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
-import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentSendWithTallyQrResultBinding
 import com.woleapp.netpos.qrgenerator.model.wallet.request.SendWithTallyNumberRequest
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils.isOnline
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,7 +38,8 @@ class SendWithTallyQrResultFragment : Fragment() {
     private val walletViewModel by activityViewModels<WalletViewModel>()
     private var verified = false
     private lateinit var networkConnectivityHelper: NetworkConnectivityHelper
-    private lateinit var connectivity: Connectivity
+
+    //  private lateinit var connectivity: Connectivity
     @Inject
     lateinit var compositeDisposable: CompositeDisposable
 
@@ -65,7 +63,7 @@ class SendWithTallyQrResultFragment : Fragment() {
             false
         )
         networkConnectivityHelper = NetworkConnectivityHelper(requireContext())
-        connectivity = Connectivity(requireContext())
+        //    connectivity = Connectivity(requireContext())
         return binding.root
     }
 
@@ -74,16 +72,16 @@ class SendWithTallyQrResultFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Singletons().getTallyWalletBalance()?.info?.available_balance?.let {
+        Singletons().getTallyWalletBalance(requireContext())?.info?.available_balance?.let {
             binding.availableBalance.text = it.formatCurrency()
         }
 
-        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
+        loader = alertDialog(requireContext())
         initViews()
-        val creditWalletNumber = Singletons().getAmountAndTallyNumber()?.tallyNumber
+        val creditWalletNumber = Singletons().getAmountAndTallyNumber(requireContext())?.tallyNumber
         walletNumber.setText(creditWalletNumber)
 
-        Singletons().getTallyWalletBalance()?.info?.verified?.let {
+        Singletons().getTallyWalletBalance(requireContext())?.info?.verified?.let {
             verified = it
         }
 
@@ -104,6 +102,10 @@ class SendWithTallyQrResultFragment : Fragment() {
                 showToast("Please enter transaction PIN")
                 return@setOnClickListener
             }
+            if (binding.tallyQrAmount.text?.trim().toString().toInt() < 100) {
+                showToast("The transaction amount must be at least 100 naira")
+                return@setOnClickListener
+            }
             if (binding.enterTransactionPin.text?.trim().toString().length < 4) {
                 showToast("The transaction pin must not be less than 4")
                 return@setOnClickListener
@@ -112,11 +114,13 @@ class SendWithTallyQrResultFragment : Fragment() {
                 showToast("Please you need to verify your number")
                 return@setOnClickListener
             }
-                if (isOnline(requireContext())) {
-                    sendWithTallyNumber()
-                } else {
-                    showToast("This device is not connected to the internet")
-                }
+            sendWithTallyNumber()
+
+//                if (isOnline(requireContext())) {
+//                    sendWithTallyNumber()
+//                } else {
+//                    showToast("This device is not connected to the internet")
+//                }
         }
     }
 
@@ -137,7 +141,7 @@ class SendWithTallyQrResultFragment : Fragment() {
         observeServerResponse(
             walletViewModel.sendWithTallyNumber(
                 requireContext(),
-                "Bearer ${Singletons().getTallyUserToken()!!}",
+                "Bearer ${Singletons().getTallyUserToken(requireContext())!!}",
                 sendWithTallyNumberRequest
             ),
             loader,
@@ -145,8 +149,8 @@ class SendWithTallyQrResultFragment : Fragment() {
             ioScheduler,
             mainThreadScheduler,
         ) {
-            val walletResponse = Prefs.getString(WALLET_RESPONSE, "")
-            showToast(walletResponse)
+            val walletResponse = EncryptedPrefsUtils.getString(requireContext(), WALLET_RESPONSE)
+            showToast(walletResponse.toString())
             findNavController().popBackStack()
         }
     }

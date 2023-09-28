@@ -4,28 +4,21 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
-import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentRecentTransactionDetailsBinding
-import com.woleapp.netpos.qrgenerator.model.QrModel
 import com.woleapp.netpos.qrgenerator.model.wallet.TallyWalletUserTransactionsResponseItem
 import com.woleapp.netpos.qrgenerator.model.wallet.request.TransactionReceiptRequest
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.getBitMap
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
-import com.woleapp.netpos.qrgenerator.utils.Singletons
-import com.woleapp.netpos.qrgenerator.utils.WALLET_RESPONSE
 import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
 import io.reactivex.Scheduler
@@ -63,14 +56,20 @@ class RecentTransactionDetailsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater,R.layout.fragment_recent_transaction_details, container, false)
-        loader = alertDialog(requireActivity(), R.layout.layout_loading_dialog)
+        binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_recent_transaction_details,
+            container,
+            false
+        )
+        loader = alertDialog(requireActivity())
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val userTransactions = arguments?.getParcelable<TallyWalletUserTransactionsResponseItem>("USERTRANSACTION")
+        val userTransactions =
+            arguments?.getParcelable<TallyWalletUserTransactionsResponseItem>("USERTRANSACTION")
 
         walletViewModel.fetchWalletMessage.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
@@ -78,39 +77,53 @@ class RecentTransactionDetailsFragment : Fragment() {
             }
         }
 
-        binding.transAmount.text = getString(R.string.amount_place_holder, userTransactions?.transaction_amount?.toDouble()?.formatCurrency() )
-        binding.transId.text = getString(R.string.trans_ref_place_holder, userTransactions?.transaction_id)
-        binding.cardOwner.text = getString(R.string.beneficiary_place_holder, userTransactions?.destination_acct_name)
-        binding.narration.text = getString(R.string.beneficiary_account_place_holder, userTransactions?.destination_acct)
-        binding.sourceAccount.text = getString(R.string.source_account_place_holder, userTransactions?.source_acct)
+        binding.transAmount.text = getString(
+            R.string.amount_place_holder,
+            userTransactions?.transaction_amount?.toDouble()?.formatCurrency()
+        )
+        binding.transId.text =
+            getString(R.string.trans_ref_place_holder, userTransactions?.transaction_id)
+        binding.cardOwner.text =
+            getString(R.string.beneficiary_place_holder, userTransactions?.destination_acct_name)
+        binding.narration.text =
+            getString(R.string.beneficiary_account_place_holder, userTransactions?.destination_acct)
+        binding.sourceAccount.text =
+            getString(R.string.source_account_place_holder, userTransactions?.source_acct)
         val date = userTransactions?.created_at?.substring(0, 10)
         val time = userTransactions?.created_at?.substring(11, 16)
-        if (time?.substring(0, 2)!! < 12.toString()){
+        if (time?.substring(0, 2)!! < 12.toString()) {
             binding.dateTime.text = getString(R.string.date_time_place_holder, "$date $time AM")
         } else {
-            val newTime = time?.substring(0,2).toInt()
+            val newTime = time.substring(0, 2).toInt()
             val calculatedTime = newTime - 12
-            val remainingTime = time?.substring(3,5)
-            if (calculatedTime == 0){
-                binding.dateTime.text = getString(R.string.date_time_place_holder, "$date 12:$remainingTime PM")
-            }else if (calculatedTime < 10){
-                binding.dateTime.text = getString(R.string.date_time_place_holder, "$date 0$calculatedTime:$remainingTime PM")
-            } else{
-                binding.dateTime.text = getString(R.string.date_time_place_holder, "$date $calculatedTime:$remainingTime PM")
+            val remainingTime = time.substring(3, 5)
+            if (calculatedTime == 0) {
+                binding.dateTime.text =
+                    getString(R.string.date_time_place_holder, "$date 12:$remainingTime PM")
+            } else if (calculatedTime < 10) {
+                binding.dateTime.text = getString(
+                    R.string.date_time_place_holder,
+                    "$date 0$calculatedTime:$remainingTime PM"
+                )
+            } else {
+                binding.dateTime.text = getString(
+                    R.string.date_time_place_holder,
+                    "$date $calculatedTime:$remainingTime PM"
+                )
             }
         }
 
         binding.shareReceipt.setOnClickListener {
-                share()
+            share()
         }
 
 
         val transId = userTransactions.transaction_id
-         newReceipt = TransactionReceiptRequest(
+        newReceipt = TransactionReceiptRequest(
             transaction_id = transId
         )
-        if (!transId.isNullOrEmpty()){
-          //  getReceipt(newReceipt)
+        if (!transId.isNullOrEmpty()) {
+            //  getReceipt(newReceipt)
         }
 
         binding.sendEmail.setOnClickListener {
@@ -119,7 +132,7 @@ class RecentTransactionDetailsFragment : Fragment() {
     }
 
     private fun sendEmail() {
-        walletViewModel.sendEmailReceipt(
+        walletViewModel.sendEmailReceipt(requireContext(),
             newReceipt
         )
         observeServerResponse(
@@ -154,7 +167,7 @@ class RecentTransactionDetailsFragment : Fragment() {
             )
             shareIntent.putExtra(Intent.EXTRA_STREAM, photo)
             shareIntent.type = "image/*"
-            shareIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            shareIntent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             startActivity(Intent.createChooser(shareIntent, null))
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
@@ -164,21 +177,6 @@ class RecentTransactionDetailsFragment : Fragment() {
 
     }
 
-    private fun getReceipt(transactionReceiptRequest: TransactionReceiptRequest){
-        walletViewModel.getTransactionReceipt(transactionReceiptRequest)
-        observeServerResponse(
-            walletViewModel.getTransactionReceiptResponse,
-            loader,
-            requireActivity().supportFragmentManager
-        ) {
-            walletViewModel.getTransactionReceiptResponse.value?.let {
-                it.data?.let { newReceipt ->
-                    receipt = newReceipt.receipt
-                  //  Glide.with(requireActivity()).load(receipt).into(binding.showReceipt)
-                }
-            }
-        }
-    }
 
     override fun onDestroyView() {
         walletViewModel.clear()

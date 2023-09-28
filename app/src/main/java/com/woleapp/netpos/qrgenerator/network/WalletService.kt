@@ -74,12 +74,6 @@ interface WalletService {
         @Body updateTransactionPinRequest: UpdateTransactionPinRequest
     ): Single<GeneralWalletResponse>
 
-    @POST("generateReceipt")
-    fun getTransactionReceipt(
-        @Header("Authorization") token: String,
-        @Body transactionReceiptRequest: TransactionReceiptRequest
-    ): Single<TransactionReceiptResponse>
-
     @POST("sendEmailReceipt")
     fun sendEmailReceipt(
         @Header("Authorization") token: String,
@@ -92,10 +86,10 @@ interface WalletService {
         @Body qrTokenRequest: QrTokenRequest
     ): Single<GeneralResponse>
 
-    @GET("fetchQrToken")
-    fun fetchQrToken(
-        @Header("Authorization") token: String
-    ): Single<Response<FetchQrTokenResponse>>
+//    @GET("fetchQrToken")
+//    fun fetchQrToken(
+//        @Header("Authorization") token: String
+//    ): Single<FetchQrTokenResponse>
 
     @DELETE("deleteQrToken")
     fun deleteQrToken(

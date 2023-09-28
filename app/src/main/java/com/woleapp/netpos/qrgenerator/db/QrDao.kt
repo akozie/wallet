@@ -18,6 +18,9 @@ interface QrDao {
     @Query("SELECT qrData FROM qr WHERE userId = :userQrCodeID")
     fun getUserQrCodes(userQrCodeID:String): List<GenerateQRResponse>
 
+    @Query("SELECT * FROM qr WHERE userId = :userQrCodeID")
+    fun getAllQrCodes(userQrCodeID:String): Single<List<DomainQREntity?>>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertQrTransaction(qrTransactionResponseModel: QrTransactionResponseModel) : Single<Long>
 }

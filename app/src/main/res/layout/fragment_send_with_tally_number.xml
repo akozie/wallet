@@ -163,6 +163,18 @@
                         app:backgroundTint="@color/background_color" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <TextView
+                    android:id="@+id/share_contacts"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="Share Tally with Friends"
+                    android:textStyle="bold"
+                    android:visibility="visible"
+                    app:layout_constraintBottom_toTopOf="@+id/fragment_wallet_pin"
+                    app:layout_constraintEnd_toEndOf="@+id/fragment_card_number"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_card_number" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/fragment_wallet_pin"
@@ -175,12 +187,12 @@
                     app:backgroundTint="@color/white"
                     app:boxStrokeColor="@color/white"
                     app:boxStrokeWidth="@dimen/margin_0dp"
-                    app:endIconDrawable="@drawable/ic_arrow_down_24"
                     app:endIconTint="@color/black"
                     app:hintEnabled="true"
+                    app:passwordToggleEnabled="true"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/fragment_card_number">
+                    app:layout_constraintTop_toBottomOf="@+id/share_contacts">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/enter_transaction_pin"

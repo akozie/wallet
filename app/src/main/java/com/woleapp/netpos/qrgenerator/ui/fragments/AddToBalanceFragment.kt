@@ -39,7 +39,6 @@ import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils.isOnline
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseOnce
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
@@ -67,7 +66,7 @@ class AddToBalanceFragment : Fragment() {
     private lateinit var receiptPdf: File
     private lateinit var pdfView: LayoutQrReceiptPdfBinding
     private var transactionCheckbox: Boolean = false
-    private lateinit var connectivity: Connectivity
+  //  private lateinit var connectivity: Connectivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,9 +83,8 @@ class AddToBalanceFragment : Fragment() {
                 generateQrViewModel.payVerveResponse.removeObservers(viewLifecycleOwner)
                 val checkOutModel = getCheckOutModel()
                 val qrModelRequest = getQrRequestModel()
-                if (isOnline(requireContext())){
                     generateQrViewModel.displayQrStatus = 1
-                    generateQrViewModel.payQrChargesForVerve(checkOutModel, qrModelRequest, it)
+                    generateQrViewModel.payQrChargesForVerve(requireContext(), checkOutModel, qrModelRequest, it)
                     val userDetails = Gson().toJson(getQrRequestModel())
                     observeServerResponseOnce(
                         generateQrViewModel.payVerveResponse,
@@ -105,9 +103,6 @@ class AddToBalanceFragment : Fragment() {
                             }
                         }
                     }
-                }else{
-                    showToast("This device is not connected to the internet")
-                }
             }
         }
     }
@@ -126,7 +121,7 @@ class AddToBalanceFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        connectivity = Connectivity(requireContext())
+      //  connectivity = Connectivity(requireContext())
         generateQrViewModel.showQrPrintDialog.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 val qrTransaction = Gson().fromJson(it, QrTransactionResponseModel::class.java)
@@ -347,12 +342,10 @@ class AddToBalanceFragment : Fragment() {
             } else {
                 findNavController().popBackStack()
             }
-        } else if (isOnline(requireContext())) {
+        } else{
             generateQrViewModel.setIsVerveCard(false)
             generateQrViewModel.displayQrStatus = 1
-            generateQrViewModel.payQrCharges(checkOutModel, qrRequest)
-        }else{
-            showToast("This device is not connected to the internet")
+            generateQrViewModel.payQrCharges(requireContext(), checkOutModel, qrRequest)
         }
         observeServerResponse(
             generateQrViewModel.payResponse,
@@ -375,14 +368,14 @@ class AddToBalanceFragment : Fragment() {
 
     private fun getQrRequestModel(): QrModelRequest =
         QrModelRequest(
-            fullname = Singletons().getCurrentlyLoggedInUser()?.fullname.toString(),
-            email = Singletons().getCurrentlyLoggedInUser()?.email.toString(),
+            fullname = Singletons().getCurrentlyLoggedInUser(requireContext())?.fullname.toString(),
+            email = Singletons().getCurrentlyLoggedInUser(requireContext())?.email.toString(),
             card_cvv = cardExpiryCvv.text.toString().trim(),
             card_expiry = cardExpiryDate.text.toString().trim(),
             card_number = cardExpiryNumber.text.toString().trim(),
             card_scheme = qrCardScheme.text.toString().trim(),
             issuing_bank = BANK_NAME,
-            mobile_phone = Singletons().getCurrentlyLoggedInUser()?.mobile_phone.toString(),
+            mobile_phone = Singletons().getCurrentlyLoggedInUser(requireContext())?.mobile_phone.toString(),
             user_id = userId
         )
 
@@ -391,8 +384,8 @@ class AddToBalanceFragment : Fragment() {
 
         return CheckOutModel(
             merchantId = UtilityParam.STRING_CHECKOUT_MERCHANT_ID,
-            name = Singletons().getCurrentlyLoggedInUser()?.fullname.toString(),
-            email = Singletons().getCurrentlyLoggedInUser()?.email.toString(),
+            name = Singletons().getCurrentlyLoggedInUser(requireContext())?.fullname.toString(),
+            email = Singletons().getCurrentlyLoggedInUser(requireContext())?.email.toString(),
             amount = totalAmount,
             currency = "NGN"
         )

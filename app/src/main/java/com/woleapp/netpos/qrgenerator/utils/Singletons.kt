@@ -1,5 +1,6 @@
 package com.woleapp.netpos.qrgenerator.utils
 
+import android.content.Context
 import com.google.gson.Gson
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.model.AmountAndTallyNumber
@@ -12,28 +13,34 @@ import com.woleapp.netpos.qrgenerator.model.wallet.WalletUserResponse
 class Singletons {
     val gson = Gson()
 
-    fun getCurrentlyLoggedInUser(): User? =
-        gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java)
+    fun getCurrentlyLoggedInUser(context: Context): User? =
+        gson.fromJson(EncryptedPrefsUtils.getString(context, PREF_USER), User::class.java)
 
     fun getPin(): String? =
         Prefs.getString(PIN_PASSWORD, "")
 
-    fun getAmountAndTallyNumber(): AmountAndTallyNumber? =
-        gson.fromJson(Prefs.getString(AMOUNT_AND_TALLY_NUMBER, ""), AmountAndTallyNumber::class.java)
+    fun getAmountAndTallyNumber(context: Context): AmountAndTallyNumber? =
+        gson.fromJson(EncryptedPrefsUtils.getString(context, AMOUNT_AND_TALLY_NUMBER), AmountAndTallyNumber::class.java)
 
-    fun getSavedQrModelRequest(): QrModelRequest? =
-        gson.fromJson(Prefs.getString(PREF_GENERATE_QR, ""), QrModelRequest::class.java)
+    fun getSavedQrModelRequest(context: Context): QrModelRequest? =
+        gson.fromJson(EncryptedPrefsUtils.getString(context, PREF_GENERATE_QR), QrModelRequest::class.java)
 
-    fun getTallyWalletBalance(): WalletUserResponse? =
-        gson.fromJson(Prefs.getString(PREF_TALLY_WALLET, ""), WalletUserResponse::class.java)
+    fun getTallyWalletBalance(context: Context): WalletUserResponse? =
+        gson.fromJson(EncryptedPrefsUtils.getString(context, PREF_TALLY_WALLET), WalletUserResponse::class.java)
 
-    fun getTransAmountAndId(): CheckOutResponse? =
-        gson.fromJson(Prefs.getString(TRANS_ID_AND_AMOUNT, ""), CheckOutResponse::class.java)
+    fun getTransAmountAndId(context: Context): CheckOutResponse? =
+        gson.fromJson(EncryptedPrefsUtils.getString(context, TRANS_ID_AND_AMOUNT), CheckOutResponse::class.java)
 
-    fun getTallyUserToken(): String? =
-        Prefs.getString(USER_TOKEN, "")
+    fun getTallyUserToken(context: Context): String? =
+        EncryptedPrefsUtils.getString(context, USER_TOKEN)
 
-    fun getLoginPassword(): String =
-        Prefs.getString(LOGIN_PASSWORD, "")
+    fun getLoginPassword(context: Context): String? =
+        EncryptedPrefsUtils.getString(context, LOGIN_PASSWORD)
+
+    fun getLoginPasswordValue(context: Context): String? =
+        EncryptedPrefsUtils.getString(context, LOGIN_PASSWORD_VALUE)
+
+    fun getRefreshToken(context: Context): String? =
+        EncryptedPrefsUtils.getString(context, REFRESH_TOKEN)
 
 }

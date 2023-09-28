@@ -102,8 +102,8 @@ class VerificationFragment : Fragment() {
                 .setCancelable(false)
                 .create()
 
-        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
-        val header = Singletons().getTallyUserToken()!!
+        loader = alertDialog(requireContext())
+        val header = Singletons().getTallyUserToken(requireContext())!!
         token = "Bearer $header"
         return binding.root
     }
@@ -272,7 +272,7 @@ class VerificationFragment : Fragment() {
     }
 
     private fun verifyWalletAccount() {
-        walletViewModel.verifyWalletNumber(token, true)
+        walletViewModel.verifyWalletNumber(requireContext(), token, true)
         observeServerResponse(
             walletViewModel.verifyWalletResponse,
             loader,
@@ -295,7 +295,7 @@ class VerificationFragment : Fragment() {
         securityQuestion: String,
         securityAnswer: String
     ) {
-        walletViewModel.setTransactionPin(
+        walletViewModel.setTransactionPin(requireContext(),
             transactionPin,
             securityQuestionId,
             securityQuestion,
@@ -317,7 +317,7 @@ class VerificationFragment : Fragment() {
             passwordSetBinding.reprintPasswordEdittext.setText("")
             passwordSetDialog.cancel()
            // walletViewModel.fetchWallet(token)
-            walletViewModel.getWalletStatus()
+            walletViewModel.getWalletStatus(requireContext())
         }
     }
 
@@ -373,13 +373,13 @@ class VerificationFragment : Fragment() {
         securityAnswer: String,
         securityQuestion: String
     ) {
-        walletViewModel.updateTransactionPin(newPin, otp, securityAnswer, securityQuestion)
+        walletViewModel.updateTransactionPin(requireContext(), newPin, otp, securityAnswer, securityQuestion)
         observeServerResponse(
             walletViewModel.updatePinResponse,
             loader,
             requireActivity().supportFragmentManager
         ) {
-            val email = Singletons().getCurrentlyLoggedInUser()?.email
+            val email = Singletons().getCurrentlyLoggedInUser(requireContext())?.email
             email?.let {
                 userViewModel.updatePin(UserEntity(it, newPin))
             }
@@ -391,7 +391,7 @@ class VerificationFragment : Fragment() {
 
     private fun getSelectedQuestion(
     ) {
-        walletViewModel.getSelectedQuestion()
+        walletViewModel.getSelectedQuestion(requireContext())
         observeServerResponse(
             walletViewModel.getSelectedQuestionResponse,
             loader,
@@ -406,7 +406,7 @@ class VerificationFragment : Fragment() {
     }
 
     private fun getOtpVerificationToUpdatePin() {
-        walletViewModel.getOtpVerificationToUpdatePin()
+        walletViewModel.getOtpVerificationToUpdatePin(requireContext())
         observeServerResponse(
             walletViewModel.getOtpToUpdatePinResponse,
             loader,

@@ -92,7 +92,7 @@
             android:layout_marginTop="@dimen/dimen_20dp"
             android:layout_marginBottom="@dimen/dimen_40dp"
             android:text="View QR"
-            android:visibility="visible"
+            android:visibility="gone"
             android:textColor="@color/white"
             android:paddingHorizontal="@dimen/margin_10dp"
             android:background="@color/orange"

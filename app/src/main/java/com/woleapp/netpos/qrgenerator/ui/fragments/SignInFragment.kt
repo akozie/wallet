@@ -21,17 +21,16 @@ import com.woleapp.netpos.qrgenerator.model.User
 import com.woleapp.netpos.qrgenerator.model.login.EmailEntity
 import com.woleapp.netpos.qrgenerator.model.login.UserViewModel
 import com.woleapp.netpos.qrgenerator.ui.activities.MainActivity
-import com.woleapp.netpos.qrgenerator.utils.LOGIN_PASSWORD
+import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
-import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SignInFragment : Fragment() {
 
-    private lateinit var _binding: FragmentSignInBinding
-    private val binding get() = _binding
+    private var _binding: FragmentSignInBinding? = null
+    private val binding get() = _binding!!
     private lateinit var emailAddress: TextInputEditText
     private lateinit var passwordView: TextInputEditText
     private lateinit var loginButton: Button
@@ -138,7 +137,7 @@ class SignInFragment : Fragment() {
             password = passwordView.text.toString().trim(),
             email = emailAddress.text.toString().trim()
         )
-        qrViewModel.login(
+        qrViewModel.login(requireContext(),
             loginUser
         )
         observeServerResponse(
@@ -146,7 +145,8 @@ class SignInFragment : Fragment() {
             loader,
             requireActivity().supportFragmentManager
         ) {
-            Prefs.putString(LOGIN_PASSWORD, passwordView.text.toString().trim())
+            EncryptedPrefsUtils.putString(requireContext(), LOGIN_PASSWORD, passwordView.text.toString().trim())
+            EncryptedPrefsUtils.putString(requireContext(), LOGIN_PASSWORD_VALUE, "0")
             loader.visibility = View.GONE
             startActivity(
                 Intent(requireContext(), MainActivity::class.java).apply {
@@ -156,5 +156,14 @@ class SignInFragment : Fragment() {
             )
             requireActivity().finish()
         }
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
+    }
+    override fun onDestroy() {
+        _binding = null
+        super.onDestroy()
     }
 }

@@ -17,6 +17,7 @@ import java.io.IOException
 class MerchantPagingSource(
     private val merchantService: MerchantService,
     private val limit:Int,
+    private val token: String
 ) : RxPagingSource<Int, Merchant>() {
     override fun getRefreshKey(state: PagingState<Int, Merchant>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
@@ -27,7 +28,7 @@ class MerchantPagingSource(
 
     override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, Merchant>> {
         val position = params.key ?: 1
-        return merchantService.getAllMerchant(limit, position)
+        return merchantService.getAllMerchant(token, limit, position)
             .subscribeOn(Schedulers.io())
             .map { toLoadResult(it, position) }
             .onErrorReturn { LoadResult.Error(it) }

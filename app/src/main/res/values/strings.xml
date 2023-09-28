@@ -3,7 +3,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="generate_qr_code">GENERATE QR CODE \n FOR YOUR DEBIT CARD</string>
-    <string name="pay_with_ease">Pay with Ease</string>
+    <string name="pay_with_ease">Pay with Ease\t</string>
     <string name="qr_for_card">GENERATE QR FOR CARD</string>
     <string name="sign_in">SIGN IN</string>
     <string name="sign_up">SIGN UP</string>

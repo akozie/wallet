@@ -36,7 +36,6 @@ import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.checkCardScheme
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.checkCardType
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils.isOnline
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseOnce
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
@@ -69,7 +68,7 @@ class GenerateMoreQrFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
+        loader = alertDialog(requireContext())
         generateQrViewModel.getCardSchemes()
         generateQrViewModel.getCardBanks()
         requireActivity().supportFragmentManager.setFragmentResultListener(
@@ -80,9 +79,8 @@ class GenerateMoreQrFragment : Fragment() {
             data?.let {
                 val checkOutModel = getCheckOutModel()
                 val qrModelRequest = getQrRequestModel()
-                if (isOnline(requireContext())) {
                     generateQrViewModel.displayQrStatus = 1
-                    generateQrViewModel.payQrChargesForVerve(checkOutModel, qrModelRequest, it)
+                    generateQrViewModel.payQrChargesForVerve(requireContext(), checkOutModel, qrModelRequest, it)
                     observeServerResponseOnce(
                         generateQrViewModel.payVerveResponse,
                         loader,
@@ -91,7 +89,7 @@ class GenerateMoreQrFragment : Fragment() {
                         if (generateQrViewModel.payVerveResponse.value?.data?.code == "90") {
                             //      showToast(generateQrViewModel.payVerveResponse.value?.data?.result.toString())
                         } else {
-                            Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
+                            EncryptedPrefsUtils.putString(requireContext(), PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
                             if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment) {
                                 val action =
                                     GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToEnterOtpFragment2()
@@ -105,9 +103,7 @@ class GenerateMoreQrFragment : Fragment() {
 //                            .commit()
                         }
                     }
-                } else {
-                    showToast("This device is not connected to the internet")
-                }
+
             }
         }
     }
@@ -163,14 +159,14 @@ class GenerateMoreQrFragment : Fragment() {
             )
             qrIssuingBank.setAdapter(bankCardAdapter)
         }
-        userEmail = Singletons().getCurrentlyLoggedInUser()?.email.toString()
+        userEmail = Singletons().getCurrentlyLoggedInUser(requireContext())?.email.toString()
         binding.email.setText(userEmail)
-        userName = Singletons().getCurrentlyLoggedInUser()?.fullname.toString()
+        userName = Singletons().getCurrentlyLoggedInUser(requireContext())?.fullname.toString()
         binding.fullName.setText(userName)
         binding.userName.text = userName
-        userPhoneNumber = Singletons().getCurrentlyLoggedInUser()?.mobile_phone.toString()
+        userPhoneNumber = Singletons().getCurrentlyLoggedInUser(requireContext())?.mobile_phone.toString()
         binding.mobileNumber.setText(userPhoneNumber)
-        userId = Singletons().getCurrentlyLoggedInUser()?.id
+        userId = Singletons().getCurrentlyLoggedInUser(requireContext())?.id
 
         binding.checkbox.setOnCheckedChangeListener { _, isChecked ->
             // Handle checkbox state changes here
@@ -399,12 +395,10 @@ class GenerateMoreQrFragment : Fragment() {
             } else {
                 findNavController().popBackStack()
             }
-        } else if (isOnline(requireContext())) {
+        } else  {
             generateQrViewModel.setIsVerveCard(false)
             generateQrViewModel.displayQrStatus = 1
-            generateQrViewModel.payQrCharges(checkOutModel, qrRequest)
-        } else {
-            showToast("This device is not connected to the internet")
+            generateQrViewModel.payQrCharges(requireContext(), checkOutModel, qrRequest)
         }
         observeServerResponse(
             generateQrViewModel.payResponse,
@@ -415,7 +409,7 @@ class GenerateMoreQrFragment : Fragment() {
                 //  Log.d("ANOTHERERROR", generateQrViewModel.payResponse.value?.data.toString())
                 // findNavController().navigate(R.id.generateMoreQrFragment)
             } else {
-                Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
+                EncryptedPrefsUtils.putString(requireContext(), PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
                 if (findNavController().currentDestination?.id == R.id.generateMoreQrFragment) {
                     val action =
                         GenerateMoreQrFragmentDirections.actionGenerateMoreQrFragmentToWebViewFragment2()

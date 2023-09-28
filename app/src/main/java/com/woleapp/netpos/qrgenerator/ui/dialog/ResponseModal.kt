@@ -61,7 +61,7 @@ class ResponseModal @Inject constructor() : DialogFragment() {
                     is QrTransactionResponseModel -> {
                         if (webViewResponse.code == "00") {
                             viewGeneratedQR.visibility = View.VISIBLE
-                            val getQrModel = Singletons().getSavedQrModelRequest()
+                            val getQrModel = Singletons().getSavedQrModelRequest(requireContext())
                             getQrModel?.let {
                                 qrViewModel.generateQR(it, requireContext())
                             }
@@ -74,7 +74,7 @@ class ResponseModal @Inject constructor() : DialogFragment() {
                     is VerveOTPResponse -> {
                         if (webViewResponse.code == "00") {
                             viewGeneratedQR.visibility = View.VISIBLE
-                            val getQrModel = Singletons().getSavedQrModelRequest()
+                            val getQrModel = Singletons().getSavedQrModelRequest(requireContext())
                             getQrModel?.let {
                                 qrViewModel.generateQR(it, requireContext())
                             }
@@ -176,32 +176,39 @@ class ResponseModal @Inject constructor() : DialogFragment() {
             val qrTokenResponse = qrViewModel.generateQrResponse.value
             val qrTokenId = qrTokenResponse?.data?.qr_code_id
             val qrToken = qrTokenResponse?.data?.data
-            val getQrModel = Singletons().getSavedQrModelRequest()
+            val getQrModel = Singletons().getSavedQrModelRequest(requireContext())
             val newQrToken = QrTokenRequest(
                 qr_code_id = qrTokenId!!,
                 qr_token = qrToken!!,
                 card_scheme = getQrModel?.card_scheme!!,
                 issuing_bank = getQrModel.issuing_bank
             )
-            walletViewModel.storeQrToken(newQrToken)
+          //  walletViewModel.storeQrToken(requireContext(), newQrToken)
 
         }
     }
 
     private fun storeQr() {
-        observeServerResponse(
-            walletViewModel.storeQrResponse, requireActivity().supportFragmentManager
-        ) {
-            val storeQrMessage = walletViewModel.storeQrResponse.value?.data?.message!!
-           showToast(storeQrMessage)
-            if (qrViewModel.displayQrStatus == 0) {
-        //        Prefs.remove(PREF_GENERATE_QR)
-                findNavController().navigate(R.id.showQrFragment)
-            } else {
-        //        Prefs.remove(PREF_GENERATE_QR)
-                findNavController().navigate(R.id.displayQrFragment2)
-            }
+        if (qrViewModel.displayQrStatus == 0) {
+            //        Prefs.remove(PREF_GENERATE_QR)
+            findNavController().navigate(R.id.showQrFragment)
+        } else {
+            //        Prefs.remove(PREF_GENERATE_QR)
+            findNavController().navigate(R.id.displayQrFragment2)
         }
+//        observeServerResponse(
+//            walletViewModel.storeQrResponse, requireActivity().supportFragmentManager
+//        ) {
+//            val storeQrMessage = walletViewModel.storeQrResponse.value?.data?.message!!
+//           showToast(storeQrMessage)
+//            if (qrViewModel.displayQrStatus == 0) {
+//        //        Prefs.remove(PREF_GENERATE_QR)
+//                findNavController().navigate(R.id.showQrFragment)
+//            } else {
+//        //        Prefs.remove(PREF_GENERATE_QR)
+//                findNavController().navigate(R.id.displayQrFragment2)
+//            }
+//        }
     }
 
     private fun setData() {

@@ -18,6 +18,10 @@ object UtilityParam {
     private external fun getWalletXAPIToken(): String
     private external fun getBearerToken(): String
 
+    private external fun getTallyConstant(): String
+
+    private external fun getMerchantHeaderToken(): String
+
      val STRING_TALLY_BASE_URL= getTallyBaseUrl()
      val STRING_TRANSACTION_BASE_URL= getTransactionBaseUrl()
      val STRING_MERCHANT_BASE_URL= getMerchantBaseUrl()
@@ -28,5 +32,9 @@ object UtilityParam {
      val STRING_WEB_VIEW_BASE_URL= getWebViewBaseUrl()
     val STRING_TALLY_WALLET_BASE_URL= getTallyWalletBaseUrl()
     val STRING_WALLET_X_API_TOKEN = getWalletXAPIToken()
+    val STRING_TALLY_CONSTANT = getTallyConstant()
+    val STRING_MERCHANT_HEADER_TOKEN = getMerchantHeaderToken()
+
+
     val STRING_WALLET_BEARER_TOKEN = getBearerToken()
 }

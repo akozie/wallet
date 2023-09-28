@@ -24,6 +24,7 @@ import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
 import com.woleapp.netpos.qrgenerator.model.verve.VerveOTPResponse
 import com.woleapp.netpos.qrgenerator.ui.dialog.ResponseModal
 import com.woleapp.netpos.qrgenerator.utils.*
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.closeSoftKeyboard
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.customSpannableString
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
@@ -59,7 +60,7 @@ class EnterOtpFragment @Inject constructor() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loader = RandomUtils.alertDialog(requireContext(), R.layout.layout_loading_dialog)
+        loader = alertDialog(requireContext())
         initViews()
         otpView.requestFocus()
         val inputMethodManager =
