@@ -155,31 +155,28 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
-                        android:inputType="number"
-                        android:maxLength="11"
                         android:textColor="@android:color/background_dark"
                         android:textCursorDrawable="@color/black"
                         android:visibility="visible"
                         app:backgroundTint="@color/background_color" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/fragment_wallet_pin"
                     style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margin_10"
                     android:hint="Enter transaction pin"
                     android:visibility="visible"
                     app:backgroundTint="@color/white"
                     app:boxStrokeColor="@color/white"
                     app:boxStrokeWidth="@dimen/margin_0dp"
-                    app:endIconDrawable="@drawable/ic_arrow_down_24"
                     app:endIconTint="@color/black"
                     app:hintEnabled="true"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
+                    app:passwordToggleEnabled="true"
+                    android:layout_marginTop="@dimen/margin_10"
                     app:layout_constraintTop_toBottomOf="@+id/fragment_card_number">
 
                     <com.google.android.material.textfield.TextInputEditText

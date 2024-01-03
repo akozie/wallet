@@ -8,6 +8,7 @@ data class FetchQrTokenResponseItem(
     val qr_code_id: String?,
     val qr_token: String?,
     val user_id: String?,
+    val email: String?,
     val card_scheme: String?,
     val issuing_bank: String?,
     val date: String?

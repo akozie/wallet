@@ -3,7 +3,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="generate_qr_code">GENERATE QR CODE \n FOR YOUR DEBIT CARD</string>
-    <string name="pay_with_ease">Pay with Ease</string>
+    <string name="pay_with_ease">Pay with Ease\t</string>
     <string name="qr_for_card">GENERATE QR FOR CARD</string>
     <string name="sign_in">SIGN IN</string>
     <string name="sign_up">SIGN UP</string>
@@ -15,7 +15,7 @@
     <string name="create_qr">CREATE QR</string>
     <string name="enter_full_name">Enter full name</string>
     <string name="enter_mobile_number">Enter mobile number</string>
-    <string name="enter_email">Enter email</string>
+    <string name="enter_email">Enter username</string>
     <string name="forgot_password">Forgot password?</string>
     <string name="enter_password">Enter password</string>
     <string name="transactions">Transactions</string>
@@ -100,6 +100,7 @@
     <string name="resend_code">Didn\'t Receive Code? Resend it</string>
     <string name="otp_resent">A fresh OTP has been sent to you…</string>
     <string name="confirm_password">Confirm Password</string>
+    <string name="confirm_referral">Confirm Referral (optional)</string>
     <string name="you_will_be_charged_a_fee_of_n100">You will be charged a fee of 100</string>
     <string name="i_understand_that_my_pin_protects_transactions_and_my_card_details_are_never_stored">I understand that my pin protects transactions and my card details are never stored.</string>
 

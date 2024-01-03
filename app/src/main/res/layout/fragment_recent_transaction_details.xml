@@ -256,6 +256,7 @@
             android:background="@color/orange"
             android:text="Send To Email"
             android:textColor="@color/white"
+            android:padding="@dimen/padding_10dp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/guideline2"

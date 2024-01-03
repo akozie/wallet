@@ -1,5 +1,7 @@
 package com.woleapp.netpos.qrgenerator.model
 
+import com.woleapp.netpos.qrgenerator.utils.UtilityParam
+
 data class QrModelRequest(
     val user_id: Int?=null,
     val card_cvv: String,
@@ -10,5 +12,6 @@ data class QrModelRequest(
     val fullname: String?,
     val issuing_bank: String,
     val mobile_phone: String?,
+    val app_code: String?=UtilityParam.STRING_TALLY_CONSTANT
   //  val date_created: String?,
 )

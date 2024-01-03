@@ -1,9 +1,5 @@
 package com.woleapp.netpos.qrgenerator.ui.fragments
 
-import android.R
-import android.app.AlertDialog
-import android.content.DialogInterface
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,17 +11,12 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.adapter.TransactionAdapter
 import com.woleapp.netpos.qrgenerator.adapter.paging.TransactionPagingAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentTransactionBinding
-import com.woleapp.netpos.qrgenerator.db.AppDatabase
 import com.woleapp.netpos.qrgenerator.model.TransactionModel
 import com.woleapp.netpos.qrgenerator.model.wallet.FetchQrTokenResponseItem
-import com.woleapp.netpos.qrgenerator.ui.activities.AuthenticationActivity
-import com.woleapp.netpos.qrgenerator.utils.PREF_USER
 import com.woleapp.netpos.qrgenerator.utils.Singletons
-import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import com.woleapp.netpos.qrgenerator.viewmodels.TransactionViewModel
 import io.reactivex.disposables.CompositeDisposable
 
@@ -40,7 +31,7 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionClick {
     private val mViewModel by activityViewModels<TransactionViewModel>()
     private lateinit var mAdapter: TransactionPagingAdapter
     private lateinit var loader: ProgressBar
-   // private lateinit var qrCode: String
+    // private lateinit var qrCode: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,7 +39,8 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionClick {
     ): View {
         // Inflate the layout for this fragment
         _binding = FragmentTransactionBinding.inflate(inflater, container, false)
-        qrCodeID = arguments?.getParcelable<FetchQrTokenResponseItem>("DETAILSQR")?.qr_code_id.toString()
+        qrCodeID =
+            arguments?.getParcelable<FetchQrTokenResponseItem>("DETAILSQR")?.qr_code_id.toString()
 
         return binding.root
     }
@@ -73,11 +65,11 @@ class TransactionFragment : Fragment(), TransactionAdapter.OnTransactionClick {
         } else {
             transactionSetUp()
         }
-        userEmail = Singletons().getCurrentlyLoggedInUser()?.fullname.toString()
+        userEmail = Singletons().getCurrentlyLoggedInUser(requireContext())?.fullname.toString()
         binding.userEmail.text = userEmail
 
         binding.retry.setOnClickListener {
-            loader.visibility =View.VISIBLE
+            loader.visibility = View.VISIBLE
             transactionSetUp()
         }
     }

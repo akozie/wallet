@@ -56,13 +56,7 @@ class WithdrawalFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
-        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
-        //  getAccountName()
-//        if (binding.accountNumber.text?.trim().toString().isNullOrEmpty()) {
-//            showToast("Please enter your account number")
-//        }
-//        Log.d("CALLEDPRO", binding.issuingBank.text?.trim().toString().length.toString())
-//        Log.d("CALLEDPROSTRING", binding.accountNumber.text?.trim().toString())
+        loader = alertDialog(requireContext())
         val test = binding.accountNumber.text.toString()
     //    Log.d("TESTTTT", test)
         if (binding.accountNumber.text?.length == 10) {
@@ -122,7 +116,7 @@ class WithdrawalFragment : Fragment() {
     private fun fetchAccountName() {
         val fetchAccount = fetchAccount()
         if (qrIssuingBank.text.contains("providus", true)) {
-            viewModel.fetchProvidusAccount(fetchAccount)
+            viewModel.fetchProvidusAccount(requireContext(), fetchAccount)
             observeServerResponse(
                 viewModel.fetchProvidusAccountResponse,
                 loader,
@@ -134,7 +128,7 @@ class WithdrawalFragment : Fragment() {
                 }
             }
         } else {
-            viewModel.fetchOtherAccount(fetchAccount)
+            viewModel.fetchOtherAccount(requireContext(), fetchAccount)
             observeServerResponse(
                 viewModel.fetchOtherAccountResponse,
                 loader,
@@ -230,9 +224,9 @@ class WithdrawalFragment : Fragment() {
         val providusRequest = providusModel()
         val otherBanksRequest = otherBanksModel()
         if (qrIssuingBank.text.contains("providus", true)) {
-            viewModel.providusToProvidus(providusRequest)
+            viewModel.providusToProvidus(requireContext(), providusRequest)
         } else {
-            viewModel.providusToOtherBanks(otherBanksRequest)
+            viewModel.providusToOtherBanks(requireContext(), otherBanksRequest)
         }
         observeServerResponse(
             viewModel.providusToProvidusResponse,

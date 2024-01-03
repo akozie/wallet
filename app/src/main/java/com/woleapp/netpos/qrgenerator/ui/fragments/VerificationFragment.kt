@@ -1,5 +1,8 @@
 package com.woleapp.netpos.qrgenerator.ui.fragments
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,27 +10,30 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.AutoCompleteTextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.pixplicity.easyprefs.library.Prefs
+import androidx.navigation.fragment.findNavController
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.adapter.SecurityQuestionsAdapter
 import com.woleapp.netpos.qrgenerator.databinding.*
 import com.woleapp.netpos.qrgenerator.model.login.UserEntity
 import com.woleapp.netpos.qrgenerator.model.login.UserViewModel
+import com.woleapp.netpos.qrgenerator.model.referrals.ConfirmReferralModel
 import com.woleapp.netpos.qrgenerator.model.wallet.NewGetSecurityQuestionResponseItem
-import com.woleapp.netpos.qrgenerator.utils.PIN_PASSWORD
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils
+import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
-import com.woleapp.netpos.qrgenerator.utils.Singletons
-import com.woleapp.netpos.qrgenerator.utils.showToast
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.showAlertDialog
 import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import io.reactivex.Scheduler
+import io.reactivex.disposables.CompositeDisposable
+import javax.inject.Inject
+import javax.inject.Named
 
+@AndroidEntryPoint
 class VerificationFragment : Fragment() {
 
     private lateinit var binding: FragmentVerificationBinding
@@ -47,6 +53,19 @@ class VerificationFragment : Fragment() {
     private lateinit var updatePinDialog: AlertDialog
     private lateinit var updatePinBinding: LayoutUpdatePinPrefTextBinding
     private var securityQuestion: Int? = 0
+    private lateinit var confirmReferralDialog: AlertDialog
+    private lateinit var confirmReferralBinding: LayoutInviteToTallyBinding
+
+    @Inject
+    lateinit var compositeDisposable: CompositeDisposable
+
+    @Inject
+    @Named("io-scheduler")
+    lateinit var ioScheduler: Scheduler
+
+    @Inject
+    @Named("main-scheduler")
+    lateinit var mainThreadScheduler: Scheduler
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -102,9 +121,23 @@ class VerificationFragment : Fragment() {
                 .setCancelable(false)
                 .create()
 
-        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
-        val header = Singletons().getTallyUserToken()!!
+        loader = alertDialog(requireContext())
+        val header = Singletons().getTallyUserToken(requireContext())!!
         token = "Bearer $header"
+
+        confirmReferralBinding = LayoutInviteToTallyBinding.inflate(
+            LayoutInflater.from(requireContext()),
+            null,
+            false
+        ).apply {
+            lifecycleOwner = this@VerificationFragment
+            executePendingBindings()
+        }
+
+        confirmReferralDialog = AlertDialog.Builder(requireContext())
+            .setView(confirmReferralBinding.root)
+            .create()
+
         return binding.root
     }
 
@@ -134,13 +167,25 @@ class VerificationFragment : Fragment() {
             verifyWalletAccount()
         }
 
-
         binding.setSecurityQuestion.setOnClickListener {
             passwordSetDialog.show()
         }
 
+        binding.confirmInvite.setOnClickListener {
+            confirmReferralDialog.show()
+            confirmReferralBinding.proceed.text = "CONFIRM REFERRAL"
+        }
+
+        confirmReferralBinding.proceed.setOnClickListener {
+            if (confirmReferralBinding.contactEdittext.text.toString().isEmpty()) {
+                showToast("Please enter the phone number")
+            } else {
+                //confirmReferral()
+            }
+        }
+
         passwordSetBinding.save.setOnClickListener {
-          //  val savedPin = Singletons().getPin()!!
+            //  val savedPin = Singletons().getPin()!!
             val transactionPIN = passwordSetBinding.reprintPasswordEdittext.text.toString()
             val securityQuestion = passwordSetBinding.securityQuestions.text.toString()
             val securityAnswer = passwordSetBinding.securityAnswers.text.toString()
@@ -169,7 +214,12 @@ class VerificationFragment : Fragment() {
                 showToast("Please your consent is needed to set your transaction PIN")
                 return@setOnClickListener
             }
-            setTransactionPin(transactionPIN, questionID.toString(), securityQuestion, securityAnswer)
+            setTransactionPin(
+                transactionPIN,
+                questionID.toString(),
+                securityQuestion,
+                securityAnswer
+            )
         }
         getSecurityQuestion = passwordSetBinding.securityQuestions
 
@@ -202,6 +252,7 @@ class VerificationFragment : Fragment() {
             val selectedSecurityQuestion = securityQuestion
             val securityAnswer = updatePinBinding.securityAnswers.text.toString()
             val otp = updatePinBinding.transactionOtp.text.toString()
+            val oldPin = updatePinBinding.transactionOldPinEdittext.text.toString()
             val newPin = updatePinBinding.transactionPinEdittext.text.toString()
             val confirmNewPin = updatePinBinding.confirmPinEdittext.text.toString()
 
@@ -217,6 +268,14 @@ class VerificationFragment : Fragment() {
                 showToast("Please enter your new PIN")
                 return@setOnClickListener
             }
+            if (oldPin.isEmpty()) {
+                showToast("Please enter your old PIN")
+                return@setOnClickListener
+            }
+            if (oldPin.length < 4) {
+                showToast("The old transaction pin must not be less than 4")
+                return@setOnClickListener
+            }
             if (newPin.length < 4) {
                 showToast("The transaction pin must not be less than 4")
                 return@setOnClickListener
@@ -230,6 +289,7 @@ class VerificationFragment : Fragment() {
             }
             if (selectedSecurityQuestion != null) {
                 updateTransactionPin(
+                    oldPin,
                     newPin,
                     otp,
                     securityAnswer,
@@ -238,7 +298,7 @@ class VerificationFragment : Fragment() {
             }
         }
 
-            getWalletStatus()
+        getWalletStatus()
 
         binding.updatePin.setOnClickListener {
             getOtpVerificationToUpdatePin()
@@ -252,6 +312,21 @@ class VerificationFragment : Fragment() {
 //            inputPasswordDialog.dismiss()
 //        }
     }
+
+//    private fun confirmReferral() {
+//        val confirmReferralModel = ConfirmReferralModel(
+//            inviter_number = confirmReferralBinding.contactEdittext.text.toString()
+//        )
+//        walletViewModel.confirmRef(requireContext(), confirmReferralModel)
+//        observeServerResponse(
+//            walletViewModel.confirmReferralResponse,
+//            loader,
+//            requireActivity().supportFragmentManager
+//        ) {
+//            confirmReferralDialog.dismiss()
+//            findNavController().popBackStack()
+//        }
+//    }
 
     private fun verifyWalletOTP(token: String, otp: String) {
         walletViewModel.verifyWalletOTP(token, otp)
@@ -272,7 +347,7 @@ class VerificationFragment : Fragment() {
     }
 
     private fun verifyWalletAccount() {
-        walletViewModel.verifyWalletNumber(token, true)
+        walletViewModel.verifyWalletNumber(requireContext(), token, true)
         observeServerResponse(
             walletViewModel.verifyWalletResponse,
             loader,
@@ -296,6 +371,7 @@ class VerificationFragment : Fragment() {
         securityAnswer: String
     ) {
         walletViewModel.setTransactionPin(
+            requireContext(),
             transactionPin,
             securityQuestionId,
             securityQuestion,
@@ -316,8 +392,8 @@ class VerificationFragment : Fragment() {
             passwordSetBinding.confirmReprintPasswordEdittext.setText("")
             passwordSetBinding.reprintPasswordEdittext.setText("")
             passwordSetDialog.cancel()
-           // walletViewModel.fetchWallet(token)
-            walletViewModel.getWalletStatus()
+            // walletViewModel.fetchWallet(token)
+            walletViewModel.getWalletStatus(requireContext())
         }
     }
 
@@ -329,10 +405,10 @@ class VerificationFragment : Fragment() {
             requireActivity().supportFragmentManager
         ) {
             walletViewModel.fetchWalletResponse.value?.let {
-                if (it.data?.verified == 0){
+                if (it.data?.verified == 0) {
                     //showToast("Source User Wallet verification required")
                     binding.updatePin.visibility = View.GONE
-                }else{
+                } else {
                     binding.verifyPhoneNumber.visibility = View.GONE
                     binding.verifyAccountText.visibility = View.GONE
                     binding.setSecurityQuestion.visibility = View.GONE
@@ -341,20 +417,20 @@ class VerificationFragment : Fragment() {
             }
         }
     }
+
     private fun getWalletStatus() {
-        //    walletViewModel.getWalletStatus()
+        walletViewModel.getWalletStatus(requireContext())
         observeServerResponse(
             walletViewModel.getWalletUserResponse,
             null,
             requireActivity().supportFragmentManager
         ) {
-            Log.d("TABRESP", "JUSTCHECKING")
             walletViewModel.getWalletUserResponse.value?.let {
-                if (it.data?.info?.verified == false){
+                if (it.data?.info?.verified == false) {
                     //showToast("Source User Wallet verification required")
                     binding.updatePin.visibility = View.GONE
-                }else{
-                    if (it.data?.info?.pin == false){
+                } else {
+                    if (it.data?.info?.pin == false) {
                         binding.setSecurityQuestion.visibility = View.VISIBLE
                         return@observeServerResponse
                     }
@@ -368,30 +444,39 @@ class VerificationFragment : Fragment() {
     }
 
     private fun updateTransactionPin(
+        oldPin: String,
         newPin: String,
         otp: String,
         securityAnswer: String,
         securityQuestion: String
     ) {
-        walletViewModel.updateTransactionPin(newPin, otp, securityAnswer, securityQuestion)
+        walletViewModel.updateTransactionPin(
+            requireContext(),
+            oldPin,
+            newPin,
+            otp,
+            securityAnswer,
+            securityQuestion
+        )
         observeServerResponse(
             walletViewModel.updatePinResponse,
             loader,
             requireActivity().supportFragmentManager
         ) {
-            val email = Singletons().getCurrentlyLoggedInUser()?.email
+            val email = Singletons().getCurrentlyLoggedInUser(requireContext())?.email
             email?.let {
                 userViewModel.updatePin(UserEntity(it, newPin))
             }
             updatePinBinding.confirmPinEdittext.setText("")
             updatePinBinding.transactionPinEdittext.setText("")
             updatePinDialog.cancel()
+            showToast("Successful")
         }
     }
 
     private fun getSelectedQuestion(
     ) {
-        walletViewModel.getSelectedQuestion()
+        walletViewModel.getSelectedQuestion(requireContext())
         observeServerResponse(
             walletViewModel.getSelectedQuestionResponse,
             loader,
@@ -406,17 +491,26 @@ class VerificationFragment : Fragment() {
     }
 
     private fun getOtpVerificationToUpdatePin() {
-        walletViewModel.getOtpVerificationToUpdatePin()
-        observeServerResponse(
-            walletViewModel.getOtpToUpdatePinResponse,
-            loader,
-            requireActivity().supportFragmentManager
-        ) {
-            val otpResponse = walletViewModel.getOtpToUpdatePinResponse.value
-            otpResponse?.let {
-                showToast(otpResponse.data!!.message)
-            }
-        }
-    }
+//        val message = "Your One Time Password is \n123456"
+//        val otpMessage = "123456"
+//        showAlertDialog(requireContext(), message, "Copy OTP"){
+//            val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+//            val clip = ClipData.newPlainText("Text copied", otpMessage)
+//            clipboardManager.setPrimaryClip(clip)
+//            showToast("OTP copied")
+//        }
 
+
+//        walletViewModel.getOtpVerificationToUpdatePin(requireContext())
+//        observeServerResponse(
+//            walletViewModel.getOtpToUpdatePinResponse,
+//            loader,
+//            requireActivity().supportFragmentManager
+//        ) {
+//            val otpResponse = walletViewModel.getOtpToUpdatePinResponse.value
+//            otpResponse?.let {
+//                showToast(otpResponse.data!!.message)
+//            }
+//        }
+    }
 }

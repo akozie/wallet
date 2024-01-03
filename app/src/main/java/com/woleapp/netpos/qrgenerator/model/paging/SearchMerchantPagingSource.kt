@@ -18,6 +18,7 @@ class SearchMerchantPagingSource(
     private val merchantService: MerchantService,
     private val search:String,
     private val limit:Int,
+    private val token: String
 ) : RxPagingSource<Int, Merchant>() {
     override fun getRefreshKey(state: PagingState<Int, Merchant>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
@@ -28,7 +29,7 @@ class SearchMerchantPagingSource(
 
     override fun loadSingle(params: LoadParams<Int>): Single<LoadResult<Int, Merchant>> {
         val position = params.key ?: 1
-        return merchantService.getMerchant(search, limit, position)
+        return merchantService.getMerchant(search, token, limit, position)
             .subscribeOn(Schedulers.io())
             .map { toLoadResult(it, position) }
             .onErrorReturn { LoadResult.Error(it) }

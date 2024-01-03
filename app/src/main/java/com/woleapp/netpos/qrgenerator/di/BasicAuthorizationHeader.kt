@@ -7,6 +7,7 @@ import okhttp3.Response
 import java.io.IOException
 
 class BasicAuthInterceptor(user: String, password: String) :
+
     Interceptor {
     private val credentials: String
 
@@ -22,3 +23,15 @@ class BasicAuthInterceptor(user: String, password: String) :
         credentials = Credentials.basic(user, password)
     }
 }
+
+class HeaderInterceptor(private val headerName: String, private val headerValue: String) : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val originalRequest = chain.request()
+        val modifiedRequest = originalRequest.newBuilder()
+            .header(headerName, headerValue)
+            .build()
+
+        return chain.proceed(modifiedRequest)
+    }
+}
+

@@ -42,9 +42,10 @@ class SignInOrGenerateQRFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.signUpButton.setOnClickListener {
-            val action =
-                SignInOrGenerateQRFragmentDirections.actionSignInOrGenerateQRFragmentToSignUpFragment()
-            findNavController().navigate(action)
+//            val action =
+//                SignInOrGenerateQRFragmentDirections.actionSignInOrGenerateQRFragmentToSignUpFragment()
+//            findNavController().navigate(action)
+            showToast("Please sign in")
         }
         binding.signInButton.setOnClickListener {
             val action =

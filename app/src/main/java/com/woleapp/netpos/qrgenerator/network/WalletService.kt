@@ -1,7 +1,10 @@
 package com.woleapp.netpos.qrgenerator.network
 
 import com.google.gson.JsonObject
-import com.woleapp.netpos.qrgenerator.model.GeneralResponse
+import com.woleapp.netpos.qrgenerator.model.*
+import com.woleapp.netpos.qrgenerator.model.referrals.ConfirmReferralModel
+import com.woleapp.netpos.qrgenerator.model.referrals.InviteToTallyFailureResponse
+import com.woleapp.netpos.qrgenerator.model.referrals.InviteToTallyModel
 import com.woleapp.netpos.qrgenerator.model.wallet.*
 import com.woleapp.netpos.qrgenerator.model.wallet.request.*
 import io.reactivex.Single
@@ -74,12 +77,6 @@ interface WalletService {
         @Body updateTransactionPinRequest: UpdateTransactionPinRequest
     ): Single<GeneralWalletResponse>
 
-    @POST("generateReceipt")
-    fun getTransactionReceipt(
-        @Header("Authorization") token: String,
-        @Body transactionReceiptRequest: TransactionReceiptRequest
-    ): Single<TransactionReceiptResponse>
-
     @POST("sendEmailReceipt")
     fun sendEmailReceipt(
         @Header("Authorization") token: String,
@@ -92,10 +89,10 @@ interface WalletService {
         @Body qrTokenRequest: QrTokenRequest
     ): Single<GeneralResponse>
 
-    @GET("fetchQrToken")
-    fun fetchQrToken(
-        @Header("Authorization") token: String
-    ): Single<Response<FetchQrTokenResponse>>
+//    @GET("fetchQrToken")
+//    fun fetchQrToken(
+//        @Header("Authorization") token: String
+//    ): Single<FetchQrTokenResponse>
 
     @DELETE("deleteQrToken")
     fun deleteQrToken(
@@ -108,33 +105,49 @@ interface WalletService {
         @Header("Authorization") token: String
     ): Single<GetSelectedQuestionResponse>
 
-        @GET("fetchNIPAccount")
+    @GET("fetchNIPAccount")
     fun fetchOtherAccount(
         @Header("Authorization") token: String,
         @Body findAccountNumberRequest: FindAccountNumberRequest
     ): Single<FindAccountNumberResponse>
 
-        @GET("fetchProvidusAccount")
+    @GET("fetchProvidusAccount")
     fun fetchProvidusAccount(
         @Header("Authorization") token: String,
         @Body findAccountNumberRequest: FindAccountNumberRequest
     ): Single<FindAccountNumberResponse>
 
-        @POST("p2p")
+    @POST("p2p")
     fun providusToProvidus(
         @Header("Authorization") token: String,
         @Body providusRequest: ProvidusRequest
     ): Single<WithdrawalResponse>
 
-        @POST("p2e")
+    @POST("p2e")
     fun providusToOtherBanks(
         @Header("Authorization") token: String,
         @Body otherBanksRequest: OtherBanksRequest
     ): Single<WithdrawalResponse>
 
-        @GET("WalletStatus")
+    @GET("WalletStatus")
     fun getWalletStatus(
         @Header("Authorization") token: String
     ): Single<JsonObject>
+
+    @POST("inviteToTally")
+    fun inviteToTally(
+        @Header("Authorization") token: String,
+        @Body inviteToTallyModel: InviteToTallyModel
+    ): Single<Response<JsonObject>>
+
+    @POST("confirmReferral")
+    fun confirmReferral(
+        @Body confirmReferralModel: ConfirmReferralModel
+    ): Single<ConfirmReferralResponse>
+
+    @POST("authenticateMCUser")
+    fun walletLogin(
+        @Body loginRequest: WalletLoginRequest
+    ): Single<WalletLoginResponse>
 
 }

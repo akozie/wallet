@@ -67,7 +67,7 @@
         tools:layout="@layout/fragment_qr_details" >
         <argument
             android:name="DETAILSQR"
-            app:argType="com.woleapp.netpos.qrgenerator.model.wallet.FetchQrTokenResponseItem" />
+            app:argType="com.woleapp.netpos.qrgenerator.model.GenerateQRResponse" />
     </fragment>
     <fragment
         android:id="@+id/QRFragment2"
@@ -85,7 +85,7 @@
         tools:layout="@layout/fragment_display_qr" >
         <argument
             android:name="DISPLAYQR"
-            app:argType="com.woleapp.netpos.qrgenerator.model.wallet.FetchQrTokenResponseItem"
+            app:argType="com.woleapp.netpos.qrgenerator.model.GenerateQRResponse"
             app:nullable="true" />
         <action
             android:id="@+id/action_displayQrFragment2_to_transactionsFragment"
@@ -189,6 +189,9 @@
         <action
             android:id="@+id/action_sendWithTallyNumberFragment_to_transactionsFragment"
             app:destination="@id/transactionsFragment" />
+        <action
+            android:id="@+id/action_sendWithTallyNumberFragment_to_contactsFragment"
+            app:destination="@id/contactsFragment" />
     </fragment>
     <dialog
         android:id="@+id/tallyWalletResponseModal"
@@ -256,4 +259,8 @@
         android:name="com.woleapp.netpos.qrgenerator.ui.fragments.VerificationFragment"
         android:label="fragment_verification"
         tools:layout="@layout/fragment_verification" />
+    <fragment
+        android:id="@+id/contactsFragment"
+        android:name="com.woleapp.netpos.qrgenerator.ui.fragments.ContactsFragment"
+        android:label="ContactsFragment" />
 </navigation>

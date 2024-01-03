@@ -17,20 +17,25 @@ import javax.inject.Singleton
 class QRRepository @Inject constructor(
     private val qrService: QRService,
     private val transactionService: TransactionService,
-    private val checkoutService: CheckoutService,
-    private val merchantService: MerchantService,
-    private val walletService: WalletService
+    private val checkoutService: CheckoutService
 ) {
 
     fun login(loginRequest: LoginRequest) = qrService.login(loginRequest)
 
+    fun logout(logoutRequest: JsonObject?) = qrService.logout(logoutRequest)
+
     fun register(registerRequest: RegisterRequest) = qrService.register(registerRequest)
+
+   // fun getNewToken(newTokenRequest: NewTokenRequest) = qrService.getNewToken(newTokenRequest)
 
     fun generateQR(qrModelRequest: QrModelRequest) = qrService.generateQR(qrModelRequest)
 
     fun getCardSchemes() = qrService.getCardSchemes()
 
     fun getCardBanks() = qrService.getCardBanks()
+
+    fun fetchQrToken() =
+        qrService.fetchUserQrs()
 
 
     fun getAllTransaction(qrCodeId: String) = transactionService.getEachTransaction(qrCodeId, 1, 10)

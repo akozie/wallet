@@ -18,25 +18,27 @@ import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentSignInBinding
 import com.woleapp.netpos.qrgenerator.model.LoginRequest
 import com.woleapp.netpos.qrgenerator.model.User
+import com.woleapp.netpos.qrgenerator.model.WalletLoginRequest
 import com.woleapp.netpos.qrgenerator.model.login.EmailEntity
 import com.woleapp.netpos.qrgenerator.model.login.UserViewModel
 import com.woleapp.netpos.qrgenerator.ui.activities.MainActivity
-import com.woleapp.netpos.qrgenerator.utils.LOGIN_PASSWORD
+import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
-import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
+import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SignInFragment : Fragment() {
 
-    private lateinit var _binding: FragmentSignInBinding
-    private val binding get() = _binding
+    private var _binding: FragmentSignInBinding? = null
+    private val binding get() = _binding!!
     private lateinit var emailAddress: TextInputEditText
     private lateinit var passwordView: TextInputEditText
     private lateinit var loginButton: Button
     private val qrViewModel by viewModels<QRViewModel>()
     private val userViewModel by viewModels<UserViewModel>()
+    private val walletViewModel by viewModels<WalletViewModel>()
     private lateinit var loader: ProgressBar
     private lateinit var user: User
 
@@ -87,7 +89,7 @@ class SignInFragment : Fragment() {
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
-                    signIn()
+                    walletSignIn()
                 }
             }
         }
@@ -133,12 +135,28 @@ class SignInFragment : Fragment() {
         return isValidated
     }
 
+    private fun walletSignIn() {
+        val loginUser = WalletLoginRequest(
+            password = passwordView.text.toString().trim(),
+            username = emailAddress.text.toString().trim()
+        )
+        walletViewModel.walletLogin(requireContext(),
+            loginUser
+        )
+        observeServerResponse(
+            walletViewModel.walletLoginResponse,
+            loader,
+            requireActivity().supportFragmentManager
+        ) {
+            signIn()
+        }
+    }
     private fun signIn() {
         val loginUser = LoginRequest(
             password = passwordView.text.toString().trim(),
             email = emailAddress.text.toString().trim()
         )
-        qrViewModel.login(
+        qrViewModel.login(requireContext(),
             loginUser
         )
         observeServerResponse(
@@ -146,7 +164,8 @@ class SignInFragment : Fragment() {
             loader,
             requireActivity().supportFragmentManager
         ) {
-            Prefs.putString(LOGIN_PASSWORD, passwordView.text.toString().trim())
+            EncryptedPrefsUtils.putString(requireContext(), LOGIN_PASSWORD, passwordView.text.toString().trim())
+            EncryptedPrefsUtils.putString(requireContext(), LOGIN_PASSWORD_VALUE, "0")
             loader.visibility = View.GONE
             startActivity(
                 Intent(requireContext(), MainActivity::class.java).apply {
@@ -156,5 +175,14 @@ class SignInFragment : Fragment() {
             )
             requireActivity().finish()
         }
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        super.onDestroyView()
+    }
+    override fun onDestroy() {
+        _binding = null
+        super.onDestroy()
     }
 }

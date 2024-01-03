@@ -56,7 +56,7 @@ class ShowQrFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        getQrModel = Singletons().getSavedQrModelRequest()!!
+        getQrModel = Singletons().getSavedQrModelRequest(requireContext())!!
 
         qrViewModel.generateQrResponse.value?.data?.data?.let {
             Glide.with(requireContext()).load(it).into(binding.qrCode)

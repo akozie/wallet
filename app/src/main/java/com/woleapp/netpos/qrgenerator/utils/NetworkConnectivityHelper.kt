@@ -36,6 +36,7 @@ class NetworkConnectivityHelper(context: Context) {
                 override fun onLost(network: Network) {
                     networkStatusSubject.onNext(false)
                 }
+
             }
             if (connectivityManager != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

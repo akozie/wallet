@@ -8,3 +8,10 @@ data class ModalData(
     var status: Boolean,
     var amount: Double
 ) : Parcelable
+
+
+data class ConnectionData(
+    val ipAddress : String,
+    val ipPort: Int,
+    val isSSL: Boolean
+)

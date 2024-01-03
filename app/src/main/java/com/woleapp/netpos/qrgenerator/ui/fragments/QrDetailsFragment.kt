@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.adapter.QrDetailsAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentQrDetailsBinding
+import com.woleapp.netpos.qrgenerator.model.GenerateQRResponse
 import com.woleapp.netpos.qrgenerator.model.QrModel
 import com.woleapp.netpos.qrgenerator.model.Transaction
 import com.woleapp.netpos.qrgenerator.model.wallet.FetchQrTokenResponseItem
@@ -42,7 +43,7 @@ class QrDetailsFragment : Fragment() {
         // Inflate the layout for this fragment
         _binding = FragmentQrDetailsBinding.inflate(inflater, container, false)
         qrViewModel.transactionResponse.removeObservers(viewLifecycleOwner)
-        qrCode = arguments?.getParcelable<FetchQrTokenResponseItem>("DETAILSQR")?.qr_code_id.toString()
+        qrCode = arguments?.getParcelable<GenerateQRResponse>("DETAILSQR")?.qr_code_id.toString()
         qrViewModel.getEachTransaction(qrCode)
         return binding.root
     }
@@ -52,7 +53,7 @@ class QrDetailsFragment : Fragment() {
         qrViewPager2 = binding.qrPager
         qrDetailRecyclerview = binding.recyclerview
 
-        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
+        loader = alertDialog(requireContext())
         qrViewModel.transactionResponse.removeObservers(viewLifecycleOwner)
         getQrTransactions()
     }

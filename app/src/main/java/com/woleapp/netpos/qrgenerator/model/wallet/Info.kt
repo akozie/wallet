@@ -6,6 +6,7 @@ data class Info(
     val fullname: String,
     val message: String,
     val pending_balance: Int,
+    val referral_bonus: Int,
     val phone_no: String,
     val pin: Boolean,
     val status: String,

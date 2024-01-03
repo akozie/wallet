@@ -20,10 +20,10 @@ class DashboardViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lif
     override fun createFragment(position: Int): Fragment {
         return if (NUM_PAGES == 4){
             when (position) {
-                1 -> QRFragment()
+                1 -> MyTallyFragment()
                 2 -> TransactionFragment()
                 3 -> MerchantsFragment()
-                else -> MyTallyFragment()
+                else -> QRFragment()
             }
         }else{
             when (position) {

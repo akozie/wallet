@@ -13,5 +13,7 @@ data class TallyWalletUserTransactionsResponseItem(
     val transaction_amount: Int,
     val transaction_id: String,
     val transaction_method: String,
+    val transaction_type: String?,
     val receipt: String?
 ) : Parcelable
+

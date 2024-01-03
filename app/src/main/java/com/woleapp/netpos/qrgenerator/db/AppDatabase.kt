@@ -13,7 +13,7 @@ import com.woleapp.netpos.qrgenerator.model.login.UserDao
 import com.woleapp.netpos.qrgenerator.model.login.UserEntity
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
 
-@Database(entities = [DomainQREntity::class, QrTransactionResponseModel::class, EmailEntity::class, UserEntity::class], version = 9, exportSchema = false)
+@Database(entities = [DomainQREntity::class, QrTransactionResponseModel::class, EmailEntity::class, UserEntity::class], version = 10, exportSchema = false)
 @TypeConverters(AppTypeConverter::class)
 abstract class AppDatabase : RoomDatabase() {
 

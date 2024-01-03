@@ -33,16 +33,15 @@
 
         <Button
             android:id="@+id/button"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_margin="10dp"
             android:background="@color/orange"
-            android:drawableLeft="@drawable/ic_baseline_add_24"
             android:drawablePadding="@dimen/margin_10dp"
             android:paddingHorizontal="@dimen/margin_15dp"
+            android:text="GENERATE QR"
             android:textColor="@color/white"
-            android:text="GENERATE MORE QR"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/verify_account" />
 
@@ -62,13 +61,13 @@
         android:id="@+id/no_qr_codes_layout"
         android:layout_width="match_parent"
         android:background="@color/white"
-        android:visibility="gone"
+        android:visibility="visible"
         android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayout8"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:background="@color/background_color"
             app:layout_constraintBottom_toTopOf="@+id/guideline2"
             app:layout_constraintEnd_toEndOf="parent"
@@ -82,6 +81,7 @@
                 android:layout_marginTop="@dimen/dimen_40dp"
                 android:text="Verify Your"
                 android:textSize="@dimen/text_size_18sp"
+                android:visibility="gone"
                 android:textColor="@color/orange"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="@+id/textView20"
@@ -92,6 +92,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="ACCOUNT"
+                android:visibility="gone"
                 android:layout_marginTop="@dimen/margin_10dp"
                 android:textColor="@color/black"
                 android:textSize="@dimen/text_size_30sp"
@@ -100,18 +101,17 @@
 
             <Button
                 android:id="@+id/generate_more_qr"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/margin_30dp"
-                android:layout_marginBottom="30dp"
+                android:layout_margin="30dp"
                 android:background="@color/orange"
-                android:drawableLeft="@drawable/ic_baseline_add_24"
                 android:drawablePadding="@dimen/margin_10dp"
                 android:padding="@dimen/margin_15dp"
                 android:paddingHorizontal="@dimen/margin_15dp"
-                android:text="GENERATE MORE QR"
+                android:text="GENERATE QR"
                 android:textColor="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView20" />
 
@@ -123,7 +123,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.4" />
+            app:layout_constraintGuide_percent="0.3" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -160,7 +160,7 @@
                 android:layout_height="0dp"
                 android:textSize="@dimen/text_size_18sp"
                 android:layout_marginTop="@dimen/margin_10"
-                android:text="With Tally, No more scanning, no more waiting on the app to load--just present your QR code and let mthe merchant scan."
+                android:text="With Tally, no more scanning, no more waiting on the app to load-just present your QR code and let the merchant scan."
                 app:layout_constraintBottom_toTopOf="@+id/guideline3"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/textView22"

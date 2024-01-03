@@ -34,7 +34,6 @@ import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils.isOnline
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseOnce
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.stringToBase64
@@ -82,9 +81,8 @@ class GenerateQrFragment : Fragment() {
                 qrViewModel.payVerveResponse.removeObservers(viewLifecycleOwner)
                 val checkOutModel = getCheckOutModel()
                 val qrModelRequest = getQrRequestModel()
-                if (isOnline(requireContext())) {
                     qrViewModel.displayQrStatus = 0
-                    qrViewModel.payQrChargesForVerve(checkOutModel, qrModelRequest, it)
+                    qrViewModel.payQrChargesForVerve(requireContext(), checkOutModel, qrModelRequest, it)
                     val userDetails = Gson().toJson(getQrRequestModel())
                     val encodeUserDetails = stringToBase64(userDetails)
                     observeServerResponseOnce(
@@ -95,7 +93,7 @@ class GenerateQrFragment : Fragment() {
                         if (qrViewModel.payVerveResponse.value?.data?.code == "90") {
                             //   showToast(qrViewModel.payVerveResponse.value?.data?.result.toString())
                         } else {
-                            Prefs.putString(PREF_GENERATE_QR, userDetails)
+                            EncryptedPrefsUtils.putString(requireContext(), PREF_GENERATE_QR, userDetails)
                             if (findNavController().currentDestination?.id == R.id.generateQrFragment) {
                                 val action =
                                     GenerateQrFragmentDirections.actionGenerateQrFragmentToEnterOtpFragment()
@@ -105,9 +103,6 @@ class GenerateQrFragment : Fragment() {
                             }
                         }
                     }
-                }else{
-                    showToast("This device is not connected to the internet")
-                }
             }
         }
     }
@@ -145,7 +140,7 @@ class GenerateQrFragment : Fragment() {
                 showToast(message)
             }
         }
-        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
+        loader = alertDialog(requireContext())
         initViews()
         qrViewModel.cardSchemeResponse.observe(viewLifecycleOwner) {
             val cardSchemeAdapter = CardSchemeAdapter(
@@ -381,12 +376,10 @@ class GenerateQrFragment : Fragment() {
             } else {
                 findNavController().popBackStack()
             }
-        } else if (isOnline(requireContext())) {
+        } else {
             qrViewModel.setIsVerveCard(false)
             qrViewModel.displayQrStatus = 0
-            qrViewModel.payQrCharges(checkOutModel, qrRequest)
-        }else{
-            showToast("This device is not connected to the internet")
+            qrViewModel.payQrCharges(requireContext(), checkOutModel, qrRequest)
         }
         observeServerResponse(
             qrViewModel.payResponse,
@@ -396,7 +389,7 @@ class GenerateQrFragment : Fragment() {
             if (qrViewModel.payResponse.value?.data?.code == "90") {
                 //  showToast(generateQrViewModel.payResponse.value?.data?.result.toString())
             } else {
-                Prefs.putString(PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
+                EncryptedPrefsUtils.putString(requireContext(), PREF_GENERATE_QR, Gson().toJson(getQrRequestModel()))
                 if (findNavController().currentDestination?.id == R.id.generateQrFragment) {
                     val action =
                         GenerateQrFragmentDirections.actionGenerateQrFragmentToWebViewFragment()

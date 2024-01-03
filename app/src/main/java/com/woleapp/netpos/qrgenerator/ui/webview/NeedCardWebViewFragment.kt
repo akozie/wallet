@@ -21,11 +21,10 @@ class NeedCardWebViewFragment : Fragment() {
     private lateinit var webView: WebView
     private lateinit var webSettings: WebSettings
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(
             inflater,

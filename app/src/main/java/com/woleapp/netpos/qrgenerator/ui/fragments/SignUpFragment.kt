@@ -1,6 +1,7 @@
 package com.woleapp.netpos.qrgenerator.ui.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,11 +15,13 @@ import com.google.android.material.textfield.TextInputEditText
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentSignUpBinding
 import com.woleapp.netpos.qrgenerator.model.RegisterRequest
+import com.woleapp.netpos.qrgenerator.model.referrals.ConfirmReferralModel
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.validatePasswordMismatch
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.validatePhoneNumbers
 import com.woleapp.netpos.qrgenerator.utils.showToast
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
+import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -32,8 +35,10 @@ class SignUpFragment : Fragment() {
     private lateinit var phoneNumber: TextInputEditText
     private lateinit var passwordView: TextInputEditText
     private lateinit var reEnterPassword: TextInputEditText
+    private lateinit var confirmRef: TextInputEditText
     private lateinit var signupButton: Button
     private val qrViewModel by viewModels<QRViewModel>()
+    private val walletViewModel by viewModels<WalletViewModel>()
     private lateinit var loader: ProgressBar
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,6 +72,7 @@ class SignUpFragment : Fragment() {
             passwordView = signUpPassword
             emailAddress = signUpEmail
             reEnterPassword = confirmPassword
+            confirmRef = confirmReferral
             signupButton = signUpButton
         }
     }
@@ -106,7 +112,10 @@ class SignUpFragment : Fragment() {
                 binding.fragmentConfirmEnterPassword.errorIconDrawable =
                     null
             }
-            !validatePasswordMismatch(passwordView.text.toString(), reEnterPassword.text.toString()) -> {
+            !validatePasswordMismatch(
+                passwordView.text.toString(),
+                reEnterPassword.text.toString()
+            ) -> {
                 binding.fragmentConfirmEnterPassword.error =
                     getString(R.string.all_password_mismatch)
                 binding.fragmentConfirmEnterPassword.errorIconDrawable =
@@ -232,7 +241,7 @@ class SignUpFragment : Fragment() {
         val registerRequest = RegisterRequest(
             fullname = fullName.text.toString().trim(),
             email = emailAddress.text.toString().trim(),
-            mobile_phone = "0"+phoneNumber.text.toString().trim(),
+            mobile_phone = "0" + phoneNumber.text.toString().trim(),
             password = passwordView.text.toString().trim()
         )
         qrViewModel.register(
@@ -244,9 +253,30 @@ class SignUpFragment : Fragment() {
             requireActivity().supportFragmentManager
         ) {
             signupButton.isEnabled = true
+//            if (confirmRef.text.toString().isEmpty()) {
+//                val action = SignUpFragmentDirections.actionSignUpFragmentToSignInFragment()
+//                findNavController().navigate(action)
+//            } else {
+//                confirmReferral()
+//            }
+            confirmReferral()
+        }
+    }
+
+    private fun confirmReferral() {
+        val confirmReferralModel = ConfirmReferralModel(
+            inviter_number = confirmRef.text.toString(),
+            invitee_number = "0" + phoneNumber.text.toString().trim(),
+            invitee_email = emailAddress.text.toString().trim(),
+        )
+        walletViewModel.confirmRef(requireContext(), confirmReferralModel)
+        observeServerResponse(
+            walletViewModel.confirmReferralResponse,
+            loader,
+            requireActivity().supportFragmentManager
+        ) {
             val action = SignUpFragmentDirections.actionSignUpFragmentToSignInFragment()
             findNavController().navigate(action)
         }
     }
-
 }

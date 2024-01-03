@@ -1,30 +1,18 @@
 package com.woleapp.netpos.qrgenerator.ui.fragments
 
-import android.content.Intent
-import android.graphics.Paint
-import android.graphics.Rect
 import android.os.Bundle
 import android.util.Log
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.pixplicity.easyprefs.library.Prefs
-import com.woleapp.netpos.qrgenerator.BuildConfig
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.adapter.DashboardViewPagerAdapter
 import com.woleapp.netpos.qrgenerator.databinding.FragmentTransactionsBinding
-import com.woleapp.netpos.qrgenerator.ui.activities.MainActivity
-import com.woleapp.netpos.qrgenerator.utils.LOGIN_PASSWORD
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
@@ -50,7 +38,7 @@ class TransactionsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loader = alertDialog(requireContext(), R.layout.layout_loading_dialog)
+        loader = alertDialog(requireContext())
         setUpViewPager()
 
 //        for (i in 0 until tabLayout.tabCount) {
@@ -64,7 +52,7 @@ class TransactionsFragment : Fragment() {
 //        }
     }
 
-//    private fun adjustTextSize(textView: TextView, tabWidth: Int) {
+    //    private fun adjustTextSize(textView: TextView, tabWidth: Int) {
 //        var textSize = 70f // Initial text size
 //        val textPaint = Paint()
 //        val bounds = Rect()
@@ -80,22 +68,23 @@ class TransactionsFragment : Fragment() {
         tabLayout = binding.tabs
 
 
-    val adapter = DashboardViewPagerAdapter(childFragmentManager, lifecycle, 4)
-    viewPager2.adapter = adapter
+        val adapter = DashboardViewPagerAdapter(childFragmentManager, lifecycle, 4)
+        viewPager2.adapter = adapter
 
-    TabLayoutMediator(tabLayout, viewPager2) { tab, position ->
-        when (position) {
-            0 -> tab.text = getString(R.string.my_tally)
-            1 -> tab.text = getString(R.string.qr_code)
-            2 -> tab.text = getString(R.string.transactions)
-            3 -> tab.text = getString(R.string.merchants)
-        }
-    }.attach()
-  //  getWalletStatus()
-}
+        TabLayoutMediator(tabLayout, viewPager2) { tab, position ->
+            when (position) {
+                0 -> tab.text = getString(R.string.qr_code)
+                1 -> tab.text = getString(R.string.my_tally)
+                2 -> tab.text = getString(R.string.transactions)
+                3 -> tab.text = getString(R.string.merchants)
+            }
+        }.attach()
+
+        //  getWalletStatus()
+    }
 
     private fun getWalletStatus() {
-        walletViewModel.getWalletStatus()
+     //  walletViewModel.getWalletStatus()
         observeServerResponse(
             walletViewModel.getWalletStatusResponse,
             null,

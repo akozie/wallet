@@ -57,7 +57,7 @@ class TallyWalletResponseModal @Inject constructor() : DialogFragment() {
                     is QrTransactionResponseModel -> {
                         if (webViewResponse.code == "00") {
                          //   viewGeneratedQR.visibility = View.VISIBLE
-                            val transID = Singletons().getTransAmountAndId()?.transId!!
+                            val transID = Singletons().getTransAmountAndId(requireContext())?.transId!!
                           //  val transAmount = Singletons().getTransAmountAndId()?.amount!!
                             addMoneyToBalance(transID)
                         }
@@ -68,7 +68,7 @@ class TallyWalletResponseModal @Inject constructor() : DialogFragment() {
                     is VerveOTPResponse -> {
                         if (webViewResponse.code == "00") {
                          //   viewGeneratedQR.visibility = View.VISIBLE
-                            val transID = Singletons().getTransAmountAndId()?.transId!!
+                            val transID = Singletons().getTransAmountAndId(requireContext())?.transId!!
                           //  val transAmount = Singletons().getTransAmountAndId()?.amount!!
                             addMoneyToBalance(transID)
                         }
@@ -153,8 +153,8 @@ class TallyWalletResponseModal @Inject constructor() : DialogFragment() {
     }
 
     private fun addMoneyToBalance(transactionID: String) {
-        walletViewModel.creditWallet(transactionID)
-        val header = Singletons().getTallyUserToken()!!
+        walletViewModel.creditWallet(requireContext(), transactionID)
+        val header = Singletons().getTallyUserToken(requireContext())!!
         token = "Bearer $header"
         observeServerResponse(
             walletViewModel.creditWalletResponse,

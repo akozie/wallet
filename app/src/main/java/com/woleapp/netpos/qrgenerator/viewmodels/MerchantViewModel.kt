@@ -12,6 +12,7 @@ import com.woleapp.netpos.qrgenerator.model.Merchant
 import com.woleapp.netpos.qrgenerator.model.paging.MerchantPagingSource
 import com.woleapp.netpos.qrgenerator.model.paging.SearchMerchantPagingSource
 import com.woleapp.netpos.qrgenerator.network.MerchantService
+import com.woleapp.netpos.qrgenerator.utils.UtilityParam.STRING_MERCHANT_HEADER_TOKEN
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Flowable
 import javax.inject.Inject
@@ -23,13 +24,13 @@ class MerchantViewModel @Inject constructor(
 
     fun getSearchedMerchant(search: String): Flowable<PagingData<Merchant>> {
         return Pager(PagingConfig(pageSize = 20, enablePlaceholders = false)) {
-            SearchMerchantPagingSource(merchantService, search, 20)
+            SearchMerchantPagingSource(merchantService, search, 20, STRING_MERCHANT_HEADER_TOKEN)
         }.flowable.cachedIn(viewModelScope)
     }
 
     fun getAllMerchant(): Flowable<PagingData<Merchant>> {
         return Pager(PagingConfig(pageSize = 20, enablePlaceholders = false)) {
-            MerchantPagingSource(merchantService, 20)
+            MerchantPagingSource(merchantService,20, STRING_MERCHANT_HEADER_TOKEN)
         }.flowable.cachedIn(viewModelScope)
     }
 }

@@ -9,6 +9,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.findNavController
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentTransferBinding
+import com.woleapp.netpos.qrgenerator.utils.showToast
 
 class TransferFragment : Fragment() {
 
@@ -37,8 +38,11 @@ class TransferFragment : Fragment() {
             //
         }
         binding.withdrawalBank.setOnClickListener {
-            val action = TransferFragmentDirections.actionTransferFragmentToWithdrawalFragment()
-            findNavController().navigate(action)
+            showToast("Oops! This feature is still in progress")
         }
+//        binding.withdrawalBank.setOnClickListener {
+//            val action = TransferFragmentDirections.actionTransferFragmentToWithdrawalFragment()
+//            findNavController().navigate(action)
+//        }
     }
 }

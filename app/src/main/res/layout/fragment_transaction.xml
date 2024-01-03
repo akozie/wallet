@@ -81,18 +81,18 @@ tools:context=".ui.fragments.TransactionFragment">
         app:layout_constraintStart_toStartOf="@+id/constraintLayout"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
 
-<!--        <TextView-->
-<!--            android:id="@+id/see_all"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginEnd="@dimen/margin_10dp"-->
-<!--            android:padding="@dimen/margin_10dp"-->
-<!--            android:text="@string/see_all"-->
-<!--            vi-->
-<!--            android:textColor="@color/green"-->
-<!--            android:textSize="@dimen/text_size_18sp"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
+        <TextView
+            android:id="@+id/see_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_10dp"
+            android:padding="@dimen/margin_10dp"
+            android:text="@string/see_all"
+            android:visibility="gone"
+            android:textColor="@color/green"
+            android:textSize="@dimen/text_size_18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
         <ProgressBar
             android:id="@+id/progress_bar"
             android:layout_width="wrap_content"
@@ -128,7 +128,7 @@ tools:context=".ui.fragments.TransactionFragment">
             android:id="@+id/empty_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No result found"
+            android:text="You have no transactions"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
