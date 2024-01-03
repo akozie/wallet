@@ -132,10 +132,6 @@ class SendWithTallyQrFragment : Fragment() {
                             scannedValue
                         )
                         EncryptedPrefsUtils.putString(requireContext(), AMOUNT_AND_TALLY_NUMBER, Gson().toJson(result))
-//                        val amount = creditAmount.text.trim()
-//                        if (amount.isNullOrEmpty()){
-//                            showToast("Amount can't be empty")
-//                        }else {
                             parentFragmentManager.beginTransaction()
                                 .replace(R.id.mainActivityfragmentContainerView, SendWithTallyQrResultFragment())
                                 .addToBackStack(null)

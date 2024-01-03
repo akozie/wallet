@@ -105,6 +105,7 @@ class QRViewModel @Inject constructor(
     val registerMessage: LiveData<Event<String>>
         get() = _registerMessage
 
+
     private val _loginMessage = MutableLiveData<Event<String>>()
     val loginMessage: LiveData<Event<String>>
         get() = _loginMessage

@@ -1,6 +1,5 @@
 package com.woleapp.netpos.qrgenerator.ui.fragments
 
-import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,23 +16,22 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.gms.auth.api.phone.SmsRetriever
-import com.google.android.material.tabs.TabLayoutMediator
 import com.woleapp.netpos.qrgenerator.R
-import com.woleapp.netpos.qrgenerator.adapter.*
-import com.woleapp.netpos.qrgenerator.broadcastreceiver.MySMSBroadcastReceiver
-import com.woleapp.netpos.qrgenerator.broadcastreceiver.MySMSBroadcastReceiver.OTPReceiveListener
-import com.woleapp.netpos.qrgenerator.databinding.*
+import com.woleapp.netpos.qrgenerator.adapter.OnUserTransactionsClick
+import com.woleapp.netpos.qrgenerator.adapter.SecurityQuestionsAdapter
+import com.woleapp.netpos.qrgenerator.adapter.TallyWalletUserTransactionAdapter
+import com.woleapp.netpos.qrgenerator.adapter.TransactionAdapter
+import com.woleapp.netpos.qrgenerator.databinding.FragmentMyTallyBinding
+import com.woleapp.netpos.qrgenerator.databinding.LayoutEnterOtpBinding
+import com.woleapp.netpos.qrgenerator.databinding.LayoutSetTransactionPinPrefTextBinding
 import com.woleapp.netpos.qrgenerator.model.TransactionModel
-import com.woleapp.netpos.qrgenerator.model.login.UserViewModel
 import com.woleapp.netpos.qrgenerator.model.wallet.NewGetSecurityQuestionResponseItem
 import com.woleapp.netpos.qrgenerator.model.wallet.TallyWalletUserTransactionsResponseItem
-import com.woleapp.netpos.qrgenerator.utils.NetworkConnectivityHelper
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils
+import com.woleapp.netpos.qrgenerator.utils.EncryptedPrefsUtils
+import com.woleapp.netpos.qrgenerator.utils.PREF_TALLY_WALLET_TEST
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.displaySecurityQuestion
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.formatCurrency
-import com.woleapp.netpos.qrgenerator.utils.RandomUtils.isDarkModeEnabled
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.Singletons
 import com.woleapp.netpos.qrgenerator.utils.showToast
@@ -45,17 +43,11 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
 
     private lateinit var binding: FragmentMyTallyBinding
     private lateinit var qrAdapter: TallyWalletUserTransactionAdapter
-   // private lateinit var qrAdapter: TransactionAdapter
     private lateinit var qrDataList: ArrayList<TallyWalletUserTransactionsResponseItem>
-    private lateinit var qrDataLists: ArrayList<TransactionModel>
     private val walletViewModel by activityViewModels<WalletViewModel>()
-    private val userViewModel by activityViewModels<UserViewModel>()
     private lateinit var loader: android.app.AlertDialog
     private var tallyWalletBalance: Int = 0
-    private lateinit var noInternetDialog: AlertDialog
-    private lateinit var noInternetBinding: LayoutNoInternetBinding
     private lateinit var token: String
-    private lateinit var email:String
     private lateinit var passwordSetDialog: AlertDialog
     private lateinit var passwordSetBinding: LayoutSetTransactionPinPrefTextBinding
     private lateinit var listOfQuestions: NewGetSecurityQuestionResponseItem
@@ -81,7 +73,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
             })
         loader = alertDialog(requireContext())
         val header = Singletons().getTallyUserToken(requireContext())!!
-         token = "Bearer $header"
+        token = "Bearer $header"
 
 
         enterOTPBinding = LayoutEnterOtpBinding.inflate(
@@ -157,7 +149,8 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
             findNavController().navigate(action)
         }
         binding.transferButton.setOnClickListener {
-            val action = TransactionsFragmentDirections.actionTransactionsFragmentToTransferFragment()
+            val action =
+                TransactionsFragmentDirections.actionTransactionsFragmentToTransferFragment()
             findNavController().navigate(action)
         }
         binding.generateQrButton.setOnClickListener {
@@ -199,8 +192,11 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
 //        }
 //            .isDisposed
 
-        getWalletStatus()
 
+        getWalletStatus()
+        Singletons().getTallyWalletBalanceTest(requireContext())?.let {
+            binding.walletBalance.text = it
+        }
         passwordSetBinding.save.setOnClickListener {
             //  val savedPin = Singletons().getPin()!!
             val transactionPIN = passwordSetBinding.reprintPasswordEdittext.text.toString()
@@ -231,7 +227,12 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
                 showToast("Please your consent is needed to set your transaction PIN")
                 return@setOnClickListener
             }
-            setTransactionPin(transactionPIN, questionID.toString(), securityQuestion, securityAnswer)
+            setTransactionPin(
+                transactionPIN,
+                questionID.toString(),
+                securityQuestion,
+                securityAnswer
+            )
         }
 
         enterOTPBinding.resendOtp.setOnClickListener {
@@ -286,7 +287,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
         ) {
             walletViewModel.fetchWalletResponse.value?.let {
                 if (it.data?.available_balance == null) {
-                 //   enterOTPDialog.show()
+                    //   enterOTPDialog.show()
                 } else if (it.data.available_balance >= 0) {
                     binding.walletBalance.text = it.data.available_balance.formatCurrency()
                     binding.walletNumber.text = it.data.phone_no
@@ -322,10 +323,10 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
             null,
             requireActivity().supportFragmentManager
         ) {
-            walletViewModel.getUserTransactionResponse.value?.let {result ->
-                if (result.data?.data.isNullOrEmpty()){
+            walletViewModel.getUserTransactionResponse.value?.let { result ->
+                if (result.data?.data.isNullOrEmpty()) {
                     binding.noTransactionYet.visibility = View.VISIBLE
-               //     binding.myTallyProgressbar.visibility = View.GONE
+                    //     binding.myTallyProgressbar.visibility = View.GONE
                     return@observeServerResponse
                 }
                 result.data?.data.let { resp ->
@@ -340,13 +341,16 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
     }
 
     override fun onEachTransactionsClicked(data: TallyWalletUserTransactionsResponseItem) {
-        val action = TransactionsFragmentDirections.actionTransactionsFragmentToRecentTransactionDetailsFragment(data)
+        val action =
+            TransactionsFragmentDirections.actionTransactionsFragmentToRecentTransactionDetailsFragment(
+                data
+            )
         findNavController().navigate(action)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-       // lifecycle.remov
+        // lifecycle.remov
     }
 
     fun Fragment.launchWhenResumed(callback: () -> Unit) {
@@ -381,22 +385,31 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
             walletViewModel.getWalletUserResponse.value?.let {
                 val pinSet = it.data?.info?.pin
                 val verified = it.data?.info?.verified
-                if (verified!!){
+                if (verified!!) {
                     binding.myTallyConstraint.visibility = View.GONE
                     binding.notAUserConstraint.visibility = View.VISIBLE
                     binding.step1.visibility = View.GONE
                     binding.verifyPhoneNumber.visibility = View.GONE
                     binding.verifyAccountText.visibility = View.GONE
-                }else{
+                } else {
                     binding.myTallyConstraint.visibility = View.GONE
                     binding.notAUserConstraint.visibility = View.VISIBLE
                     binding.step1.visibility = View.VISIBLE
                     binding.verifyPhoneNumber.visibility = View.VISIBLE
                     binding.verifyAccountText.visibility = View.VISIBLE
                 }
-                if (pinSet!! && verified){
+                if (pinSet!! && verified) {
                     binding.myTallyConstraint.visibility = View.VISIBLE
-                    binding.walletBalance.text = it.data.info.available_balance.formatCurrency()
+                   // binding.walletBalance.text = it.data.info.available_balance.formatCurrency()
+                    if (binding.walletBalance.text.toString() == " ") {
+                        binding.walletBalance.text = it.data.info.available_balance.formatCurrency()
+                        EncryptedPrefsUtils.putString(
+                            requireContext(),
+                            PREF_TALLY_WALLET_TEST,
+                            binding.walletBalance.text.toString()
+                        )
+                        Log.d("MTTALLYDEBUG", binding.walletBalance.text.toString())
+                    }
                     binding.walletNumber.text = it.data.info.phone_no
                     binding.notAUserConstraint.visibility = View.GONE
                     binding.step1.visibility = View.GONE
@@ -409,7 +422,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
                     return@observeServerResponse
                 }
 
-                if (pinSet && !it.data.info.verified){
+                if (pinSet && !it.data.info.verified) {
                     binding.myTallyConstraint.visibility = View.GONE
                     binding.notAUserConstraint.visibility = View.VISIBLE
                     binding.step1.visibility = View.VISIBLE
@@ -421,7 +434,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
                     return@observeServerResponse
                 }
 
-                if (!pinSet && it.data.info.verified){
+                if (!pinSet && it.data.info.verified) {
                     binding.myTallyConstraint.visibility = View.GONE
                     binding.notAUserConstraint.visibility = View.VISIBLE
                     binding.step1.visibility = View.GONE
@@ -433,7 +446,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
                     return@observeServerResponse
                 }
 
-                if (!verified){
+                if (!verified) {
                     binding.myTallyConstraint.visibility = View.GONE
                     binding.notAUserConstraint.visibility = View.VISIBLE
                     binding.step1.visibility = View.VISIBLE
@@ -444,7 +457,7 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
                     binding.setPinText.visibility = View.GONE
                     return@observeServerResponse
                 }
-                if (!it.data.info.pin){
+                if (!it.data.info.pin) {
                     binding.myTallyConstraint.visibility = View.GONE
                     binding.notAUserConstraint.visibility = View.VISIBLE
                     binding.step1.visibility = View.VISIBLE
@@ -457,7 +470,15 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
                 }
                 if (it.data.info.available_balance >= 0) {
                     binding.myTallyConstraint.visibility = View.VISIBLE
-                    binding.walletBalance.text = it.data.info.available_balance.formatCurrency()
+//                    if (binding.walletBalance.text.toString().isNullOrEmpty()) {
+//                        binding.walletBalance.text = it.data.info.available_balance.formatCurrency()
+//                        EncryptedPrefsUtils.putString(
+//                            requireContext(),
+//                            PREF_TALLY_WALLET_TEST,
+//                            binding.walletBalance.text.toString()
+//                        )
+//                        Log.d("MTTALLYDEBUG", binding.walletBalance.text.toString())
+//                    }
                     binding.walletNumber.text = it.data.info.phone_no
                     return@observeServerResponse
                 }
@@ -472,7 +493,8 @@ class MyTallyFragment : Fragment(), TransactionAdapter.OnTransactionClick, OnUse
         securityQuestion: String,
         securityAnswer: String
     ) {
-        walletViewModel.setTransactionPin(requireContext(),
+        walletViewModel.setTransactionPin(
+            requireContext(),
             transactionPin,
             securityQuestionId,
             securityQuestion,

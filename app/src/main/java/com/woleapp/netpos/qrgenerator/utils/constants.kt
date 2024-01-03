@@ -19,7 +19,11 @@ const val QR_FILE_DOWNLOAD = "QR"
 const val PIN_PASSWORD = "pin_password"
 const val REQUEST_CAMERA_CODE_PERMISSION = 1
 const val PREF_TALLY_WALLET = "PREF_TALLY_WALLET"
+const val PREF_TALLY_WALLET_TEST = "pref_tally_wallet_test"
 const val USER_TOKEN = "USER_TOKEN"
+const val USER_TOKEN_ID = "user_token_id"
+const val ACCOUNT_ID = "account_id"
+const val ADMIN_ACCESS_TOKEN = "admin_access_token"
 const val TRANS_ID_AND_AMOUNT = "TRANS_ID_AND_AMOUNT"
 const val STRING_PIN_BLOCK_DIALOG_TAG = "STRING_PIN_BLOCK_DIALOG_TAG"
 const val RESEND_PAYLOAD_FOR_VERVE = "RESEND_PAYLOAD_FOR_VERVE"
@@ -33,6 +37,7 @@ const val LOGIN_PASSWORD = "LOGIN_PASSWORD"
 const val LOGIN_PASSWORD_VALUE = "LOGIN_PASSWORD_VALUE"
 const val REFRESH_TOKEN = "refresh_token"
 const val REFRESH_TOKEN_ERROR = "refresh_token_error"
+const val READ_CONTACTS_PERMISSION_REQUEST_CODE = 10
 
 
 

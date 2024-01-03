@@ -1,5 +1,6 @@
 package com.woleapp.netpos.qrgenerator.ui.activities
 
+import android.Manifest
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
@@ -9,7 +10,6 @@ import android.os.Handler
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -31,18 +31,18 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.work.*
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.textfield.TextInputEditText
-import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.*
 import com.woleapp.netpos.qrgenerator.model.LoginRequest
-import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.model.login.UserEntity
 import com.woleapp.netpos.qrgenerator.model.login.UserViewModel
-import com.woleapp.netpos.qrgenerator.model.pay.ConnectionData
+import com.woleapp.netpos.qrgenerator.model.referrals.InviteToTallyModel
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseActivity
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.shareAppLink
+import com.woleapp.netpos.qrgenerator.utils.RandomUtils.showAlertDialog
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -89,6 +89,8 @@ class MainActivity : AppCompatActivity() {
     private val delayMillis = 1000L // 1 second delay
     private lateinit var passwordView: TextInputEditText
     private lateinit var loginButton: Button
+    private lateinit var inviteToTallyDialog: AlertDialog
+    private lateinit var inviteToTallyBinding: LayoutInviteToTallyBinding
 
     @Inject
     lateinit var compositeDisposable: CompositeDisposable
@@ -116,9 +118,23 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(
             navController.graph, drawerLayout
         )
-       // newFunction()
+        // newFunction()
         setupActionBarWithNavController(navController, appBarConfiguration)
         navigationView.setupWithNavController(navController)
+
+        inviteToTallyBinding = LayoutInviteToTallyBinding.inflate(
+            LayoutInflater.from(this),
+            null,
+            false
+        ).apply {
+            lifecycleOwner = this@MainActivity
+            executePendingBindings()
+        }
+
+        inviteToTallyDialog = AlertDialog.Builder(this)
+            .setView(inviteToTallyBinding.root)
+            .create()
+
 
         loginBinding = LayoutReenterPasswordToContinueBinding.inflate(
             LayoutInflater.from(this),
@@ -145,6 +161,8 @@ class MainActivity : AppCompatActivity() {
 
         signOutSpannableText()
 
+        qrViewModel.getWalletStatus(this)
+
 
         viewModel.loginMessage.observe(this) {
             it.getContentIfNotHandled()?.let { message ->
@@ -158,86 +176,109 @@ class MainActivity : AppCompatActivity() {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.sendWithTallyNumberFragment -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.addToBalanceFragment -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.generateMoreQrFragment -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.displayQrFragment2 -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.displayWalletQrFragment -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.merchantDetailsFragment -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.sendWithTallyNumberFragment -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.sendWithTallyQrFragment -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.sendWithTallyQrResultFragment -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.withdrawalFragment -> {
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                 }
                 R.id.recentTransactionDetailsFragment -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.transactionDetailsFragment -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.transactionDetailsFragment -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.qrDetailsFragment2 -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.verificationFragment -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
+                }
+                R.id.contactsFragment -> {
+                    setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
+                    binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 R.id.webViewFragment2 -> {
                     setSupportActionBar(binding.appBarDashboard.dashboardActivityToolbar)
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.GONE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.GONE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.GONE
                 }
                 else -> {
                     binding.appBarDashboard.dashboardActivityToolbar.setNavigationOnClickListener(
@@ -245,6 +286,7 @@ class MainActivity : AppCompatActivity() {
                     )
                     binding.appBarDashboard.contentDashboard.setUpAccount.visibility = View.VISIBLE
                     binding.appBarDashboard.contentDashboard.signOut.visibility = View.VISIBLE
+                    binding.appBarDashboard.contentDashboard.inviteToTally.visibility = View.VISIBLE
                 }
             }
         }
@@ -285,6 +327,36 @@ class MainActivity : AppCompatActivity() {
                     }) // A null listener allows the button to dismiss the dialog and take no further action.
                 .setNegativeButton(android.R.string.no, null)
                 .show()
+        }
+
+        binding.appBarDashboard.contentDashboard.inviteToTally.setOnClickListener {
+            inviteToTallyDialog.show()
+        }
+
+        inviteToTallyBinding.selectContacts.visibility = View.VISIBLE
+        inviteToTallyBinding.selectContacts.setOnClickListener {
+            genericPermissionHandler(
+                this,
+                this,
+                Manifest.permission.READ_CONTACTS,
+                READ_CONTACTS_PERMISSION_REQUEST_CODE,
+                "You need to grant this permission to share contacts",
+            ) {
+                inviteToTallyDialog.dismiss()
+                navController.navigate(R.id.contactsFragment)
+            }
+        }
+        inviteToTallyBinding.proceed.setOnClickListener {
+            if (inviteToTallyBinding.contactEdittext.text.toString().isEmpty()) {
+                Toast.makeText(this, "Please enter phone number(s)", Toast.LENGTH_SHORT).show()
+            } else {
+                inviteToTally()
+            }
+        }
+
+        inviteToTallyBinding.socialMediaImage.setOnClickListener {
+            inviteToTallyDialog.dismiss()
+            shareAppLink(this, packageManager)
         }
 
         loginBinding.signOut.setOnClickListener {
@@ -439,8 +511,12 @@ class MainActivity : AppCompatActivity() {
             it.getContentIfNotHandled()?.let { message ->
                 if (message == "Expired token") {
                     loginDialog.show()
+                } else {
+                    showAlertDialog(this, message, "OK") {
+                        loader.dismiss()
+                    }
                 }
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+
             }
         }
 
@@ -448,8 +524,9 @@ class MainActivity : AppCompatActivity() {
             it.getContentIfNotHandled()?.let { message ->
                 if (message == "Expired token") {
                     loginDialog.show()
+                } else {
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
                 }
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -730,20 +807,38 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun newFunction(){
-        val gson = Gson()
-        val connectionData = ConnectionData(
-            ipAddress = "196.6.103.10",
-            ipPort = 55533,
-            isSSL = true
-        )
-        val jsonModel = gson.toJson(connectionData)
-        val dataEncryption = DataEncryption()
-        val encryptedData = dataEncryption.encryptData(jsonModel)
-        Log.d("ENCRYPTEDDATA", encryptedData.toString())
+    private fun inviteToTally() {
+        //    loader.show()
 
-//        if (encryptedData != null){
-//            val encryptedData = dataEncryption.decryptData(encryptedData)
+        val invitees = inviteToTallyBinding.contactEdittext.text.toString()
+        val newInvitees = InviteToTallyModel(invitees)
+
+        qrViewModel.inviteToTally(this, newInvitees)
+        observeServerResponseActivity(
+            this,
+            this,
+            qrViewModel.inViteToTallyResponse,
+            loader,
+            supportFragmentManager
+        ) {
+            qrViewModel.inViteToTallyResponse.value?.let {
+                //  showToast(it.data.message)
+                inviteToTallyDialog.dismiss()
+            }
+        }
+
+//        observeServerResponseActivity(
+//            this,
+//            qrViewModel.inviteToTally(this, newInvitees),
+//            loader,
+//            compositeDisposable,
+//            ioScheduler,
+//            mainThreadScheduler,
+//            supportFragmentManager
+//        ) {
+//            val walletResponse = EncryptedPrefsUtils.getString(this, WALLET_RESPONSE)
+//            Toast.makeText(this, "$walletResponse", Toast.LENGTH_SHORT).show()
+//            inviteToTallyDialog.dismiss()
 //        }
     }
 

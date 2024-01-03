@@ -18,12 +18,14 @@ import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.FragmentSignInBinding
 import com.woleapp.netpos.qrgenerator.model.LoginRequest
 import com.woleapp.netpos.qrgenerator.model.User
+import com.woleapp.netpos.qrgenerator.model.WalletLoginRequest
 import com.woleapp.netpos.qrgenerator.model.login.EmailEntity
 import com.woleapp.netpos.qrgenerator.model.login.UserViewModel
 import com.woleapp.netpos.qrgenerator.ui.activities.MainActivity
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
+import com.woleapp.netpos.qrgenerator.viewmodels.WalletViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -36,6 +38,7 @@ class SignInFragment : Fragment() {
     private lateinit var loginButton: Button
     private val qrViewModel by viewModels<QRViewModel>()
     private val userViewModel by viewModels<UserViewModel>()
+    private val walletViewModel by viewModels<WalletViewModel>()
     private lateinit var loader: ProgressBar
     private lateinit var user: User
 
@@ -86,7 +89,7 @@ class SignInFragment : Fragment() {
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
-                    signIn()
+                    walletSignIn()
                 }
             }
         }
@@ -132,6 +135,22 @@ class SignInFragment : Fragment() {
         return isValidated
     }
 
+    private fun walletSignIn() {
+        val loginUser = WalletLoginRequest(
+            password = passwordView.text.toString().trim(),
+            username = emailAddress.text.toString().trim()
+        )
+        walletViewModel.walletLogin(requireContext(),
+            loginUser
+        )
+        observeServerResponse(
+            walletViewModel.walletLoginResponse,
+            loader,
+            requireActivity().supportFragmentManager
+        ) {
+            signIn()
+        }
+    }
     private fun signIn() {
         val loginUser = LoginRequest(
             password = passwordView.text.toString().trim(),

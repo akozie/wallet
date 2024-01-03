@@ -6,3 +6,14 @@ data class LoginResponse(
     val token: String,
     val refreshToken: String
 )
+
+data class WalletLoginResponse(
+    val status: String,
+    val data: LoginData
+)
+
+data class LoginData(
+    val adminAccessToken: String,
+    val userTokenId: String,
+    val accountId: String,
+)

@@ -77,6 +77,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    @Named("appTokenHeaderInterceptor")
+    fun providesAppTokenHeaderInterceptor(): Interceptor =
+        HeaderInterceptor(UtilityParam.STRING_MERCHANT_HEADER_TOKEN_NAME, UtilityParam.STRING_MERCHANT_HEADER_TOKEN)
+
+    @Provides
+    @Singleton
     @Named("walletHeaderInterceptor")
     fun providesWalletHeaderInterceptor(): Interceptor =
         BearerAuthInterceptor(UtilityParam.STRING_WALLET_X_API_TOKEN)
@@ -86,7 +92,23 @@ object AppModule {
     @Named("defaultOkHttp")
     fun providesOKHTTPClient(
         @Named("loggingInterceptor") loggingInterceptor: Interceptor,
-        @Named("headerInterceptor") headerInterceptor: Interceptor
+        @Named("appTokenHeaderInterceptor") headerInterceptor: Interceptor
+    ): OkHttpClient =
+        OkHttpClient().newBuilder()
+            .connectTimeout(70, TimeUnit.SECONDS)
+            .readTimeout(70, TimeUnit.SECONDS)
+            .writeTimeout(70, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
+            .addInterceptor(headerInterceptor)
+            .addInterceptor(loggingInterceptor)
+            .build()
+
+    @Provides
+    @Singleton
+    @Named("appTokenOkHttp")
+    fun providesOKHTTPClientForQrService(
+        @Named("loggingInterceptor") loggingInterceptor: Interceptor,
+        @Named("appTokenHeaderInterceptor") headerInterceptor: Interceptor
     ): OkHttpClient =
         OkHttpClient().newBuilder()
             .connectTimeout(70, TimeUnit.SECONDS)
@@ -130,7 +152,7 @@ object AppModule {
     @Singleton
     @Named("defaultRetrofit")
     fun providesRetrofit(
-        @Named("defaultOkHttp") okhttp: OkHttpClient,
+        @Named("appTokenOkHttp") okhttp: OkHttpClient,
         @Named("baseUrl") baseUrl: String
     ): Retrofit =
         Retrofit.Builder()

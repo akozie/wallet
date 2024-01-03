@@ -28,11 +28,23 @@ class Singletons {
     fun getTallyWalletBalance(context: Context): WalletUserResponse? =
         gson.fromJson(EncryptedPrefsUtils.getString(context, PREF_TALLY_WALLET), WalletUserResponse::class.java)
 
+    fun getTallyWalletBalanceTest(context: Context): String? =
+        EncryptedPrefsUtils.getString(context, PREF_TALLY_WALLET_TEST)
+
     fun getTransAmountAndId(context: Context): CheckOutResponse? =
         gson.fromJson(EncryptedPrefsUtils.getString(context, TRANS_ID_AND_AMOUNT), CheckOutResponse::class.java)
 
     fun getTallyUserToken(context: Context): String? =
         EncryptedPrefsUtils.getString(context, USER_TOKEN)
+
+    fun getAdminAccessToken(context: Context): String? =
+        EncryptedPrefsUtils.getString(context, ADMIN_ACCESS_TOKEN)
+
+    fun getAccountId(context: Context): String? =
+        EncryptedPrefsUtils.getString(context, ACCOUNT_ID)
+
+    fun getWalletUserTokenId(context: Context): String? =
+        EncryptedPrefsUtils.getString(context, USER_TOKEN_ID)
 
     fun getLoginPassword(context: Context): String? =
         EncryptedPrefsUtils.getString(context, LOGIN_PASSWORD)

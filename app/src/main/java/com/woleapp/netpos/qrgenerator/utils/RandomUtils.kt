@@ -3,13 +3,14 @@ package com.woleapp.netpos.qrgenerator.utils
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Typeface
 import android.net.ConnectivityManager
-import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.CountDownTimer
@@ -26,6 +27,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.*
@@ -34,8 +36,10 @@ import com.google.android.gms.auth.api.phone.SmsRetriever
 import com.google.android.gms.tasks.Task
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
+import com.woleapp.netpos.qrgenerator.model.GeneralResponse
 import com.woleapp.netpos.qrgenerator.model.QrModelRequest
 import com.woleapp.netpos.qrgenerator.model.Status
+import com.woleapp.netpos.qrgenerator.model.referrals.InviteToTallyFailureResponse
 import com.woleapp.netpos.qrgenerator.model.wallet.*
 import io.reactivex.Scheduler
 import io.reactivex.Single
@@ -45,12 +49,14 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.launch
+import pub.devrel.easypermissions.EasyPermissions
 import timber.log.Timber
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
 object RandomUtils {
+
 
     fun <T> observeServerResponseActivity(
         context: Context,
@@ -80,6 +86,7 @@ object RandomUtils {
             }
         }
     }
+
     fun <T> observeServerResponseActivity(
         context: Context,
         serverResponse: Single<Resource<T>>,
@@ -102,7 +109,11 @@ object RandomUtils {
                                 ) {
                                     successAction()
                                 } else {
-                                    Toast.makeText(context, R.string.an_error_occurred, Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        context,
+                                        R.string.an_error_occurred,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
                             Status.LOADING -> {
@@ -112,8 +123,12 @@ object RandomUtils {
                                 loadingDialog.dismiss()
                                 if (it.data is String && it.data.contains("false")) {
                                     Toast.makeText(context, "Wrong PIN", Toast.LENGTH_SHORT).show()
-                                }else{
-                                    Toast.makeText(context, "An error occurred, please try again", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "An error occurred, please try again",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
                             Status.TIMEOUT -> {
@@ -126,8 +141,12 @@ object RandomUtils {
                         loadingDialog.dismiss()
                     }
                 }
-        )    }
+        )
+    }
 
+    private val _fetchWalletMessage = MutableLiveData<Event<String>>()
+    val fetchWalletMessage: LiveData<Event<String>>
+        get() = _fetchWalletMessage
 
     fun <T> Fragment.observeServerResponse(
         serverResponse: Single<Resource<T>>,
@@ -146,8 +165,10 @@ object RandomUtils {
                                 loadingDialog.dismiss()
                                 if (
                                     it.data is SendWithTallyNumberResponse ||
-                                            it.data is TransactionReceiptResponse ||
-                                            it.data is FetchQrTokenResponse
+                                    it.data is TransactionReceiptResponse ||
+                                    it.data is FetchQrTokenResponse ||
+                                    it.data is InviteToTallyFailureResponse ||
+                                    it.data is GeneralResponse
                                 ) {
                                     successAction()
                                 } else {
@@ -163,16 +184,21 @@ object RandomUtils {
                             Status.ERROR -> {
                                 loadingDialog.dismiss()
                                 if (it.data is String && it.data.contains("Recipient")) {
-                                    showToast("Recipient is not a Tally user or account is not verified")
+                                    _fetchWalletMessage.value = Event("Recipient Wallet does not exist")
+                                    //_fetchWalletMessage.value = Event("Recipient is not a Tally user or account is not verified")
                                 } else if (it.data is String && it.data.contains("User")) {
-                                    showToast("User cannot send money to self")
+                                    _fetchWalletMessage.value =
+                                        Event("User cannot send money to self")
                                 } else if (it.data is String && it.data.contains("Insufficient")) {
-                                    showToast("Insufficient Balance")
+                                    _fetchWalletMessage.value = Event("Insufficient Balance")
                                 } else if (it.data is String && it.data.contains("transaction")) {
-                                    showToast("The transaction amount must be at least 100.")
+                                    _fetchWalletMessage.value =
+                                        Event("The transaction amount must be at least 100.")
                                 } else {
-                                    showToast("Wrong Pin")
+                                    _fetchWalletMessage.value = Event("Wrong Pin")
                                 }
+                                // val walletResponse = EncryptedPrefsUtils.getString(requireContext(), WALLET_RESPONSE)
+                                //  _fetchWalletMessage.value = Event(walletResponse.toString())
                             }
                             Status.TIMEOUT -> {
                                 loadingDialog.dismiss()
@@ -201,7 +227,7 @@ object RandomUtils {
                     successAction()
                 }
                 Status.LOADING -> {
-                  //  Log.d("LOADING", "LOADINGRESULT")
+                    //  Log.d("LOADING", "LOADINGRESULT")
                     loadingDialog.show()
                 }
                 Status.ERROR -> {
@@ -220,7 +246,7 @@ object RandomUtils {
         serverResponse: LiveData<Resource<T>>,
         loadingDialog: AlertDialog,
         fragmentManager: FragmentManager,
-        successAction: (qrData:T) -> Unit
+        successAction: (qrData: T) -> Unit
     ) {
         serverResponse.observe(this.viewLifecycleOwner) {
             when (it.status) {
@@ -229,7 +255,7 @@ object RandomUtils {
                     successAction(it.data!!)
                 }
                 Status.LOADING -> {
-                  //  Log.d("LOADING", "LOADINGRESULT")
+                    //  Log.d("LOADING", "LOADINGRESULT")
                     loadingDialog.show()
                 }
                 Status.ERROR -> {
@@ -342,6 +368,26 @@ object RandomUtils {
         dialogBuilder.setView(dialogView)
         randomGeneratedTexts(dialogView.findViewById(R.id.custom_texts))
         return dialogBuilder.create()
+    }
+
+
+    fun showAlertDialog(
+        context: Context,
+        message: String,
+        positiveButtonTitle: String,
+        onPositiveButtonClick: () -> Unit,
+    ) {
+        val alertDialog = AlertDialog.Builder(context)
+            .setMessage(message)
+            .setPositiveButton(positiveButtonTitle) { _, _ ->
+                onPositiveButtonClick()
+                // Dismiss the dialog when "Yes" is clicked
+                alertDialog(context).dismiss()
+            }
+            .setCancelable(false)
+            .create()
+
+        alertDialog.show()
     }
 
     fun getGUID() = UUID.randomUUID().toString().replace("-", "")
@@ -522,17 +568,18 @@ object RandomUtils {
             else -> "Unknown"
         }
     }
+
     fun checkCardScheme(
         cardNumber: String,
     ): String {
-        var newResult : String = ""
+        var newResult: String = ""
         val visaPattern = "^4[0-9]{12}(?:[0-9]{3})?\$"
         val mastercardPattern = "^5[1-5][0-9]{14}\$"
         val amexPattern = "^3[47][0-9]{13}\$"
         val discoverPattern = "^6(?:011|5[0-9]{2})[0-9]{12}\$"
         val vervePattern = "^((506(0|1|2|3|4|5))|(650(0|1|2|3|4|5)))\\d{12}$"
         val anotherVervePattern = "^((506(0|1|2|3|4|5))|(650(0|1|2|3|4|5)))\\d{15}$"
-         when {
+        when {
             cardNumber.matches(Regex(visaPattern)) -> newResult = "Visa"
             cardNumber.matches(Regex(mastercardPattern)) -> newResult = "Mastercard"
             cardNumber.matches(Regex(amexPattern)) -> newResult = "American Express"
@@ -557,11 +604,11 @@ object RandomUtils {
     }
 
     fun validatePhoneNumbers(phoneNumber: String): Boolean {
-        val nigeriaPhoneNumber =  """^[789]{1}[01]{1}[0-9]{8}$""".toRegex()
+        val nigeriaPhoneNumber = """^[789]{1}[01]{1}[0-9]{8}$""".toRegex()
         return phoneNumber.matches(nigeriaPhoneNumber)
     }
 
-     fun getBitMap(view: View): Bitmap {
+    fun getBitMap(view: View): Bitmap {
         val bitMap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitMap)
         val bgDrawable = view.background
@@ -616,4 +663,72 @@ object RandomUtils {
                     Timber.d(errorTag, throwable.localizedMessage)
                 }
         }
+
+
+    private fun checkForPermission(context: Context, perms: String) =
+        EasyPermissions.hasPermissions(
+            context,
+            perms,
+        )
+
+    fun genericPermissionHandler(
+        host: LifecycleOwner,
+        context: Context,
+        perm: String,
+        permCode: Int,
+        permRationale: String,
+        fn: () -> Unit,
+    ) {
+        if (checkForPermission(context, perm)) {
+            fn()
+        } else {
+            requestForPermission(
+                host,
+                permCode,
+                permRationale,
+                perm,
+            )
+        }
+    }
+
+    private fun requestForPermission(
+        host: LifecycleOwner,
+        requestCode: Int,
+        permissionRationale: String,
+        permissionToRequest: String,
+    ) {
+        if (host is Fragment) {
+            EasyPermissions.requestPermissions(
+                host,
+                permissionRationale,
+                requestCode,
+                permissionToRequest,
+            )
+        } else {
+            host as Activity
+            EasyPermissions.requestPermissions(
+                host,
+                permissionRationale,
+                requestCode,
+                permissionToRequest,
+            )
+        }
+    }
+
+    fun shareAppLink(context: Context, packageManager: PackageManager) {
+        val shareIntent = Intent(Intent.ACTION_SEND)
+        shareIntent.type = "text/plain"
+        shareIntent.putExtra(
+            Intent.EXTRA_TEXT,
+            "Fast, safe, secure contactless transactions all at your fingertips on the Tally network. Join me on https://play.google.com/store/apps/details?id=com.woleapp.netpos.qrgenerator and use my number ${
+                Singletons().getCurrentlyLoggedInUser(context)?.mobile_phone
+            } as referral code during registration"
+        )
+
+        val chooser = Intent.createChooser(shareIntent, "Invite friends via")
+        if (shareIntent.resolveActivity(packageManager) != null) {
+            startActivity(context, chooser, null)
+        }
+
+    }
 }

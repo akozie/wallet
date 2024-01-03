@@ -1,13 +1,11 @@
 package com.woleapp.netpos.qrgenerator.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.woleapp.netpos.qrgenerator.databinding.ContactLayoutBinding
 import com.woleapp.netpos.qrgenerator.model.ContactModel
-import com.woleapp.netpos.qrgenerator.model.TransactionModel
 
 
 class ContactAdapter(
@@ -53,7 +51,11 @@ class ContactAdapter(
                 }else{
                     holder.contactSelectIcon.visibility = View.GONE
                     selectedItem.remove(item)
+//                    if (selectedItem.isEmpty()) {
+//                        showShareButton(false)
+//                    }
                 }
+
                 itemView.setOnClickListener {
                     selectItem(position)
                 }
@@ -89,8 +91,8 @@ class ContactAdapter(
         showShareButton(true)
     }
 
-    private fun selectItem(adapterPostion: Int){
-        contactList[adapterPostion].selected = !contactList[adapterPostion].selected
+    private fun selectItem(adapterPosition: Int){
+        contactList[adapterPosition].selected = !contactList[adapterPosition].selected
 
         notifyDataSetChanged()
     }

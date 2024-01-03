@@ -90,10 +90,10 @@ class SendWithTallyQrResultFragment : Fragment() {
                 showToast("Please enter destination account")
                 return@setOnClickListener
             }
-            if (binding.enterDescAccount.text?.trim().toString().length < 11) {
-                showToast("The destination account must not be less than 11")
-                return@setOnClickListener
-            }
+//            if (binding.enterDescAccount.text?.trim().toString().length < 11) {
+//                showToast("The destination account must not be less than 11")
+//                return@setOnClickListener
+//            }
             if (binding.tallyQrAmount.text?.trim().toString().isEmpty()) {
                 showToast("Please enter wallet amount")
                 return@setOnClickListener
@@ -136,7 +136,10 @@ class SendWithTallyQrResultFragment : Fragment() {
         val sendWithTallyNumberRequest = SendWithTallyNumberRequest(
             dest_account = walletNumber.text?.trim().toString(),
             transaction_amount = amount.text.trim().toString(),
-            transaction_pin = binding.enterTransactionPin.text?.trim().toString()
+            transaction_pin = binding.enterTransactionPin.text?.trim().toString(),
+            adminAccessToken = Singletons().getAdminAccessToken(requireContext())!!,
+            userTokenId = Singletons().getWalletUserTokenId(requireContext())!!,
+            accountId = Singletons().getAccountId(requireContext())!!
         )
         observeServerResponse(
             walletViewModel.sendWithTallyNumber(

@@ -2,7 +2,9 @@ package com.woleapp.netpos.qrgenerator.ui.fragments
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -24,13 +26,17 @@ import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.adapter.BankCardAdapter
 import com.woleapp.netpos.qrgenerator.adapter.CardSchemeAdapter
+import com.woleapp.netpos.qrgenerator.databinding.DisplayQrBinding
 import com.woleapp.netpos.qrgenerator.databinding.FragmentGenerateMoreQrBinding
 import com.woleapp.netpos.qrgenerator.databinding.LayoutQrReceiptPdfBinding
+import com.woleapp.netpos.qrgenerator.databinding.LayoutSetTransactionPinPrefTextBinding
+import com.woleapp.netpos.qrgenerator.databinding.TransactionStatusModalBinding
 import com.woleapp.netpos.qrgenerator.model.QrModelRequest
 import com.woleapp.netpos.qrgenerator.model.Row
 import com.woleapp.netpos.qrgenerator.model.RowX
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
+import com.woleapp.netpos.qrgenerator.ui.dialog.ResponseModal
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.checkCardScheme
@@ -40,6 +46,7 @@ import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponse
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseOnce
 import com.woleapp.netpos.qrgenerator.viewmodels.QRViewModel
 import java.io.File
+import java.util.*
 
 
 class GenerateMoreQrFragment : Fragment() {
@@ -65,6 +72,11 @@ class GenerateMoreQrFragment : Fragment() {
     private lateinit var receiptPdf: File
     private lateinit var pdfView: LayoutQrReceiptPdfBinding
     private var transactionCheckbox: Boolean = false
+    private var timeSeconds = 5L
+    private lateinit var responseModalLayout: TransactionStatusModalBinding
+    private lateinit var responseDialog: AlertDialog
+    private lateinit var displayQrLayout: DisplayQrBinding
+    private lateinit var displayQrDialog: AlertDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -116,6 +128,72 @@ class GenerateMoreQrFragment : Fragment() {
         pdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_generate_more_qr, container, false)
+
+        responseModalLayout = TransactionStatusModalBinding.inflate(
+            LayoutInflater.from(requireContext()),
+            null,
+            false
+        ).apply {
+            lifecycleOwner = this@GenerateMoreQrFragment
+            executePendingBindings()
+        }
+
+        responseDialog =
+            AlertDialog.Builder(requireContext())
+                .setView(responseModalLayout.root)
+                .setCancelable(false)
+                .create()
+
+        displayQrLayout = DisplayQrBinding.inflate(
+            LayoutInflater.from(requireContext()),
+            null,
+            false
+        ).apply {
+            lifecycleOwner = this@GenerateMoreQrFragment
+            executePendingBindings()
+        }
+
+        displayQrDialog =
+            AlertDialog.Builder(requireContext())
+                .setView(displayQrLayout.root)
+                .setCancelable(false)
+                .create()
+
+        responseModalLayout.printReceipt.visibility = View.GONE
+        responseModalLayout.viewGeneratedQr.visibility = View.VISIBLE
+        responseModalLayout.statusIconLAV.setAnimation(R.raw.lottiesuccess)
+        responseModalLayout.successFailed.text = getString(R.string.success)
+        responseModalLayout.successFailed.setTextColor(resources.getColor(R.color.success))
+        responseModalLayout.qrAmount.text = 100.toLong().formatCurrency("\u20A6")
+
+        displayQrLayout.qrCode.setImageResource(R.drawable.apetu)
+        displayQrLayout.download.text = "DONE"
+
+        responseModalLayout.viewGeneratedQr.setOnClickListener {
+            responseDialog.dismiss()
+            displayQrDialog.show()
+        }
+
+        displayQrLayout.download.setOnClickListener {
+            displayQrDialog.dismiss()
+//            findNavController().popBackStack()
+
+//            val url = "https://www.google.com" // Replace this with your desired URL
+            val url = "https://drive.google.com/file/d/1rrXteWiiuk_kX8znzpb5nv-ALeguy9_W/view?usp=sharing" // Replace this with your desired URL
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(url)
+            intent.`package` = "com.android.chrome" // Specify Chrome's package name
+
+            try {
+                startActivity(intent)
+            } catch (e: Exception) {
+                // If Chrome is not available, open with the default browser
+                intent.`package` = null
+                startActivity(intent)
+            }
+        }
+
+
         return binding.root
     }
 
@@ -274,7 +352,8 @@ class GenerateMoreQrFragment : Fragment() {
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
-                    checkOut()
+//                    checkOut()
+                    startResendTimer()
                 }
             }
         }
@@ -471,6 +550,29 @@ class GenerateMoreQrFragment : Fragment() {
         ) {
             receiptPdf = createPdf(view, this)
         }
+    }
+
+    private fun startResendTimer() {
+        val timer = Timer()
+
+        // Schedule a task to run repeatedly at a fixed rate
+        timer.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                // Code to run repeatedly at a fixed rate
+                timeSeconds--
+                activity?.runOnUiThread {
+                    loader.show()
+                }
+                if (timeSeconds <= 0) {
+                    timeSeconds = 5L
+                    timer.cancel()
+                    activity?.runOnUiThread {
+                        loader.dismiss()
+                        responseDialog.show()
+                    }
+                }
+            }
+        }, 0, 1000) // run 1000 milliseconds (1 second)
     }
 
 }

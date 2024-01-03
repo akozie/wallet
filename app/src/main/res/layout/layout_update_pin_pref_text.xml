@@ -95,13 +95,32 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/transaction_old_pin_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Old Transaction PIN"
+            app:passwordToggleEnabled="true"
+            app:layout_constraintTop_toBottomOf="@id/transaction_otp_layout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/transaction_old_pin_edittext"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:maxLength="4"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:inputType="numberPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/transaction_pin_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Transaction PIN"
             app:passwordToggleEnabled="true"
-            app:layout_constraintTop_toBottomOf="@id/transaction_otp_layout">
+            app:layout_constraintTop_toBottomOf="@id/transaction_old_pin_layout">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/transaction_pin_edittext"
