@@ -743,7 +743,7 @@ class WalletViewModel @Inject constructor(
                             ?: "{\"message\":\"Unexpected error\"}"
                         _confirmReferralMessage.value = Event(
                             try {
-                                Gson().fromJson(errorMessage, ErrorModel::class.java).message
+                                Gson().fromJson(errorMessage, LoginWalletErrorResponse::class.java).message
                             } catch (e: Exception) {
                                 "Error"
                             }

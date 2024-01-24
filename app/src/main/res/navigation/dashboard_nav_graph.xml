@@ -187,11 +187,11 @@
             android:id="@+id/action_sendWithTallyNumberFragment_to_myTallyFragment2"
             app:destination="@id/myTallyFragment" />
         <action
-            android:id="@+id/action_sendWithTallyNumberFragment_to_transactionsFragment"
-            app:destination="@id/transactionsFragment" />
-        <action
             android:id="@+id/action_sendWithTallyNumberFragment_to_contactsFragment"
             app:destination="@id/contactsFragment" />
+        <action
+            android:id="@+id/action_sendWithTallyNumberFragment_to_transactionsFragment"
+            app:destination="@id/transactionsFragment" />
     </fragment>
     <dialog
         android:id="@+id/tallyWalletResponseModal"

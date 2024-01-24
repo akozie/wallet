@@ -59,6 +59,12 @@ class SignInFragment : Fragment() {
                 loginButton.isEnabled = true
             }
         }
+        walletViewModel.confirmReferralMessage.observe(viewLifecycleOwner) {
+            it.getContentIfNotHandled()?.let { message ->
+                showToast(message)
+                loginButton.isEnabled = true
+            }
+        }
         loader = binding.signInProgressBar
         initViews()
         loginButton.setOnClickListener {

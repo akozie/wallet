@@ -185,13 +185,9 @@ class SendWithTallyNumberFragment : Fragment() {
 
         transactionStatusBinding.cancelButton.setOnClickListener {
             transactionStatusDialog.dismiss()
-            val action = SendWithTallyNumberFragmentDirections.actionSendWithTallyNumberFragmentToTransactionsFragment()
-            findNavController().navigate(action)
         }
         transactionStatusBinding.viewGeneratedQr.setOnClickListener {
             transactionStatusDialog.dismiss()
-            val action = SendWithTallyNumberFragmentDirections.actionSendWithTallyNumberFragmentToTransactionsFragment()
-            findNavController().navigate(action)
         }
 
         transactionStatusBinding.printReceipt.visibility = View.GONE
@@ -246,7 +242,13 @@ class SendWithTallyNumberFragment : Fragment() {
         ) {
             val walletResponse = EncryptedPrefsUtils.getString(requireContext(), WALLET_RESPONSE)
             showToast(walletResponse.toString())
-            findNavController().popBackStack()
+            balanceResult = (binding.availableBalance.text.toString().substring(1, binding.availableBalance.text.toString().length-3).replace("," ,"").toInt() - binding.enterWalletAmount.text.toString().toInt()).toString()
+            binding.availableBalance.text = balanceResult.toInt().formatCurrency()
+            EncryptedPrefsUtils.putString(requireContext(), PREF_TALLY_WALLET_TEST, balanceResult.toInt().formatCurrency())
+            transactionStatusDialog.show()
+            transactionStatusBinding.qrAmount.text = binding.enterWalletAmount.text.toString().toLong().formatCurrency("\u20A6")
+            val actions = SendWithTallyNumberFragmentDirections.actionSendWithTallyNumberFragmentToTransactionsFragment()
+            findNavController().navigate(actions)
         }
     }
 
