@@ -61,14 +61,15 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/guideline_vertical"
                         app:layout_constraintTop_toTopOf="parent" />
+
                     <androidx.constraintlayout.widget.Guideline
                         android:id="@+id/guideline_vertical"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:backgroundTint="@color/white"
                         android:background="@color/white"
+                        android:backgroundTint="@color/white"
                         android:orientation="vertical"
-                        app:layout_constraintGuide_percent="0.5" />
+                        app:layout_constraintGuide_begin="196dp" />
 
                     <LinearLayout
                         android:id="@+id/button2"

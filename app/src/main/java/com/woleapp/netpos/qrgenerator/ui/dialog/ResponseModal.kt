@@ -21,6 +21,7 @@ import com.woleapp.netpos.qrgenerator.databinding.LayoutQrReceiptPdfBinding
 import com.woleapp.netpos.qrgenerator.databinding.TransactionStatusModalBinding
 import com.woleapp.netpos.qrgenerator.model.pay.ModalData
 import com.woleapp.netpos.qrgenerator.model.pay.QrTransactionResponseModel
+import com.woleapp.netpos.qrgenerator.model.qrinfo.StoreQrInfoRequest
 import com.woleapp.netpos.qrgenerator.model.verve.VerveOTPResponse
 import com.woleapp.netpos.qrgenerator.model.wallet.request.QrTokenRequest
 import com.woleapp.netpos.qrgenerator.ui.activities.AuthenticationActivity
@@ -177,14 +178,27 @@ class ResponseModal @Inject constructor() : DialogFragment() {
             val qrTokenId = qrTokenResponse?.data?.qr_code_id
             val qrToken = qrTokenResponse?.data?.data
             val getQrModel = Singletons().getSavedQrModelRequest(requireContext())
-            val newQrToken = QrTokenRequest(
+            val email = Singletons().getCurrentlyLoggedInUser(requireContext())
+//            val newQrToken = QrTokenRequest(
+//                qr_code_id = qrTokenId!!,
+//                qr_token = qrToken!!,
+//                card_scheme = getQrModel?.card_scheme!!,
+//                issuing_bank = getQrModel.issuing_bank
+//            )
+            val newQrToken = StoreQrInfoRequest(
                 qr_code_id = qrTokenId!!,
-                qr_token = qrToken!!,
+                email = email?.email.toString(),
                 card_scheme = getQrModel?.card_scheme!!,
                 issuing_bank = getQrModel.issuing_bank
             )
-          //  walletViewModel.storeQrToken(requireContext(), newQrToken)
-
+            walletViewModel.storeQrInfo(requireContext(), newQrToken)
+            observeServerResponse(
+                walletViewModel.storeQrInfoResponse, requireActivity().supportFragmentManager
+            ) {
+                walletViewModel.storeQrInfoResponse.value.let {
+                    Log.d("TALLYRESP", it.toString())
+                }
+            }
         }
     }
 

@@ -95,7 +95,8 @@ class SignInFragment : Fragment() {
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
-                    walletSignIn()
+                    //walletSignIn()
+                    signIn()
                 }
             }
         }

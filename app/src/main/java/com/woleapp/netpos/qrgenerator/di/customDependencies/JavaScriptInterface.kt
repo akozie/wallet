@@ -25,7 +25,7 @@ class JavaScriptInterface(
     private val loader = RandomUtils.alertDialog(context)
     private val webViewBaseUrl =
         UtilityParam.STRING_WEB_VIEW_BASE_URL + UtilityParam.STRING_CHECKOUT_MERCHANT_ID + "/"
-
+    
     @JavascriptInterface
     fun sendValueToWebView() =
         "$termUrl<======>$md<======>$cReq<======>$acsUrl<======>$transId<======>$webViewBaseUrl<======>$redirectHtml"

@@ -2,6 +2,7 @@ package com.woleapp.netpos.qrgenerator.network
 
 import com.google.gson.JsonObject
 import com.woleapp.netpos.qrgenerator.model.*
+import com.woleapp.netpos.qrgenerator.model.qrinfo.StoreQrInfoRequest
 import com.woleapp.netpos.qrgenerator.model.referrals.ConfirmReferralModel
 import com.woleapp.netpos.qrgenerator.model.referrals.InviteToTallyFailureResponse
 import com.woleapp.netpos.qrgenerator.model.referrals.InviteToTallyModel
@@ -89,10 +90,10 @@ interface WalletService {
         @Body qrTokenRequest: QrTokenRequest
     ): Single<GeneralResponse>
 
-//    @GET("fetchQrToken")
-//    fun fetchQrToken(
-//        @Header("Authorization") token: String
-//    ): Single<FetchQrTokenResponse>
+    @GET("fetchQrToken")
+    fun fetchQrToken(
+        @Header("Authorization") token: String
+    ): Single<FetchQrTokenResponse>
 
     @DELETE("deleteQrToken")
     fun deleteQrToken(
@@ -149,5 +150,11 @@ interface WalletService {
     fun walletLogin(
         @Body loginRequest: WalletLoginRequest
     ): Single<WalletLoginResponse>
+
+    @POST("storeQrInfo")
+    fun storeQrInfo(
+        @Header("Authorization") token: String,
+        @Body storeQrInfoRequest: StoreQrInfoRequest
+    ): Single<GeneralWalletResponse>
 
 }

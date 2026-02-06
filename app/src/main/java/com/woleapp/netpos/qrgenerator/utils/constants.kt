@@ -27,7 +27,7 @@ const val ADMIN_ACCESS_TOKEN = "admin_access_token"
 const val TRANS_ID_AND_AMOUNT = "TRANS_ID_AND_AMOUNT"
 const val STRING_PIN_BLOCK_DIALOG_TAG = "STRING_PIN_BLOCK_DIALOG_TAG"
 const val RESEND_PAYLOAD_FOR_VERVE = "RESEND_PAYLOAD_FOR_VERVE"
-const val CHARGE_AMOUNT = 100.00
+const val CHARGE_AMOUNT = 5.00
 const val SAVE_CUSTOMER_DETAILS = "SAVE_CUSTOMER_DETAILS"
 const val WALLET_RESPONSE = "WALLET_RESPONSE"
 const val SMS_CONSENT_REQUEST = 2
@@ -37,7 +37,10 @@ const val LOGIN_PASSWORD = "LOGIN_PASSWORD"
 const val LOGIN_PASSWORD_VALUE = "LOGIN_PASSWORD_VALUE"
 const val REFRESH_TOKEN = "refresh_token"
 const val REFRESH_TOKEN_ERROR = "refresh_token_error"
+const val FIREBASE_TOKEN = "firebase_token"
 const val READ_CONTACTS_PERMISSION_REQUEST_CODE = 10
+const val WORKER_INPUT_FIREBASE_DEVICE_TOKEN_TAG = "worker_firebase_device_token_tag"
+
 
 
 

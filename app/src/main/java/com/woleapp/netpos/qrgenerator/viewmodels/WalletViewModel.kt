@@ -8,9 +8,11 @@ import androidx.lifecycle.ViewModel
 import com.google.gson.Gson
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.model.*
+import com.woleapp.netpos.qrgenerator.model.qrinfo.StoreQrInfoRequest
 import com.woleapp.netpos.qrgenerator.model.referrals.ConfirmReferralModel
 import com.woleapp.netpos.qrgenerator.model.referrals.InviteToTallyFailureResponse
 import com.woleapp.netpos.qrgenerator.model.referrals.InviteToTallyModel
+import com.woleapp.netpos.qrgenerator.model.updatetoken.StoreDeviceToken
 import com.woleapp.netpos.qrgenerator.model.wallet.*
 import com.woleapp.netpos.qrgenerator.model.wallet.request.*
 import com.woleapp.netpos.qrgenerator.network.WalletRepository
@@ -128,10 +130,17 @@ class WalletViewModel @Inject constructor(
         MutableLiveData()
     val walletLoginResponse: LiveData<Resource<WalletLoginResponse>> get() = _walletLoginResponse
 
+    private var _storeQrInfoResponse: MutableLiveData<Resource<GeneralWalletResponse>> =
+        MutableLiveData()
+    val storeQrInfoResponse: LiveData<Resource<GeneralWalletResponse>> get() = _storeQrInfoResponse
 
     private var _getWalletUserResponse: MutableLiveData<Resource<WalletUserResponse>> =
         MutableLiveData()
     val getWalletUserResponse: LiveData<Resource<WalletUserResponse>> get() = _getWalletUserResponse
+
+    private var _getStoredFirebaseTokenResponse: MutableLiveData<Resource<GeneralWalletResponse>> =
+        MutableLiveData()
+    val getStoredFirebaseTokenResponse: LiveData<Resource<GeneralWalletResponse>> get() = _getStoredFirebaseTokenResponse
 
 
     private val _fetchWalletMessage = MutableLiveData<Event<String>>()
@@ -156,6 +165,31 @@ class WalletViewModel @Inject constructor(
 
     private lateinit var formattedDate: String
 
+    fun storeDeviceToken(context: Context, token: StoreDeviceToken) {
+        _getStoredFirebaseTokenResponse.postValue(Resource.loading(null))
+        disposable.add(walletRepository.storeDeviceToken("Bearer ${Singletons().getTallyUserToken(context)!!}", token)
+            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribe { data, error ->
+                data?.let {
+                    _getStoredFirebaseTokenResponse.postValue(Resource.success(it))
+                }
+                error?.let {
+                    _getStoredFirebaseTokenResponse.postValue(Resource.error(null))
+                    (it as? HttpException).let { httpException ->
+                        val errorMessage = httpException?.response()?.errorBody()?.string()
+                            ?: "{\"message\":\"Unexpected error\"}"
+//                        _fetchWalletMessage.value = Event(
+//                            try {
+//                                Gson().fromJson(errorMessage, ErrorModel::class.java).message
+//                                    ?: "Error"
+//                            } catch (e: Exception) {
+//                                "Error"
+//                            }
+//                        )
+                    }
+                }
+            })
+    }
     fun fetchWallet(token: String) {
         _fetchWalletResponse.postValue(Resource.loading(null))
         disposable.add(walletRepository.fetchWallet(token)
@@ -738,6 +772,34 @@ class WalletViewModel @Inject constructor(
                 }
                 error?.let {
                     _walletLoginResponse.postValue(Resource.error(null))
+                    (it as? HttpException).let { httpException ->
+                        val errorMessage = httpException?.response()?.errorBody()?.string()
+                            ?: "{\"message\":\"Unexpected error\"}"
+                        _confirmReferralMessage.value = Event(
+                            try {
+                                Gson().fromJson(errorMessage, LoginWalletErrorResponse::class.java).message
+                            } catch (e: Exception) {
+                                "Error"
+                            }
+                        )
+                    }
+                }
+            })
+    }
+
+    fun storeQrInfo(context: Context, storeQrInfoRequest: StoreQrInfoRequest) {
+        _storeQrInfoResponse.postValue(Resource.loading(null))
+        disposable.add(walletRepository.storeQrInfo(
+            "Bearer ${Singletons().getTallyUserToken(context)!!}",
+            storeQrInfoRequest
+        )
+            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribe { data, error ->
+                data?.let {
+                    _storeQrInfoResponse.postValue(Resource.success(it))
+                }
+                error?.let {
+                    _storeQrInfoResponse.postValue(Resource.error(null))
                     (it as? HttpException).let { httpException ->
                         val errorMessage = httpException?.response()?.errorBody()?.string()
                             ?: "{\"message\":\"Unexpected error\"}"

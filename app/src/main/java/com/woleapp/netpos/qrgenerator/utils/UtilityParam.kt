@@ -24,6 +24,8 @@ object UtilityParam {
     private external fun getMerchantHeaderTokenName(): String
 
     private external fun getGoogleAppLink(): String
+    private external fun getFirebaseToken(): String
+    private external fun getXApiKey(): String
 
     val STRING_TALLY_BASE_URL = getTallyBaseUrl()
     val STRING_TRANSACTION_BASE_URL = getTransactionBaseUrl()
@@ -38,6 +40,8 @@ object UtilityParam {
     val STRING_TALLY_CONSTANT = getTallyConstant()
     val STRING_MERCHANT_HEADER_TOKEN = getMerchantHeaderToken()
     val STRING_MERCHANT_HEADER_TOKEN_NAME = getMerchantHeaderTokenName()
+    val STRING_FIREBASE_TOKEN = getFirebaseToken()
+    val X_API_KEY = getXApiKey()
     val STRING_GOOGLE_APP_LINK = getGoogleAppLink()
 
 

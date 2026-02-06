@@ -354,8 +354,8 @@ class GenerateMoreQrFragment : Fragment() {
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
-//                    checkOut()
-                    startResendTimer()
+                    checkOut()
+                    //startResendTimer()
                 }
             }
         }

@@ -49,7 +49,7 @@ Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getWebViewBaseUrl(JNIEnv 
 JNIEXPORT jstring JNICALL
 Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getTallyWalletBaseUrl(JNIEnv *env,
                                                                              jobject thiz) {
-    return (*env)->NewStringUTF(env, "https://test.tally.netpluspay.com/api/transactions/");
+    return (*env)->NewStringUTF(env, "https://tally.netpluspay.com/api/transactions/");
 }
 
 JNIEXPORT jstring JNICALL
@@ -83,4 +83,14 @@ Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getMerchantHeaderTokenNam
 JNIEXPORT jstring JNICALL
 Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getGoogleAppLink(JNIEnv *env, jobject thiz) {
     return (*env) ->NewStringUTF(env, "Fast, safe, secure contactless transactions all at your fingertips on the Tally network. Join me on https://play.google.com/store/apps/details?id=com.woleapp.netpos.qrgenerator and use my number ${Singletons().getCurrentlyLoggedInUser(context)?.mobile_phone} as referral code during registration");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getFirebaseToken(JNIEnv *env, jobject thiz) {
+    return (*env) ->NewStringUTF(env, "https://tally.netpluspay.com/api/");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_qrgenerator_utils_UtilityParam_getXApiKey(JNIEnv *env, jobject thiz) {
+    return (*env) ->NewStringUTF(env, "27403342c95d1d83a40c0a8523803ec1518e2e5d6edd64b6296a81e8f94b1091");
 }

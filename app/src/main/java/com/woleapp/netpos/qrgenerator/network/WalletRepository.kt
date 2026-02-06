@@ -2,8 +2,10 @@ package com.woleapp.netpos.qrgenerator.network
 
 import com.woleapp.netpos.qrgenerator.model.LoginRequest
 import com.woleapp.netpos.qrgenerator.model.WalletLoginRequest
+import com.woleapp.netpos.qrgenerator.model.qrinfo.StoreQrInfoRequest
 import com.woleapp.netpos.qrgenerator.model.referrals.ConfirmReferralModel
 import com.woleapp.netpos.qrgenerator.model.referrals.InviteToTallyModel
+import com.woleapp.netpos.qrgenerator.model.updatetoken.StoreDeviceToken
 import com.woleapp.netpos.qrgenerator.model.wallet.request.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -11,9 +13,11 @@ import javax.inject.Singleton
 
 @Singleton
 class WalletRepository @Inject constructor(
-    private val walletService: WalletService
+    private val walletService: WalletService,
+    private val updateTokenService: UpdateTokenService,
 ) {
 
+    fun storeDeviceToken(token: String,  deviceToken: StoreDeviceToken) = updateTokenService.storeDeviceToken(token, deviceToken)
     fun fetchWallet(token: String) = walletService.fetchWallet(token)
 
     fun verifyWalletNumber(token: String, verifyWallet: Boolean) =
@@ -116,5 +120,8 @@ class WalletRepository @Inject constructor(
 
     fun walletLogin(loginRequest: WalletLoginRequest) =
         walletService.walletLogin(loginRequest)
+
+    fun storeQrInfo(token: String, storeQrInfoRequest: StoreQrInfoRequest) =
+        walletService.storeQrInfo(token, storeQrInfoRequest)
 
 }

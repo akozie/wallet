@@ -10,6 +10,7 @@ import android.os.Handler
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -29,8 +30,10 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.work.*
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.JsonObject
 import com.woleapp.netpos.qrgenerator.R
 import com.woleapp.netpos.qrgenerator.databinding.*
@@ -38,6 +41,7 @@ import com.woleapp.netpos.qrgenerator.model.LoginRequest
 import com.woleapp.netpos.qrgenerator.model.login.UserEntity
 import com.woleapp.netpos.qrgenerator.model.login.UserViewModel
 import com.woleapp.netpos.qrgenerator.model.referrals.InviteToTallyModel
+import com.woleapp.netpos.qrgenerator.model.updatetoken.StoreDeviceToken
 import com.woleapp.netpos.qrgenerator.utils.*
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.alertDialog
 import com.woleapp.netpos.qrgenerator.utils.RandomUtils.observeServerResponseActivity
@@ -91,6 +95,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var loginButton: Button
     private lateinit var inviteToTallyDialog: AlertDialog
     private lateinit var inviteToTallyBinding: LayoutInviteToTallyBinding
+    private lateinit var firebaseInstance: FirebaseMessaging
 
     @Inject
     lateinit var compositeDisposable: CompositeDisposable
@@ -533,6 +538,29 @@ class MainActivity : AppCompatActivity() {
         loginButton.setOnClickListener {
             login()
         }
+
+        firebaseInstance = FirebaseMessaging.getInstance()
+        getFireBaseToken(firebaseInstance) {
+            EncryptedPrefsUtils.putString(this, FIREBASE_TOKEN, it)
+            Log.d("FIREBASE_TOKEN", it)
+            sendTokenToBackend(it)
+        }
+
+    }
+    private fun getFireBaseToken(
+        firebaseMessagingInstance: FirebaseMessaging,
+        actionToPerformWithTheReceivedToken: (received: String) -> Unit,
+    ) {
+        firebaseMessagingInstance.token.addOnCompleteListener(
+            OnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    return@OnCompleteListener
+                }
+
+                val token = task.result
+                actionToPerformWithTheReceivedToken(token)
+            },
+        )
     }
 
     private fun signOutSpannableText() {
@@ -805,6 +833,13 @@ class MainActivity : AppCompatActivity() {
             loader.dismiss()
             loginDialog.dismiss()
         }
+    }
+
+    private fun sendTokenToBackend(
+        token: String,
+    ) {
+        val storeDeviceToken = StoreDeviceToken(token)
+        qrViewModel.storeDeviceToken(this, storeDeviceToken)
     }
 
     private fun inviteToTally() {

@@ -555,7 +555,8 @@ object RandomUtils {
         val mastercardPattern = "^5[1-5][0-9]{14}\$"
         val amexPattern = "^3[47][0-9]{13}\$"
         val discoverPattern = "^6(?:011|5[0-9]{2})[0-9]{12}\$"
-        val vervePattern = "^((506(0|1|2|3|4|5))|(650(0|1|2|3|4|5)))\\d{12}$"
+        val anotherVerveCardPattern = "^((506(0|1|2|3|4|5))|(650(0|1|2|3|4|5)))\\d{12}$"
+        val vervePattern = "^5[0-9]{6,}$" //
         val anotherVervePattern = "^((506(0|1|2|3|4|5))|(650(0|1|2|3|4|5)))\\d{15}$"
 
         return when {
@@ -563,6 +564,7 @@ object RandomUtils {
             cardNumber.matches(Regex(mastercardPattern)) -> img.setImageResource(R.drawable.mastercard_logo)
             cardNumber.matches(Regex(amexPattern)) -> "American Express"
             cardNumber.matches(Regex(discoverPattern)) -> "Discover"
+            cardNumber.matches(Regex(anotherVerveCardPattern)) -> img.setImageResource(R.drawable.verve)
             cardNumber.matches(Regex(vervePattern)) -> img.setImageResource(R.drawable.verve)
             cardNumber.matches(Regex(anotherVervePattern)) -> img.setImageResource(R.drawable.verve)
             else -> "Unknown"
@@ -577,7 +579,8 @@ object RandomUtils {
         val mastercardPattern = "^5[1-5][0-9]{14}\$"
         val amexPattern = "^3[47][0-9]{13}\$"
         val discoverPattern = "^6(?:011|5[0-9]{2})[0-9]{12}\$"
-        val vervePattern = "^((506(0|1|2|3|4|5))|(650(0|1|2|3|4|5)))\\d{12}$"
+        val anotherVerveCardPattern = "^((506(0|1|2|3|4|5))|(650(0|1|2|3|4|5)))\\d{12}$"
+        val vervePattern = "^5[0-9]{6,}$" //
         val anotherVervePattern = "^((506(0|1|2|3|4|5))|(650(0|1|2|3|4|5)))\\d{15}$"
         when {
             cardNumber.matches(Regex(visaPattern)) -> newResult = "Visa"
@@ -585,6 +588,7 @@ object RandomUtils {
             cardNumber.matches(Regex(amexPattern)) -> newResult = "American Express"
             cardNumber.matches(Regex(discoverPattern)) -> newResult = "Discover"
             cardNumber.matches(Regex(vervePattern)) -> newResult = "Verve"
+            cardNumber.matches(Regex(anotherVerveCardPattern)) -> newResult = "Verve"
             cardNumber.matches(Regex(anotherVervePattern)) -> newResult = "Verve"
             else -> "Unknown"
         }

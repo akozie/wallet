@@ -61,6 +61,11 @@ object AppModule {
     @Named("tallyWalletBaseUrl")
     fun providesTallyWalletBaseUrl(): String = UtilityParam.STRING_TALLY_WALLET_BASE_URL
 
+    @Provides
+    @Singleton
+    @Named("fireBaseTokenBaseUrl")
+    fun providesFireBaseTokenBaseUrl(): String = UtilityParam.STRING_FIREBASE_TOKEN
+
 
     @Provides
     @Singleton
@@ -220,6 +225,20 @@ object AppModule {
 
     @Provides
     @Singleton
+    @Named("defaultFirebaseTokenRetrofit")
+    fun providesFirebaseTokenRetrofit(
+        @Named("walletOkHttp") okhttp: OkHttpClient,
+        @Named("fireBaseTokenBaseUrl") baseUrl: String
+    ): Retrofit =
+        Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .baseUrl(baseUrl)
+            .client(okhttp)
+            .build()
+
+    @Provides
+    @Singleton
     fun providesContactlessRegService(
         @Named("defaultRetrofit") retrofit: Retrofit
     ): QRService = retrofit.create(QRService::class.java)
@@ -247,6 +266,12 @@ object AppModule {
     fun providesTallyWalletService(
         @Named("defaultTallyWalletRetrofit") retrofit: Retrofit
     ): WalletService = retrofit.create(WalletService::class.java)
+
+    @Provides
+    @Singleton
+    fun providesUpdateTokenService(
+        @Named("defaultFirebaseTokenRetrofit") retrofit: Retrofit
+    ): UpdateTokenService = retrofit.create(UpdateTokenService::class.java)
 
     @Provides
     @Singleton

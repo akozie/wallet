@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "652788281738",
+    "project_id": "tally-b7759",
+    "storage_bucket": "tally-b7759.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:652788281738:android:4484f0ae9c393d40d11873",
+        "android_client_info": {
+          "package_name": "com.woleapp.netpos.qrgenerator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA71daO4DftVQ8NnH5W48lLG9UIpknZXlo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

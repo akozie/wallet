@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import com.auth0.android.jwt.JWT
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.qrgenerator.db.AppDatabase
 import com.woleapp.netpos.qrgenerator.model.*
 import com.woleapp.netpos.qrgenerator.model.checkout.CheckOutModel
@@ -157,6 +158,7 @@ class QRViewModel @Inject constructor(
             EncryptedPrefsUtils.putString(context, REFRESH_TOKEN, it.refreshToken)
             val userToken = it.token
             EncryptedPrefsUtils.putString(context, USER_TOKEN, userToken)
+            Prefs.putString(USER_TOKEN, userToken)
             val userTokenDecoded = JWT(userToken)
             val user = User().apply {
                 this.fullname =
@@ -182,6 +184,8 @@ class QRViewModel @Inject constructor(
                 data?.let {
                     EncryptedPrefsUtils.putString(context, PREF_USER, Gson().toJson(it))
                     _loginResponse.postValue(Resource.success(it) as Resource<LoginResponse>)
+                    val login = Resource.success(it) as Resource<LoginResponse>
+                    Log.d("LOGINNRESULLLL", login.toString())
                     _loginMessage.value = Event("User logged in successfully")
                 }
                 error?.let {
@@ -210,7 +214,8 @@ class QRViewModel @Inject constructor(
         disposable.add(qrRepository.logout(logoutRequest).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread()).subscribe { data, error ->
                 data?.let {
-                    _logoutResponse.postValue(Resource.success(it))
+                   val logout = _logoutResponse.postValue(Resource.success(it))
+                    Log.d("RESULLLL", Resource.success(it).data?.message.toString())
                     _logoutMessage.value = Event("Logout Successful")
                 }
                 error?.let {
@@ -293,7 +298,7 @@ class QRViewModel @Inject constructor(
         disposable.add(qrRepository.generateQR(qrModelRequest).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread()).subscribe { data, error ->
                 data?.let {
-                    _generateQrResponse.postValue(Resource.success(it))
+                    val result = _generateQrResponse.postValue(Resource.success(it))
                     _generateQrMessage.value = Event("Success")
                     val c = Calendar.getInstance().time
                     val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
@@ -586,8 +591,7 @@ class QRViewModel @Inject constructor(
     fun sendOtpForVerveCard(otp: String) {
         _transactionResponseFromVerve.value = Resource.loading(null)
         _payVerveResponse.value?.data?.let {
-            val otpDetails =
-                stringToBase64(it.transId + ":" + it.result + ":" + otp.trim() + ":" + it.provider)
+            val otpDetails = stringToBase64(it.transId + ":" + it.result + ":" + otp.trim() + ":" + it.provider)
             var result = it.transId + ":" + it.result + ":" + otp.trim() + ":" + it.provider
             val newClientDataForVerve = otpDetails.replace("\n", "")
             val otpPayLoad = SendOtpForVerveCardModel(newClientDataForVerve)

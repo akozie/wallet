@@ -194,4 +194,12 @@ dependencies {
 
     implementation "androidx.security:security-crypto:1.1.0-alpha02"
 
+
+    // Firebase
+    implementation platform('com.google.firebase:firebase-bom:30.4.1')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-messaging-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+
 }
+apply plugin: 'com.google.gms.google-services'
